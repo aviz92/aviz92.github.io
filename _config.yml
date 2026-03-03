@@ -23,7 +23,6 @@ social:
     - https://www.linkedin.com/in/avi-zaguri-41869b11b
 
 theme_mode: dark
-
 avatar: ""
 toc: true
 
@@ -31,9 +30,3 @@ comments:
   active: ""
 
 paginate: 10
-
-plugins:
-  - jekyll-feed
-  - jekyll-sitemap
-  - jekyll-seo-tag
-  - jekyll-paginate
