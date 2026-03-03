@@ -1,16 +1,18 @@
+# The Site Configuration
+
+# Import the theme
 theme: jekyll-theme-chirpy
 
 lang: en
 timezone: Asia/Jerusalem
 
 title: Avi Zaguri
-tagline: "Automation Infrastructure Architect | Python Expert"
+tagline: "Automation Infrastructure Architect | Python Expert | Open Source Builder"
 description: >-
   Thoughts on automation architecture, Python, DevOps,
   and building production-grade open-source tools.
 
 url: "https://aviz92.github.io"
-baseurl: ""
 
 github:
   username: aviz92
@@ -22,11 +24,121 @@ social:
     - https://github.com/aviz92
     - https://www.linkedin.com/in/avi-zaguri-41869b11b
 
+webmaster_verifications:
+  google:
+  bing:
+
+analytics:
+  google:
+    id:
+
+pageviews:
+  provider:
+
 theme_mode: dark
-avatar: ""
+
+cdn:
+
+avatar:
+
+social_preview_image:
+
 toc: true
 
 comments:
-  active: ""
+  provider:
+  giscus:
+    repo:
+    repo_id:
+    category:
+    category_id:
+    mapping:
+    strict:
+    input_position:
+    lang:
+    reactions_enabled:
+
+assets:
+  self_host:
+    enabled:
+    env:
+
+pwa:
+  enabled: true
+  cache:
+    enabled: true
+    deny_paths:
 
 paginate: 10
+
+baseurl: ""
+
+# ------------ The following options are not recommended to be modified ------------------
+
+kramdown:
+  footnote_backlink: "&#8617;&#xfe0e;"
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: highlight
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1
+
+collections:
+  tabs:
+    output: true
+    sort_by: order
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+      comments: true
+      toc: true
+      permalink: /posts/:title/
+  - scope:
+      path: _drafts
+    values:
+      comments: false
+  - scope:
+      path: ""
+      type: tabs
+    values:
+      layout: page
+      permalink: /:title/
+
+sass:
+  style: compressed
+
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  profile: false
+  blanklines: false
+  ignore:
+    envs: [development]
+
+exclude:
+  - "*.gem"
+  - "*.gemspec"
+  - docs
+  - tools
+  - README.md
+  - LICENSE
+  - purgecss.js
+  - "*.config.js"
+  - "package*.json"
+
+jekyll-archives:
+  enabled: [categories, tags]
+  layouts:
+    category: category
+    tag: tag
+  permalinks:
+    tag: /tags/:name/
+    category: /categories/:name/
