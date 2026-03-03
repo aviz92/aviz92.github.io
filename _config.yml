@@ -1,8 +1,39 @@
+theme: jekyll-theme-chirpy
+
+lang: en
+timezone: Asia/Jerusalem
+
 title: Avi Zaguri
 tagline: "Automation Infrastructure Architect | Python Expert"
+description: >-
+  Thoughts on automation architecture, Python, DevOps,
+  and building production-grade open-source tools.
+
 url: "https://aviz92.github.io"
 baseurl: ""
+
 github:
   username: aviz92
+
 social:
-  - https://www.linkedin.com/in/avi-zaguri-41869b11b/
+  name: Avi Zaguri
+  email: ""
+  links:
+    - https://github.com/aviz92
+    - https://www.linkedin.com/in/avi-zaguri-41869b11b
+
+theme_mode: dark
+
+avatar: ""
+toc: true
+
+comments:
+  active: ""
+
+paginate: 10
+
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+  - jekyll-paginate
