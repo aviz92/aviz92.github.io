@@ -1,78 +1,139 @@
 ---
-title: "django-versioned-models: Solving Multi-Version Data Compatibility in Production"
+title: "django-versioned-models: Drop-in Release Management for Django"
 date: 2026-03-03 09:00:00 +0200
 categories: [Python, Django]
-tags: [python, django, open-source, versioning, database, orm, pypi]
+tags: [python, django, open-source, versioning, database, orm, pypi, ci-cd]
 pin: true
 ---
 
-## The Problem Nobody Wants to Talk About
+## The Problem
 
-Version management hits every production system eventually. The scenario is familiar:
+Most Django projects treat data as a single global state. But in any serious deployment — firmware, embedded systems, config-driven products, or any system with multiple versions in the field — data is version-dependent.
 
-- `v1.2` running in production
-- `v1.3` deployed to staging
-- `v1.4` in beta testing with select customers
+When you have `v1.0.0` locked in production, `v1.1.0` being tested by QA, and `v1.2.0` being built by User, each version needs to see **its own data state**. The standard Django ORM doesn't model this. You end up with workarounds: feature flags, parallel tables, or manual filtering logic scattered everywhere.
 
-Each version expects data in a specific format. The data evolves over time. And old versions **cannot just break**.
-
-## How Most Teams Handle It (Badly)
-
-Most teams default to one of three painful approaches:
-
-**Force simultaneous upgrades** — Requires coordinating every client, every deployment, at the same time. In practice, this never works cleanly. Someone's always on an older version.
-
-**Parallel tables/schemas** — You end up maintaining duplicate data structures, writing sync logic, and doubling your migration surface area. A maintenance nightmare that compounds with every release.
-
-**Conditional logic sprawl** — `if version >= "1.3": ...` scattered across your codebase. This is tech debt central. It's unreadable, untestable, and it grows without bound.
+`django-versioned-models` solves this at the model layer — cleanly, with minimal changes to your existing code.
 
 ---
 
-## What django-versioned-models Does Differently
+## What It Actually Does
 
-I built [`django-versioned-models`](https://github.com/aviz92/django-versioned-models) to address this at the data layer — where the problem actually lives.
+Every model that inherits from `VersionedModel` automatically gets two fields:
 
-The core idea: **each deployed version queries the data state it was designed for.**
-
-### Key Features
-
-**Time-travel queries** — `v1.2` retrieves data as it existed at `v1.2`'s release. `v1.4` gets the current state. Each version sees a consistent, correct snapshot.
-
-**Automatic versioning tied to your release timeline** — No manual snapshot management. Versions are anchored to your actual deployment history.
-
-**Clean API, minimal code changes** — Built on Django ORM patterns you already know. Add a mixin, define your versioning strategy, and you're done.
+- `release` — which version this row belongs to
+- `status` — data readiness: `DRAFT`, `FUTURE`, or `APPROVED`
 
 ```python
-from django_versioned_models.mixins import VersionedModelMixin
+from django_versioned_models.mixins import VersionedModel
 
-class Product(VersionedModelMixin, models.Model):
+class MyModel(VersionedModel):
     name = models.CharField(max_length=255)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    # ... your fields
+
+    class Meta:
+        unique_together = [('release', 'name')]  # unique per release, not globally
 ```
 
-That's the integration surface. Your existing queries work as-is.
+That's the entire integration surface. No registration, no decorators, no config beyond that.
 
 ---
 
-## The Real Insight
+## The Data Status Workflow
 
-Most "versioning" discussions focus on audit trails and change history. That's useful — but it's not the hard problem.
+```
+DRAFT <-> FUTURE -> APPROVED  (one-way to approved, CI only)
+```
 
-The hard problem is **deployment reality**: when customers are running `v1.2` and your backend is on `v1.4`, your data layer needs to serve both. Simultaneously. Correctly.
+| Status | Who sets it | Meaning |
+|--------|-------------|---------|
+| `DRAFT` | User | Being actively worked on |
+| `FUTURE` | User | Planned, not yet ready |
+| `APPROVED` | CI only | Stable — what tests run against |
 
-`django-versioned-models` is built around that constraint, not around theoretical correctness.
+The key insight: **CI always queries `approved` rows only**. User can edit `DRAFT` data in production without breaking any test run.
+
+```python
+MyModel.objects.approved(release)     # CI — stable rows only
+MyModel.objects.for_release(release)  # everyone — all statuses
+```
 
 ---
 
-## Get It
+## The Release Lifecycle
+
+```bash
+# 1. Create the first release
+python manage.py create_release --release-version v1.0.0
+
+# 2. Add data via Admin or API (status=DRAFT by default)
+
+# 3. CI approves stable rows
+python manage.py approve_release --release-version v1.0.0
+
+# 4. Lock and ship — locked releases are immutable
+python manage.py lock_release --release-version v1.0.0
+
+# 5. Next version — branch from the locked release
+python manage.py create_release --release-version v1.1.0 --based-on v1.0.0
+
+# 6. Bug found after deployment? Patch — never modify a locked release
+python manage.py create_release --release-version v1.0.1 --based-on v1.0.0
+```
+
+---
+
+## Lock Enforcement
+
+Locked releases are immutable at the model level — not just at the API level. Any attempt to `save()` or `delete()` a row in a locked release raises a `ValidationError`, regardless of where it comes from: Admin, API, shell, or management command.
+
+```python
+# This raises ValidationError if the release is locked
+my_instance.save()
+my_instance.delete()
+```
+
+---
+
+## Auto-Discovery + Topological Sort
+
+Every model that inherits from `VersionedModel` is discovered automatically on `create_release`. No manual registration. When branching a release, models are duplicated in the correct FK dependency order — resolved automatically via topological sort.
+
+---
+
+## Full Command Reference
+
+| Command | Description |
+|---------|-------------|
+| `create_release --release-version v1.0.0` | Standalone release |
+| `create_release --release-version v1.1.0 --based-on v1.0.0` | Branch from locked release |
+| `approve_release --release-version v1.1.0` | Approve all DRAFT rows (CI) |
+| `lock_release --release-version v1.1.0` | Make release immutable |
+| `unlock_release --release-version v1.1.0` | Unlock (before deployment only) |
+| `deprecate_release --release-version v1.0.0` | Soft-delete (data preserved) |
+| `deprecate_release --release-version v1.0.0 --undo` | Restore deprecated release |
+
+---
+
+## Install
 
 ```bash
 pip install django-versioned-models
 ```
 
+Add to `INSTALLED_APPS`:
+
+```python
+INSTALLED_APPS = [
+    ...
+    'django_versioned_models',
+]
+```
+
+Run migrations:
+
+```bash
+python manage.py migrate
+```
+
 - 📦 [PyPI](https://pypi.org/project/django-versioned-models/)
 - 🐙 [GitHub](https://github.com/aviz92/django-versioned-models)
-- 📄 MIT Licensed
-
-Contributions and feedback welcome. If you're dealing with multi-version deployments, I'd genuinely like to hear how you're handling it.
+- 📄 MIT Licensed — current release: `v0.1.1`
