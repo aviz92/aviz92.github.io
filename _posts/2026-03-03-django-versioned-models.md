@@ -136,4 +136,3 @@ python manage.py migrate
 
 - 📦 [PyPI](https://pypi.org/project/django-versioned-models/)
 - 🐙 [GitHub](https://github.com/aviz92/django-versioned-models)
-- 📄 MIT Licensed — current release: `v0.1.1`
