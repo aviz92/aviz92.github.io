@@ -1,6 +1,6 @@
 ---
 title: "drf-easy-crud: Enterprise-Grade CRUD for Django REST Framework"
-date: 2026-03-03 10:00:00 +0200
+date: 2026-03-04 10:00:00 +0200
 categories: [Backend, Django]
 tags: [python, django, drf, rest-api, crud, filtering, pagination]
 description: "Stop writing the same GET/POST/PUT/PATCH/DELETE boilerplate in every ViewSet. drf-easy-crud gives you enterprise-grade CRUD with advanced filtering, pagination, and ForeignKey lookups out of the box."

@@ -1,6 +1,6 @@
 ---
 title: "python-github-plus: A Production-Ready GitHub Client with Service-Based Architecture"
-date: 2026-03-04 09:00:00 +0200
+date: 2026-03-05 09:00:00 +0200
 categories: [Backend, DevOps]
 tags: [python, github, automation, devops, ci-cd]
 description: "python-github-plus extends PyGitHub with a clean service-based architecture for branch management, PR workflows, workflow automation, file operations, and tag management — all with robust error handling."

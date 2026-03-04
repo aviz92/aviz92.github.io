@@ -1,6 +1,6 @@
 ---
 title: "python-notion-plus: An Intuitive Notion API Client with Auto-Pagination"
-date: 2026-03-04 10:30:00 +0200
+date: 2026-03-05 10:30:00 +0200
 categories: [Backend, Productivity]
 tags: [python, notion, api, automation, productivity]
 description: "python-notion-plus wraps the Notion API with automatic pagination, database querying, and intuitive page formatting — making it easy to read and process Notion databases programmatically."

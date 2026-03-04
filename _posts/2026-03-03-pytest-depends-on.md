@@ -1,6 +1,6 @@
 ---
 title: "pytest-depends-on: Explicit Test Dependency Management for Pytest"
-date: 2026-03-02 11:00:00 +0200
+date: 2026-03-03 11:00:00 +0200
 categories: [Testing, Pytest]
 tags: [python, pytest, dependencies, testing, automation]
 description: "Declare explicit dependencies between tests and automatically skip dependent tests when their prerequisites fail. pytest-depends-on brings proper dependency management to your pytest suite."

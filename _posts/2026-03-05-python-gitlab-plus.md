@@ -1,6 +1,6 @@
 ---
 title: "python-gitlab-plus: Advanced GitLab Client for MR and Pipeline Automation"
-date: 2026-03-04 09:30:00 +0200
+date: 2026-03-05 09:30:00 +0200
 categories: [Backend, DevOps]
 tags: [python, gitlab, automation, devops, ci-cd, pipelines]
 description: "python-gitlab-plus extends the official python-gitlab package with a service-based architecture for branches, merge requests, pipelines, tags, and file operations — with built-in error handling and pipeline wait support."

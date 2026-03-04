@@ -1,6 +1,6 @@
 ---
 title: "django-versioned-models: Drop-in Release Management for Django"
-date: 2026-03-03 09:00:00 +0200
+date: 2026-03-04 09:00:00 +0200
 categories: [Python, Django]
 tags: [python, django, open-source, versioning, database, orm, pypi, ci-cd]
 pin: true

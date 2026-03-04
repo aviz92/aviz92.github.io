@@ -1,6 +1,6 @@
 ---
 title: "python-jira-plus: Extended JIRA Client with Pagination, Retries, and Field Validation"
-date: 2026-03-04 10:00:00 +0200
+date: 2026-03-05 10:00:00 +0200
 categories: [Backend, DevOps]
 tags: [python, jira, automation, project-management, api]
 description: "python-jira-plus extends the official jira package with automatic retries, built-in pagination, field validation against JIRA metadata, and cleaner interfaces for issue creation, search, and updates."
