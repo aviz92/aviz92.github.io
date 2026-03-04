@@ -45,17 +45,17 @@ social_preview_image:
 toc: true
 
 comments:
-  provider:
+  provider: giscus
   giscus:
-    repo:
-    repo_id:
-    category:
-    category_id:
-    mapping:
-    strict:
-    input_position:
-    lang:
-    reactions_enabled:
+    repo: aviz92/aviz92.github.io
+    repo_id: R_kgDORduegw
+    category: Announcements
+    category_id: DIC_kwDORdueg84C3pMr
+    mapping: pathname
+    strict: 0
+    input_position: bottom
+    lang: en
+    reactions_enabled: 1
 
 assets:
   self_host:
