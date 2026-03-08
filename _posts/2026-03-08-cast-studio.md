@@ -42,10 +42,3 @@ If you just need a quick one-off GIF and don't care about reproducibility, `agg`
 All configuration options, CLI flags, and examples are in the README on PyPI:
 
 [pypi.org/project/cast-studio](https://pypi.org/project/cast-studio)
-
----
-
-## Links
-
-- **PyPI**: [pypi.org/project/cast-studio](https://pypi.org/project/cast-studio)
-- **GitHub**: [github.com/aviz92/cast-studio](https://github.com/aviz92/cast-studio)
