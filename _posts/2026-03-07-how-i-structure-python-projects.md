@@ -4,7 +4,7 @@ date: 2026-03-07 06:00:00 +0200
 categories: [Architecture, Python]
 tags: [python, architecture, project-structure, best-practices, devops, cli, django, fastapi]
 description: "After building 20+ open-source Python projects, here's the opinionated structure I use for every new project — from the base template to logging, CLI commands, API layers, and CI workflows."
-pin: true
+pin: false
 ---
 
 After building and maintaining 20+ Python open-source projects, I've converged on a consistent structure that I apply to every new project. This post walks through the full picture — from day zero setup to production-ready patterns.
