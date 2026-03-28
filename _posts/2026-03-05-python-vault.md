@@ -6,7 +6,11 @@ tags: [python, vault, hashicorp, secrets, security, devops, ci-cd]
 description: "python-vault wraps hvac with a minimal, production-ready interface for AppRole authentication and KV v2 secret retrieval — configured via environment variables or constructor arguments."
 ---
 
-Hardcoded secrets in `.env` files work for local development but don't belong in production. `python-vault` is a thin, focused wrapper around `hvac` that makes HashiCorp Vault's AppRole authentication and KV v2 secret engine straightforward to use in any Python project or CI pipeline.
+Hardcoded secrets in `.env` files work for local development but don't belong in production. And storing application secrets as CI pipeline variables just moves the problem — now your database passwords live in your CI provider instead of your codebase, and you're still one leaked variable away from a breach. `python-vault` is a thin, focused wrapper around `hvac` that makes HashiCorp Vault's AppRole authentication and KV v2 secret retrieval straightforward in any Python project or pipeline — one init, one call, always authenticated.
+
+## Why I Built This
+
+Every time I integrated Vault into a new project I wrote the same 30 lines: resolve credentials from env vars, create the `hvac` client, authenticate with AppRole, handle the auth failure case, then wrap `read_secret_version` into something usable. It was the same code, every time. I packaged it once so I could stop writing it.
 
 ## Installation
 
@@ -17,20 +21,7 @@ pip install python-vault
 uv add python-vault
 ```
 
----
-
-## Why AppRole?
-
-HashiCorp Vault supports many authentication methods. **AppRole** is the standard choice for machine-to-machine authentication — CI pipelines, backend services, automation scripts. It uses two credentials:
-
-- **`role_id`** — identifies the application (like a username, can be committed to config)
-- **`secret_id`** — proves the application's identity (like a password, must stay secret)
-
-Together they authenticate against Vault and return a token with exactly the permissions defined for that role — nothing more.
-
----
-
-## Configuration
+## Setup & Configuration
 
 The client reads from environment variables by default — no constructor arguments needed in most setups:
 
@@ -55,15 +46,13 @@ vault = VaultClient(
     vault_addr="https://vault.mycompany.com",
     vault_role_id="your-role-id",
     vault_secret_id="your-secret-id",
-    vault_mount="kv"
+    vault_mount="kv",
 )
 ```
 
 Constructor arguments take precedence over environment variables.
 
----
-
-## Reading Secrets
+## Quick Start
 
 ```python
 import json
@@ -74,56 +63,11 @@ secret_data = vault.read_secret("services/my-app/db")
 print(json.dumps(secret_data, indent=4))
 ```
 
-`read_secret()` targets the **KV v2 engine** and always raises on deleted secret versions — no silent reads of stale or removed secrets.
+`VaultClient()` authenticates at construction time. If AppRole auth fails, the constructor raises immediately — there's no lazy auth, no silent failures. A `VaultClient` instance is always authenticated.
 
----
+## Real-World Example
 
-## How It Works
-
-The implementation is intentionally minimal — under 30 lines:
-
-```python
-class VaultClient:
-    def __init__(self, vault_addr=None, vault_role_id=None,
-                 vault_secret_id=None, vault_mount=None):
-        # env vars as fallback for every argument
-        self.vault_addr = vault_addr or os.getenv("VAULT_ADDR")
-        self.vault_role_id = vault_role_id or os.getenv("VAULT_ROLE_ID")
-        self.vault_secret_id = vault_secret_id or os.getenv("VAULT_SECRET_ID")
-        self.vault_mount = vault_mount or os.getenv("VAULT_MOUNT")
-
-        self.client = hvac.Client(url=self.vault_addr)
-        self._authenticate()
-
-    def _authenticate(self):
-        self.client.auth.approle.login(
-            role_id=self.vault_role_id,
-            secret_id=self.vault_secret_id
-        )
-        if not self.client.is_authenticated():
-            raise Exception("Vault AppRole authentication failed")
-
-    def read_secret(self, path: str) -> dict:
-        return self.client.secrets.kv.v2.read_secret_version(
-            path=path,
-            mount_point=self.vault_mount,
-            raise_on_deleted_version=True
-        )
-```
-
-Three things happen at init time:
-
-1. Credentials are resolved (constructor args → env vars)
-2. An `hvac.Client` is created pointing at the Vault address
-3. AppRole authentication runs immediately — if it fails, construction fails with a clear exception
-
-This means a `VaultClient` instance is always authenticated. There's no lazy auth, no silent failures.
-
----
-
-## CI Pipeline Example
-
-A common pattern — fetch DB credentials at deploy time instead of storing them in CI secrets:
+A common pattern — fetch DB and API credentials at deploy time instead of storing them as CI pipeline secrets:
 
 ```python
 import os
@@ -134,11 +78,40 @@ def get_db_config() -> dict:
     secret = vault.read_secret("ci/production/database")
     return secret["data"]["data"]  # KV v2 nests data under data.data
 
+def get_api_tokens() -> dict:
+    vault = VaultClient()
+    secret = vault.read_secret("ci/production/api-tokens")
+    return secret["data"]["data"]
+
 db = get_db_config()
-# db["host"], db["port"], db["password"] ...
+tokens = get_api_tokens()
+
+# db["host"], db["port"], db["password"]
+# tokens["github_token"], tokens["jira_token"]
 ```
 
-In CI, set `VAULT_ADDR`, `VAULT_ROLE_ID`, and `VAULT_SECRET_ID` as pipeline secrets — the actual application secrets stay in Vault, not in your CI configuration.
+In CI, set `VAULT_ADDR`, `VAULT_ROLE_ID`, and `VAULT_SECRET_ID` as pipeline secrets — the actual application secrets stay in Vault. A breach of your CI configuration no longer exposes your database passwords or API keys, only the AppRole credentials needed to fetch them.
+
+## Key Features
+
+AppRole is the right auth method for machine-to-machine use. It uses two credentials: `role_id` identifies the application (safe to commit to config), and `secret_id` proves its identity (must stay secret). Together they authenticate against Vault and return a scoped token with exactly the permissions defined for that role — nothing more. This is why AppRole is the standard for CI pipelines and backend services.
+
+The implementation is intentionally minimal — under 30 lines. Three things happen at init:
+
+1. Credentials resolve from constructor args, falling back to env vars
+2. An `hvac.Client` is created pointing at the Vault address
+3. AppRole authentication runs immediately — failure raises with a clear exception
+
+`read_secret()` targets the KV v2 engine and always passes `raise_on_deleted_version=True` — no silent reads of stale or removed secret versions. If the path doesn't exist or the version was deleted, you get an exception rather than `None` data.
+
+## Goes Well With
+
+- [`python-jira-plus`](/posts/python-jira-plus) — I pair these in ticket automation scripts: close the Jira ticket when the PR merges
+- [`python-github-plus`](/posts/python-github-plus) — pull GitHub tokens from Vault in automation scripts instead of env vars
+- [`python-gitlab-plus`](/posts/python-gitlab-plus) — same pattern for GitLab access tokens in pipeline scripts
+- [`python-notion-plus`](/posts/python-notion-plus) — store Notion API keys in Vault instead of CI secrets
+- [`python-base-command`](/posts/python-base-command) — wrap Vault-backed scripts as proper CLI commands with built-in logging
+- [`custom-python-logger`](/posts/custom-python-logger) — log auth events and secret access for audit trails
 
 ---
 
@@ -147,4 +120,4 @@ In CI, set `VAULT_ADDR`, `VAULT_ROLE_ID`, and `VAULT_SECRET_ID` as pipeline secr
 - **PyPI**: [pypi.org/project/python-vault](https://pypi.org/project/python-vault)
 - **GitHub**: [github.com/aviz92/python-vault](https://github.com/aviz92/python-vault)
 
-Feedback, issues, and PRs are welcome.
+Secrets belong in Vault. This makes putting them there painless.
