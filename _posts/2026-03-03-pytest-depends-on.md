@@ -6,7 +6,11 @@ tags: [python, pytest, dependencies, testing, automation]
 description: "Declare explicit dependencies between tests and automatically skip dependent tests when their prerequisites fail. pytest-depends-on brings proper dependency management to your pytest suite."
 ---
 
-In integration and end-to-end testing, tests often depend on each other. If `test_login` fails, running `test_dashboard` is pointless — and its failure is misleading. `pytest-depends-on` solves this by letting you declare dependencies explicitly and skip dependent tests automatically when prerequisites don't pass.
+In integration and end-to-end testing, tests often depend on each other. If `test_login` fails, running `test_dashboard` is pointless — and its failure is misleading. Without explicit dependency management, a single upstream failure cascades into a wall of failures across your suite, making CI reports noisy and root-cause analysis painful. `pytest-depends-on` lets you declare dependencies explicitly and skip dependent tests automatically when their prerequisites don't pass.
+
+## Why I Built This
+
+I was working on an end-to-end API test suite where each test built on the state created by the previous one — create user, fetch user, update user, delete user. When the create call broke, I'd get four failures in the report instead of one. Debugging meant figuring out which failures were real and which were just cascading noise. I wanted the test runner to be smart enough to stop when it already knows a test can't possibly succeed.
 
 ## Installation
 
@@ -17,21 +21,9 @@ pip install pytest-depends-on
 uv add pytest-depends-on
 ```
 
----
+## Quick Start
 
-## The Problem
-
-Without dependency management, a single upstream failure cascades into a wall of failures across your suite — even though the root cause is a single broken test. This makes CI reports noisy and root-cause analysis painful.
-
-`pytest-depends-on` gives you a clean way to express: "don't run this test unless that one passed."
-
----
-
-## Usage
-
-### Basic Dependency
-
-`test_child` runs only if `test_parent` passes. If `test_parent` fails or is skipped, `test_child` is automatically skipped.
+Declare a dependency with `@pytest.mark.depends_on`, then enable the plugin via `pytest.ini`:
 
 ```python
 import pytest
@@ -44,86 +36,21 @@ def test_child():
     assert True
 ```
 
-### Enable the Plugin
-
-The plugin is **opt-in**. Pass `--depends-on` to activate dependency tracking and skip behaviour. Without it, all `depends_on` markers are ignored and every test runs normally.
-
-Add the flags to your `pytest.ini`:
-
 ```ini
 [pytest]
 addopts =
-    --depends-on          # enable dependency tracking and skip behaviour
-    --depends-on-reorder  # reorder tests so parents always run first
+    --depends-on
+    --depends-on-reorder
 
 markers =
     depends_on: mark test as dependent on another test
 ```
 
-Or pass them directly on the command line:
-
-```bash
-pytest --depends-on --depends-on-reorder
-```
-
----
-
-## Automatic Test Reordering
-
-One practical problem with test dependencies is ordering: if `test_child` is collected before `test_parent`, it will always skip — even when the parent would have passed.
-
-Pass `--depends-on-reorder` to fix this automatically. The plugin performs a topological sort of the collected test suite at collection time, guaranteeing parents always run before their dependents — regardless of file order or definition order within a file.
-
-```
-Before reorder:  test_child_a → test_child_b → test_parent
-After reorder:   test_parent  → test_child_a → test_child_b
-```
-
-Circular dependencies are detected, logged as a warning, and handled gracefully (the run continues).
-
----
-
-## Advanced Options
-
-### Custom Status Dependency
-
-By default, the dependent test expects the parent to have **passed**. You can change this — for example, to run a recovery test only when the initial test fails:
-
-```python
-from pytest_depends_on.consts.status import Status
-
-@pytest.mark.depends_on(tests=["test_provision_resource"], status=Status.FAILED)
-def test_cleanup_on_failure():
-    # Only runs if provisioning failed
-    cleanup_partial_resources()
-```
-
-Supported statuses: `PASSED`, `FAILED`, `SKIPPED`, `XFAILED`, `XPASSED`
-
-### Soft Dependency (`allowed_not_run`)
-
-If the parent test hasn't run yet (e.g., due to test ordering or collection filters), the dependent test will skip by default. Set `allowed_not_run=True` to allow it to proceed anyway:
-
-```python
-@pytest.mark.depends_on(tests=["test_setup"], allowed_not_run=True)
-def test_feature():
-    # Runs even if test_setup hasn't executed
-    pass
-```
-
----
-
-## Automatic Status Tracking
-
-The plugin automatically tracks test outcomes (`passed`, `failed`, `skipped`, `xfailed`, `xpassed`) during the `call` phase — no manual tracking needed. Dependencies are resolved dynamically at runtime.
-
-> Use `--depends-on-reorder` to guarantee parents always run first so status tracking works correctly regardless of collection order.
-
----
+`test_child` runs only if `test_parent` passes. If it fails or is skipped, `test_child` is automatically skipped. The plugin is opt-in — without `--depends-on`, all markers are ignored and every test runs normally.
 
 ## Real-World Example
 
-A typical integration test flow:
+A typical CRUD API test flow — each operation depends on the previous one succeeding:
 
 ```python
 def test_create_user():
@@ -146,7 +73,45 @@ def test_delete_user():
     assert response.status_code == 204
 ```
 
-If `test_create_user` fails, the remaining three tests are automatically skipped — keeping your report clean and the failure clearly localized.
+If `test_create_user` fails, the remaining three tests are automatically skipped — one failure in the report, clear localization, no noise.
+
+## Key Features
+
+`--depends-on-reorder` solves the collection order problem automatically. If `test_child` is collected before `test_parent`, it will always skip even when the parent would have passed. The flag triggers a topological sort of the entire test suite at collection time, guaranteeing parents always run before their dependents regardless of file order or definition order within a file:
+
+```
+Before reorder:  test_child_a → test_child_b → test_parent
+After reorder:   test_parent  → test_child_a → test_child_b
+```
+
+Circular dependencies are detected, logged as a warning, and handled gracefully — the run continues.
+
+Custom status dependencies let you express more nuanced relationships. The default expects the parent to have passed, but you can flip it — for example, to run a cleanup test only when provisioning fails:
+
+```python
+from pytest_depends_on.consts.status import Status
+
+@pytest.mark.depends_on(tests=["test_provision_resource"], status=Status.FAILED)
+def test_cleanup_on_failure():
+    cleanup_partial_resources()
+```
+
+All five pytest statuses are supported: `PASSED`, `FAILED`, `SKIPPED`, `XFAILED`, `XPASSED`.
+
+Soft dependencies via `allowed_not_run=True` let a dependent test proceed even if its parent hasn't run yet — useful when you're running a filtered subset of the suite and don't want non-relevant dependencies causing skips:
+
+```python
+@pytest.mark.depends_on(tests=["test_setup"], allowed_not_run=True)
+def test_feature():
+    pass
+```
+
+Status tracking is automatic. The plugin hooks into the `call` phase and records every test outcome — no manual tracking, no shared state to manage.
+
+## The Stack Behind the Examples
+
+- [`pytest-plugins`](/posts/pytest-plugins) — CI reporting layer that works alongside the requirements manifest in pipeline workflows
+- [`custom-python-logger`](/posts/custom-python-logger) — the logger powering `self.logger` in every command
 
 ---
 
@@ -155,4 +120,4 @@ If `test_create_user` fails, the remaining three tests are automatically skipped
 - **PyPI**: [pypi.org/project/pytest-depends-on](https://pypi.org/project/pytest-depends-on)
 - **GitHub**: [github.com/aviz92/pytest-depends-on](https://github.com/aviz92/pytest-depends-on)
 
-Feedback, issues, and PRs are welcome.
+One real failure. Not ten misleading ones.
