@@ -6,7 +6,11 @@ tags: [python, cli, automation, django, commands, utilities]
 description: "python-base-command brings Django's BaseCommand pattern — handle(), add_arguments(), CommandError, call_command(), auto-discovery — to any Python project, with zero Django dependency."
 ---
 
-If you've written Django management commands, you know how clean the pattern is: a `Command` class, `handle()` for logic, `add_arguments()` for the CLI interface, `CommandError` for clean error handling. `python-base-command` brings that exact pattern to standalone Python projects — no Django required.
+If you've written Django management commands, you know how clean the pattern is: a `Command` class, `handle()` for logic, `add_arguments()` for the CLI interface, `CommandError` for clean error handling. The problem is that pattern lives inside Django — and most of my automation scripts, data pipelines, and internal tools aren't Django projects. I kept reinventing the same CLI structure from scratch, every time.
+
+## Why I Built This
+
+I had a collection of standalone Python tools — data sync scripts, report generators, migration helpers — each with its own ad-hoc argument parsing and inconsistent error handling. I wanted the same discipline Django's management commands enforce, but without pulling in the entire framework as a dependency. So I extracted the pattern, added a logger, and made auto-discovery work out of the box.
 
 ## Installation
 
@@ -16,8 +20,6 @@ pip install python-base-command
 ```bash
 uv add python-base-command
 ```
-
----
 
 ## Quick Start
 
@@ -74,89 +76,91 @@ python3 cli.py greet Alice --shout
 python3 cli.py greet --version
 ```
 
----
+## Real-World Example
 
-## Built-in Logging
-
-Every command gets `self.logger` — a `CustomLoggerAdapter` from `custom-python-logger` — for free:
+Here's a typical internal tooling setup — a data export command that lives alongside other ops scripts:
 
 ```python
-self.logger.debug("...")
-self.logger.info("...")
-self.logger.step("...")        # custom level for process steps
-self.logger.warning("...")
-self.logger.error("...")
-self.logger.exception("...")   # logs with full traceback
+# commands/export_reports.py
+from python_base_command import BaseCommand, CommandError
+
+
+class Command(BaseCommand):
+    help = "Export weekly reports to CSV or JSON"
+    version = "2.1.0"
+
+    def add_arguments(self, parser):
+        parser.add_argument("--format", choices=["csv", "json"], default="csv")
+        parser.add_argument("--dry-run", action="store_true", help="Preview without writing")
+        parser.add_argument("--week", type=int, required=True, help="ISO week number")
+
+    def handle(self, **kwargs):
+        week = kwargs["week"]
+        fmt = kwargs["format"]
+
+        self.logger.step(f"Fetching data for week {week}...")
+        records = fetch_weekly_data(week)
+
+        if not records:
+            raise CommandError(f"No data found for week {week}.")
+
+        if kwargs["dry_run"]:
+            self.logger.warning(f"Dry run — {len(records)} records would be exported as {fmt}.")
+            return
+
+        self.logger.step(f"Writing {len(records)} records as {fmt}...")
+        write_export(records, fmt)
+        self.logger.info("Export complete.")
 ```
 
-No setup needed. No `logging.getLogger()` boilerplate.
+```bash
+python3 cli.py export_reports --week 12 --format json --dry-run
+python3 cli.py export_reports --week 12 --format json
+```
 
----
+`self.logger` is already wired up — colored output, `STEP` level, everything — with no setup code inside the command.
 
-## Built-in Flags
+## Key Features
 
-Every command automatically gets these flags:
+Every `BaseCommand` subclass gets `self.logger` for free — a `CustomLoggerAdapter` from `custom-python-logger` with colored output, the `STEP` log level for marking pipeline stages, and `EXCEPTION` for clean traceback logging. No `logging.getLogger()` boilerplate anywhere in your commands.
 
-| Flag | Description |
-|------|-------------|
-| `--version` | Print version and exit |
-| `-v` / `--verbosity` | 0=minimal, 1=normal, 2=verbose, 3=very verbose |
-| `--traceback` | Re-raise `CommandError` with full traceback |
+Every command also automatically receives three built-in flags: `--version` prints and exits, `-v` / `--verbosity` controls output detail (0–3), and `--traceback` re-raises `CommandError` with a full traceback instead of swallowing it — useful when debugging in CI.
 
----
-
-## Manual Registry
-
-Register multiple commands in a single file using `@registry.register()`:
+Auto-discovery means you drop a file with a `Command` class into your `commands/` folder and it's immediately available from the CLI. No registration, no imports in a central file. For cases where you want multiple commands in a single file, the `@registry.register()` decorator handles that:
 
 ```python
-# my_commands.py
 from python_base_command import BaseCommand, CommandRegistry
 
 registry = CommandRegistry()
 
 @registry.register("greet")
 class GreetCommand(BaseCommand):
-    help = "Greet a user"
-
     def add_arguments(self, parser):
         parser.add_argument("name", type=str)
 
     def handle(self, **kwargs):
         self.logger.info(f"Hello, {kwargs['name']}!")
 
-
-@registry.register("export")
-class ExportCommand(BaseCommand):
-    help = "Export data"
-
-    def add_arguments(self, parser):
-        parser.add_argument("--format", choices=["csv", "json"], default="csv")
-        parser.add_argument("--dry-run", action="store_true")
-
-    def handle(self, **kwargs):
-        if kwargs["dry_run"]:
-            self.logger.warning("Dry run — no files written.")
-            return
-        self.logger.info(f"Exported as {kwargs['format']}.")
-
-
 if __name__ == "__main__":
     registry.run()
 ```
 
-```bash
-python3 my_commands.py greet Alice
-python3 my_commands.py export --format json --dry-run
+`LabelCommand` is available for commands that process one or more string labels — file paths, identifiers, slugs. Override `handle_label()` and the framework calls it once per argument:
+
+```python
+from python_base_command import LabelCommand, CommandError
+
+class Command(LabelCommand):
+    label = "filepath"
+    help = "Process one or more files"
+
+    def handle_label(self, label, **kwargs):
+        if not label.endswith((".txt", ".csv")):
+            raise CommandError(f"Unsupported file type: {label}")
+        self.logger.info(f"Processed: {label}")
 ```
 
-Registry files dropped into the `commands/` folder are auto-discovered alongside classic `Command` files.
-
----
-
-## Testing with `call_command`
-
-Invoke commands programmatically — identical to Django's `call_command`:
+Testing works exactly like Django's `call_command` — invoke commands programmatically and assert on their behavior or the exceptions they raise:
 
 ```python
 from python_base_command import call_command, CommandError
@@ -173,46 +177,11 @@ def test_greet_empty_name():
         call_command(GreetCommand, name="")
 ```
 
-`CommandError` propagates normally via `call_command` but is caught and logged cleanly when invoked from the CLI.
+`CommandError` propagates cleanly in tests but is caught and printed without a traceback when invoked from the CLI — unless you pass `--traceback`.
 
----
+## The Stack Behind the Examples
 
-## `LabelCommand`
-
-For commands that accept one or more string labels — files, identifiers, etc.:
-
-```python
-from python_base_command import LabelCommand, CommandError
-
-class Command(LabelCommand):
-    label = "filepath"
-    help = "Process one or more files"
-
-    def handle_label(self, label, **kwargs):
-        if not label.endswith((".txt", ".csv")):
-            raise CommandError(f"Unsupported file type: {label}")
-        self.logger.info(f"Processed: {label}")
-```
-
-```bash
-python3 cli.py process report.csv notes.txt
-```
-
----
-
-## Comparison with Django
-
-| Feature | Django `BaseCommand` | `python-base-command` |
-|---------|---------------------|-----------------------|
-| `handle()` / `add_arguments()` | ✅ | ✅ |
-| `CommandError` with `returncode` | ✅ | ✅ |
-| `LabelCommand` | ✅ | ✅ |
-| `call_command()` | ✅ | ✅ |
-| `output_transaction` | ✅ | ✅ |
-| Auto-discovery from folder | ✅ | ✅ |
-| `self.logger` (custom-python-logger) | ❌ | ✅ |
-| Manual registry | ❌ | ✅ |
-| Django dependency | required | ❌ none |
+- [`custom-python-logger`](/posts/custom-python-logger) — the logger powering `self.logger` in every command
 
 ---
 
@@ -221,4 +190,4 @@ python3 cli.py process report.csv notes.txt
 - **PyPI**: [pypi.org/project/python-base-command](https://pypi.org/project/python-base-command)
 - **GitHub**: [github.com/aviz92/python-base-command](https://github.com/aviz92/python-base-command)
 
-Feedback, issues, and PRs are welcome.
+If you've been gluing together `argparse`, `logging.basicConfig`, and a try/except in every script, this gives you the same structure Django trained you to love — without the framework.
