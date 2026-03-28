@@ -75,4 +75,5 @@ for page in pages:
 
 - **PyPI**: [pypi.org/project/python-notion-plus](https://pypi.org/project/python-notion-plus)
 - **GitHub**: [github.com/aviz92/python-notion-plus](https://github.com/aviz92/python-notion-plus)
-- **Install**: `pip install python-notion-plus`
+
+Feedback, issues, and PRs are welcome.

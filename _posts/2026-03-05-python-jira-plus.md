@@ -110,4 +110,5 @@ Transient network errors and rate limits are retried automatically using the `re
 
 - **PyPI**: [pypi.org/project/python-jira-plus](https://pypi.org/project/python-jira-plus)
 - **GitHub**: [github.com/aviz92/python-jira-plus](https://github.com/aviz92/python-jira-plus)
-- **Install**: `pip install python-jira-plus`
+
+Feedback, issues, and PRs are welcome.

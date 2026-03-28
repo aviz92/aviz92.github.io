@@ -170,4 +170,5 @@ github_client.project.remove_member("olduser")
 
 - **PyPI**: [pypi.org/project/python-github-plus](https://pypi.org/project/python-github-plus)
 - **GitHub**: [github.com/aviz92/python-github-plus](https://github.com/aviz92/python-github-plus)
-- **Install**: `pip install python-github-plus`
+
+Feedback, issues, and PRs are welcome.

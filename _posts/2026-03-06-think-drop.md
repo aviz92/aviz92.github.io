@@ -122,4 +122,5 @@ Then open Telegram, find your bot, and send `/start`.
 ## Links
 
 - **GitHub**: [github.com/aviz92/think-drop](https://github.com/aviz92/think-drop)
-- **Install**: `git clone https://github.com/aviz92/think-drop.git && uv sync`
+
+Feedback, issues, and PRs are welcome.

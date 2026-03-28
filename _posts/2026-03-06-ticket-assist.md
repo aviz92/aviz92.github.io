@@ -127,4 +127,5 @@ Switch providers with a single env var — no code changes:
 ## Links
 
 - **GitHub**: [github.com/aviz92/ticket-assist](https://github.com/aviz92/ticket-assist)
-- **Install**: `git clone https://github.com/aviz92/ticket-assist.git && uv sync`
+
+Feedback, issues, and PRs are welcome.

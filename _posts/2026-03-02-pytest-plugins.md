@@ -129,4 +129,5 @@ addopts =
 
 - **PyPI**: [pypi.org/project/pytest-plugins](https://pypi.org/project/pytest-plugins)
 - **GitHub**: [github.com/aviz92/pytest-plugins](https://github.com/aviz92/pytest-plugins)
-- **Install**: `pip install pytest-plugins`
+
+Feedback, issues, and PRs are welcome.

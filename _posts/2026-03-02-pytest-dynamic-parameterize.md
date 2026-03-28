@@ -149,4 +149,5 @@ def my_params(config):
 
 - **PyPI**: [pypi.org/project/pytest-dynamic-parameterize](https://pypi.org/project/pytest-dynamic-parameterize)
 - **GitHub**: [github.com/aviz92/pytest-dynamic-parameterize](https://github.com/aviz92/pytest-dynamic-parameterize)
-- **Install**: `pip install pytest-dynamic-parameterize`
+
+Feedback, issues, and PRs are welcome.

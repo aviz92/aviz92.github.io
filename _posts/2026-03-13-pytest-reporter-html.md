@@ -168,17 +168,12 @@ It's particularly useful for:
 
 ## Full Documentation
 
-The full README with all configuration options, CLI flags, and advanced examples is on GitHub:
+All configuration options, CLI flags, and examples are in the README on PyPI:
 
-[github.com/YevgenyFarber/pytest-reporter-html](https://github.com/YevgenyFarber/pytest-reporter-html)
+- **PyPI**: [pypi.org/project/pytest-reporter-html](https://pypi.org/project/pytest-reporter-html)
+- **GitHub**: [github.com/YevgenyFarber/pytest-reporter-html](https://github.com/YevgenyFarber/pytest-reporter-html)
 
-And the package is available on PyPI:
-
-```bash
-uv add pytest-reporter-html
-# or
-pip install pytest-reporter-html
-```
+Feedback, issues, and PRs are welcome.
 
 ---
 

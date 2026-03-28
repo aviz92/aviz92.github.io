@@ -154,3 +154,5 @@ If `test_create_user` fails, the remaining three tests are automatically skipped
 
 - **PyPI**: [pypi.org/project/pytest-depends-on](https://pypi.org/project/pytest-depends-on)
 - **GitHub**: [github.com/aviz92/pytest-depends-on](https://github.com/aviz92/pytest-depends-on)
+
+Feedback, issues, and PRs are welcome.

@@ -195,7 +195,7 @@ Remove the decorator when you're done — or leave it committed. Without `--only
 
 ## Links
 
-- **GitHub**: [github.com/aviz92/pytest-only-markers](https://github.com/aviz92/pytest-only-markers)
 - **PyPI**: [pypi.org/project/pytest-only-markers](https://pypi.org/project/pytest-only-markers)
+- **GitHub**: [github.com/aviz92/pytest-only-markers](https://github.com/aviz92/pytest-only-markers)
 
 Feedback, issues, and PRs are welcome.

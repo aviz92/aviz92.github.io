@@ -146,4 +146,5 @@ In CI, set `VAULT_ADDR`, `VAULT_ROLE_ID`, and `VAULT_SECRET_ID` as pipeline secr
 
 - **PyPI**: [pypi.org/project/python-vault](https://pypi.org/project/python-vault)
 - **GitHub**: [github.com/aviz92/python-vault](https://github.com/aviz92/python-vault)
-- **Install**: `pip install python-vault`
+
+Feedback, issues, and PRs are welcome.

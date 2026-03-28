@@ -245,4 +245,5 @@ The result is a typed `list[Employee]` — ready for test assertions, no dict ke
 
 - **PyPI**: [pypi.org/project/pyrest-model-client](https://pypi.org/project/pyrest-model-client)
 - **GitHub**: [github.com/aviz92/pyrest-model-client](https://github.com/aviz92/pyrest-model-client)
-- **Install**: `uv add pyrest-model-client`
+
+Feedback, issues, and PRs are welcome.

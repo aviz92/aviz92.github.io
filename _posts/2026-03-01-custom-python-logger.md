@@ -130,4 +130,5 @@ logger.step("Step message via get_logger.")
 
 - **PyPI**: [pypi.org/project/custom-python-logger](https://pypi.org/project/custom-python-logger)
 - **GitHub**: [github.com/aviz92/custom-python-logger](https://github.com/aviz92/custom-python-logger)
-- **Install**: `pip install custom-python-logger`
+
+Feedback, issues, and PRs are welcome.

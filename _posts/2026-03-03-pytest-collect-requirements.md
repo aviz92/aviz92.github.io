@@ -126,4 +126,5 @@ def test_high_memory_workload(request: FixtureRequest):
 
 - **PyPI**: [pypi.org/project/pytest-collect-requirements](https://pypi.org/project/pytest-collect-requirements)
 - **GitHub**: [github.com/aviz92/pytest-collect-requirements](https://github.com/aviz92/pytest-collect-requirements)
-- **Install**: `pip install pytest-collect-requirements`
+
+Feedback, issues, and PRs are welcome.

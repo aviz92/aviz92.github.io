@@ -233,3 +233,5 @@ No ordering required on the developer's part.
 
 - **PyPI**: [django-versioned-models](https://pypi.org/project/django-versioned-models)
 - **GitHub**: [aviz92/django-versioned-models](https://github.com/aviz92/django-versioned-models)
+
+Feedback, issues, and PRs are welcome.

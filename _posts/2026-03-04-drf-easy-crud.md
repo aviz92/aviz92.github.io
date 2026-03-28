@@ -212,4 +212,5 @@ In large projects with many models and endpoints, the benefits compound quickly:
 
 - **PyPI**: [pypi.org/project/drf-easy-crud](https://pypi.org/project/drf-easy-crud)
 - **GitHub**: [github.com/aviz92/drf-easy-crud](https://github.com/aviz92/drf-easy-crud)
-- **Install**: `uv add drf-easy-crud`
+
+Feedback, issues, and PRs are welcome.

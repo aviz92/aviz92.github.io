@@ -185,4 +185,5 @@ gitlab_client.project.remove_member("olduser")
 
 - **PyPI**: [pypi.org/project/python-gitlab-plus](https://pypi.org/project/python-gitlab-plus)
 - **GitHub**: [github.com/aviz92/python-gitlab-plus](https://github.com/aviz92/python-gitlab-plus)
-- **Install**: `pip install python-gitlab-plus`
+
+Feedback, issues, and PRs are welcome.

@@ -220,4 +220,5 @@ python3 cli.py process report.csv notes.txt
 
 - **PyPI**: [pypi.org/project/python-base-command](https://pypi.org/project/python-base-command)
 - **GitHub**: [github.com/aviz92/python-base-command](https://github.com/aviz92/python-base-command)
-- **Install**: `pip install python-base-command`
+
+Feedback, issues, and PRs are welcome.
