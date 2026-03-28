@@ -1,7 +1,7 @@
 ---
 title: "python-vault: Lightweight HashiCorp Vault Client for AppRole Authentication"
 date: 2026-03-04 11:00:00 +0200
-categories: [Python Clients]
+categories: [Backend, Python Clients]
 tags: [python, vault, hashicorp, secrets, security, devops, ci-cd]
 description: "python-vault wraps hvac with a minimal, production-ready interface for AppRole authentication and KV v2 secret retrieval — configured via environment variables or constructor arguments."
 ---

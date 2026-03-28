@@ -1,7 +1,7 @@
 ---
 title: "think-drop: A Personal AI Note-Taking Bot for Telegram and Notion"
 date: 2026-03-06 11:00:00 +0200
-categories: [AI]
+categories: [AI, Productivity]
 tags: [python, ai, llm, telegram, notion, automation, productivity]
 description: "Send a voice note or text to Telegram, and think-drop automatically classifies it, generates a summary, and writes it to your Notion workspace — powered by Gemini, OpenAI, or Claude."
 ---

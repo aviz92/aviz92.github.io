@@ -1,7 +1,7 @@
 ---
 title: "django-versioned-models: Drop-in Release Management for Django"
 date: 2026-03-08
-categories: [Django]
+categories: [Backend, Django]
 tags: [django, python, versioning, ci, open-source]
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: "python-base-command: Django-Style CLI Commands Without Django"
 date: 2026-03-01 07:30:00 +0200
-categories: [Core Foundations]
+categories: [Backend, Core Foundations]
 tags: [python, cli, automation, django, commands, utilities]
 description: "python-base-command brings Django's BaseCommand pattern — handle(), add_arguments(), CommandError, call_command(), auto-discovery — to any Python project, with zero Django dependency."
 ---

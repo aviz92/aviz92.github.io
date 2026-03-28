@@ -1,7 +1,7 @@
 ---
 title: "pytest-collect-requirements: Automated Requirements Traceability from Your Test Suite"
 date: 2026-03-03 13:00:00 +0200
-categories: [Pytest]
+categories: [Testing, Pytest]
 tags: [python, pytest, requirements, traceability, infrastructure, testing]
 description: "Annotate tests with infrastructure or product requirements, then collect them into a structured JSON file — without running the tests. pytest-collect-requirements brings requirements traceability directly into your test suite."
 ---

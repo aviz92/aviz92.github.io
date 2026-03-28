@@ -1,7 +1,7 @@
 ---
 title: "pytest-dynamic-parameterize: Runtime Test Parameterization for Complex Data-Driven Scenarios"
 date: 2026-03-02 12:00:00 +0200
-categories: [Pytest]
+categories: [Testing, Pytest]
 tags: [python, pytest, parameterize, data-driven, testing]
 description: "Generate test parameters at runtime from functions, config files, databases, or APIs. pytest-dynamic-parameterize replaces static @pytest.mark.parametrize with fully dynamic, function-driven parameterization."
 ---

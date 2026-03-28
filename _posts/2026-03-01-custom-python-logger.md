@@ -1,7 +1,7 @@
 ---
 title: "custom-python-logger: Colored, Contextual Logging for Python Projects"
 date: 2026-03-01 07:00:00 +0200
-categories: [Core Foundations]
+categories: [Backend, Core Foundations]
 tags: [python, logging, debugging, devops, utilities]
 description: "custom-python-logger adds colored output, custom log levels (STEP, EXCEPTION), contextual fields, UTC support, and pretty-printing helpers — all behind a single build_logger() call."
 ---

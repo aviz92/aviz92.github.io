@@ -1,7 +1,7 @@
 ---
 title: "pytest-only-markers: Isolate Any Test Instantly Without Touching Your CI"
 date: 2026-03-17 09:00:00 +0300
-categories: [Pytest]
+categories: [Testing, Pytest]
 tags: [python, pytest, testing, automation, ci-cd, markers, devtools]
 description: >-
   pytest-only-markers lets you flag individual tests with ONLY_* markers and run
