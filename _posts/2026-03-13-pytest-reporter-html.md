@@ -107,7 +107,7 @@ Per-test JSON files are written alongside the HTML, one per test. If you want to
 ## Goes Well With
 
 - [`custom-python-logger`](/posts/custom-python-logger) — the logger used in the examples; `self.logger` output flows into the report automatically
-- [`pytest-plugins`](/posts/pytest-plugins) — `--maxfail-streak` and `--fail2skip` work cleanly alongside marker isolation for focused debugging runs
+- [`pytest-plugins`](/posts/pytest-plugins) — CI reporting layer that works alongside the requirements manifest in pipeline workflows
 - [`pytest-depends-on`](/posts/pytest-depends-on) — run a specific dependency chain in isolation without triggering unrelated tests
 - [`pytest-reporter-html`](/posts/pytest-reporter-html) — isolated runs produce tight, single-test HTML reports that are easy to share
 - [`pytest-dynamic-parameterize`](/posts/pytest-dynamic-parameterize) — isolate one parameterized variant without running the full parameter set
