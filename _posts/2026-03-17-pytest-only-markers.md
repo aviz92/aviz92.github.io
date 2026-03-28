@@ -9,50 +9,70 @@ description: >-
   One decorator, one flag, full isolation.
 ---
 
-There's a specific kind of frustration that comes up when debugging a flaky test in a large suite.
+There's a specific kind of frustration that comes up when debugging a flaky test in a large suite. You don't want to run all 800 tests. You don't want to fiddle with `-k` expressions. You definitely don't want to temporarily comment out `pytestmark` at the top of the file and forget to put it back. You just want to run this test, and only this test, exactly as it would run in CI — markers and all. `pytest-only-markers` solves that with one decorator and one flag.
 
-You don't want to run all 800 tests. You don't want to fiddle with `-k` expressions. You definitely don't want to temporarily comment out `pytestmark` at the top of the file and forget to put it back. You just want to say: **run this test, and only this test, exactly as it would run in CI** — markers and all.
+## Why I Built This
 
-That's the problem `pytest-only-markers` solves. But there's a deeper problem it also addresses — one that comes up constantly in production test suites with multiple CI pipelines.
+Most pytest projects accumulate module-level `pytestmark` lists over time. CI runs `pytest -m regression` — a generic command that touches the whole suite. That's fine for most tests. But inside those modules there are always two or three tests that can only safely run under one specific marker condition. The existing options — move the file, add a `skipif`, change the module `pytestmark`, add `-k` exclusions to CI — are all bad for different reasons. I wanted the test itself to declare where it belongs, with the plugin enforcing it at collection time.
 
----
-
-## The Real Problem: Module-Level Markers vs. Individual Test Constraints
-
-Most pytest projects accumulate module-level `pytestmark` lists over time:
-
-```python
-pytestmark = [pytest.mark.regression, pytest.mark.e2e, pytest.mark.slow]
-```
-
-CI runs something like `pytest -m regression` — a generic command that touches the whole suite. That's fine for most tests.
-
-But inside that module, there are two or three tests that **can only safely run under one specific marker condition** — say, only as part of `smoke`, or only when a specific service is available. They're not wrong to live in that module, but they can't participate in every marker combination the generic CI command triggers.
-
-The old options are all bad:
-
-- **Move the tests to a different file** — awkward, breaks cohesion
-- **Add a `skipif` condition** — verbose, and it's runtime logic masquerading as a collection concern
-- **Change the module `pytestmark`** — affects every test in the file
-- **Add `-k` exclusions to the CI command** — fragile, grows over time, and `-k` doesn't strip inherited markers anyway
-
-`pytest-only-markers` gives you a fourth option: **the test declares where it belongs, and the plugin enforces it**.
-
----
-
-## A Concrete CI Pattern: `X or ONLY_X`
-
-Say your CI has two pipeline commands:
+## Installation
 
 ```bash
-# Full regression suite
-pytest -m regression
-
-# Smoke suite — fast, critical-path only
-pytest -m smoke
+pip install pytest-only-markers
+```
+```bash
+uv add pytest-only-markers
 ```
 
-Your module looks like this:
+## Setup & Configuration
+
+```ini
+[pytest]
+addopts = --only-markers-prefix
+markers =
+    ONLY_smoke: Run only smoke tests
+    ONLY_api: Run only API tests
+```
+
+Or pass the flag directly:
+
+```bash
+pytest --only-markers-prefix tests/
+```
+
+The plugin is opt-in — without `--only-markers-prefix`, all `ONLY_*` markers are inert and the suite runs normally.
+
+## Quick Start
+
+Decorate the test that has constraints, run with the flag:
+
+```python
+pytestmark = [pytest.mark.regression, pytest.mark.e2e]
+
+def test_full_flow():
+    ...
+
+@pytest.mark.ONLY_smoke
+def test_health_check():
+    ...
+```
+
+```bash
+pytest --only-markers-prefix tests/
+# Only test_health_check runs. test_full_flow is deselected.
+# pytestmark (regression, e2e) is stripped from test_health_check.
+```
+
+## Real-World Example
+
+Say your CI has two pipeline commands — a full regression suite and a fast smoke suite:
+
+```bash
+pytest -m regression          # full suite
+pytest -m "smoke or ONLY_smoke"  # smoke suite
+```
+
+A module has tests that participate in regression, but one test should only ever run as part of smoke:
 
 ```python
 pytestmark = [pytest.mark.regression, pytest.mark.e2e]
@@ -68,81 +88,26 @@ def test_health_check():
     ...
 ```
 
-`test_health_check` has a constraint: it should **only run as part of smoke**, never pulled in by `regression` or `e2e` through the inherited `pytestmark`.
-
-You update the smoke pipeline command to:
-
-```bash
-pytest -m "smoke or ONLY_smoke"
-```
-
-Now the logic is explicit and enforced at the marker level:
+With this setup:
 
 | Command | `test_full_flow` | `test_checkout` | `test_health_check` |
 |---|---|---|---|
-| `pytest -m regression` | ✅ runs | ✅ runs | ❌ skipped — no `regression` |
+| `pytest -m regression` | ✅ runs | ✅ runs | ❌ skipped |
 | `pytest -m "smoke or ONLY_smoke"` | ❌ skipped | ❌ skipped | ✅ runs |
 | `pytest --only-markers-prefix` | ❌ deselected | ❌ deselected | ✅ isolated, markers stripped |
 
-The `ONLY_smoke` marker does double duty:
+`ONLY_smoke` does double duty: in CI it's a scoped inclusion tag, locally it's an isolation switch. No changes to `pytest.ini`. No `-k` hacks. No `skipif` conditions.
 
-- **In CI** — acts as a scoped inclusion tag: the test participates in `smoke or ONLY_smoke` runs and nothing else
-- **Locally** — combine with `--only-markers-prefix` to run it in full isolation, stripped of all inherited `pytestmark` noise
+## Key Features
 
-No changes to `pytest.ini`. No `-k` hacks. No `skipif` conditions. The test itself declares where it belongs.
+When `--only-markers-prefix` is active and any test in the collected suite carries an `ONLY_*` marker, only those tests run. Everything else is deselected — appearing in pytest's `x deselected` summary, never silently dropped. The plugin is transparent about what it's doing.
 
----
+Marker isolation is the part that makes this different from `-k`. Non-`ONLY_*` markers — including the entire module `pytestmark` — are stripped from matching tests at the item level. Downstream plugins, reporters, and hooks see only the `ONLY_*` markers for that test, giving you a genuinely clean execution environment. `-k` by contrast doesn't strip inherited markers; it just filters by name.
 
-## Installation
-
-```bash
-pip install pytest-only-markers
-```
-```bash
-uv add pytest-only-markers
-```
-
-Enable it via `pytest.ini`:
-
-```ini
-[pytest]
-addopts = --only-markers-prefix
-markers =
-    ONLY_smoke: Run only smoke tests
-    ONLY_api: Run only API tests
-```
-
-Or pass the flag directly on the CLI:
-
-```bash
-pytest --only-markers-prefix tests/
-```
-
----
-
-## More Usage Patterns
-
-### Multiple `ONLY_*` markers on one test
-
-Stack them freely — all `ONLY_*` markers are preserved, everything else is stripped:
+The prefix match is case-insensitive — `ONLY_smoke` and `only_smoke` are treated identically, which matters on teams where engineers have different habits:
 
 ```python
-pytestmark = [pytest.mark.regression, pytest.mark.slow]
-
-@pytest.mark.ONLY_api
-@pytest.mark.ONLY_smoke
-def test_create_user():
-    assert True
-# Effective markers: ONLY_api + ONLY_smoke
-# pytestmark (regression, slow) is stripped entirely
-```
-
-### Case-insensitive prefix
-
-Both `ONLY_smoke` and `only_smoke` are treated identically:
-
-```python
-@pytest.mark.only_smoke   # lowercase
+@pytest.mark.only_smoke   # lowercase — works
 def test_ping():
     assert True
 
@@ -151,11 +116,18 @@ def test_pong():
     assert True
 ```
 
-Useful when different engineers have different habits — the plugin doesn't care.
+Stack multiple `ONLY_*` markers freely — all are preserved, everything else is stripped:
 
-### Combine isolation with a local debugging loop
+```python
+@pytest.mark.ONLY_api
+@pytest.mark.ONLY_smoke
+def test_create_user():
+    assert True
+# Effective markers: ONLY_api + ONLY_smoke
+# pytestmark (regression, slow) stripped entirely
+```
 
-Decorate the test you're working on, run in full isolation, iterate:
+For local debugging loops, decorate the test you're working on and iterate without touching CI config:
 
 ```python
 @pytest.mark.ONLY_debug
@@ -167,29 +139,16 @@ def test_payment_edge_case():
 pytest --only-markers-prefix tests/payments/
 ```
 
-Remove the decorator when you're done — or leave it committed. Without `--only-markers-prefix` in CI's `addopts`, the marker is inert.
+Remove the decorator when you're done — or leave it. Without `--only-markers-prefix` in CI's `addopts`, the marker is inert.
 
----
+## Goes Well With
 
-## Why Not Just Use `-k`?
-
-`-k` is a substring match against test names. It's powerful for ad-hoc filtering but has two hard limits here:
-
-1. It **doesn't strip inherited markers** from matched tests — the module-level `pytestmark` still applies.
-2. It requires you to know the test name upfront, and it matches across the whole suite by name, not by intent.
-
-`pytest-only-markers` is intent-driven. You decorate the test that has constraints, and the plugin enforces isolation — including cleaning up the marker environment for that test so downstream plugins, reporters, and hooks see only what's actually relevant.
-
----
-
-## Features at a Glance
-
-- **Selective collection** — only tests with an `ONLY_*` marker are collected; all others are deselected
-- **Case-insensitive prefix** — `ONLY_*` and `only_*` are equivalent
-- **Marker isolation** — non-`ONLY_*` markers, including module `pytestmark`, are stripped from matching items
-- **Transparent deselection** — skipped tests appear in pytest's `x deselected` summary, never silently dropped
-- **Instance-level patch** — `iter_markers` is patched per item, not globally, so downstream plugins see a clean marker set
-- **Opt-in via flag** — `--only-markers-prefix` is required to activate; without it the plugin is a no-op
+- [`custom-python-logger`](/posts/custom-python-logger) — the logger used in the examples; `self.logger` output flows into the report automatically
+- [`pytest-plugins`](/posts/pytest-plugins) — `--maxfail-streak` and `--fail2skip` work cleanly alongside marker isolation for focused debugging runs
+- [`pytest-depends-on`](/posts/pytest-depends-on) — run a specific dependency chain in isolation without triggering unrelated tests
+- [`pytest-reporter-html`](/posts/pytest-reporter-html) — isolated runs produce tight, single-test HTML reports that are easy to share
+- [`pytest-dynamic-parameterize`](/posts/pytest-dynamic-parameterize) — isolate one parameterized variant without running the full parameter set
+- [`pytest-collect-requirements`](/posts/pytest-collect-requirements) — collect test requirements from the same dynamic sources as your parameters for fully data-driven pipelines
 
 ---
 
@@ -198,4 +157,4 @@ Remove the decorator when you're done — or leave it committed. Without `--only
 - **PyPI**: [pypi.org/project/pytest-only-markers](https://pypi.org/project/pytest-only-markers)
 - **GitHub**: [github.com/aviz92/pytest-only-markers](https://github.com/aviz92/pytest-only-markers)
 
-Feedback, issues, and PRs are welcome.
+Decorate the test. Run the flag. Everything else stays out of the way.
