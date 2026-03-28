@@ -41,13 +41,42 @@ def test_child():
     assert True
 ```
 
-### Register the Marker (optional but recommended)
+### Enable the Plugin
+
+The plugin is **opt-in**. Pass `--depends-on` to activate dependency tracking and skip behaviour. Without it, all `depends_on` markers are ignored and every test runs normally.
+
+Add the flags to your `pytest.ini`:
 
 ```ini
 [pytest]
+addopts =
+    --depends-on          # enable dependency tracking and skip behaviour
+    --depends-on-reorder  # reorder tests so parents always run first
+
 markers =
     depends_on: mark test as dependent on another test
 ```
+
+Or pass them directly on the command line:
+
+```bash
+pytest --depends-on --depends-on-reorder
+```
+
+---
+
+## Automatic Test Reordering
+
+One practical problem with test dependencies is ordering: if `test_child` is collected before `test_parent`, it will always skip — even when the parent would have passed.
+
+Pass `--depends-on-reorder` to fix this automatically. The plugin performs a topological sort of the collected test suite at collection time, guaranteeing parents always run before their dependents — regardless of file order or definition order within a file.
+
+```
+Before reorder:  test_child_a → test_child_b → test_parent
+After reorder:   test_parent  → test_child_a → test_child_b
+```
+
+Circular dependencies are detected, logged as a warning, and handled gracefully (the run continues).
 
 ---
 
@@ -83,7 +112,9 @@ def test_feature():
 
 ## Automatic Status Tracking
 
-The plugin automatically tracks test outcomes (`passed`, `failed`, `skipped`, `xfailed`, `xpassed`) during the `call` phase — no manual tracking needed. Dependencies are resolved dynamically at runtime, so the order tests are collected doesn't matter.
+The plugin automatically tracks test outcomes (`passed`, `failed`, `skipped`, `xfailed`, `xpassed`) during the `call` phase — no manual tracking needed. Dependencies are resolved dynamically at runtime.
+
+> Use `--depends-on-reorder` to guarantee parents always run first so status tracking works correctly regardless of collection order.
 
 ---
 
@@ -120,4 +151,3 @@ If `test_create_user` fails, the remaining three tests are automatically skipped
 
 - **PyPI**: [pypi.org/project/pytest-depends-on](https://pypi.org/project/pytest-depends-on)
 - **GitHub**: [github.com/aviz92/pytest-depends-on](https://github.com/aviz92/pytest-depends-on)
-- **Install**: `pip install pytest-depends-on`
