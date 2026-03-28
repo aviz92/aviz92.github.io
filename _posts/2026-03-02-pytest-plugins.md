@@ -1,7 +1,7 @@
 ---
 title: "pytest-plugins: Enhanced Reporting and Smart CI Utilities for Pytest"
 date: 2026-03-02 10:00:00 +0200
-categories: [Testing, Pytest]
+categories: [Pytest]
 tags: [python, pytest, ci, reporting, testing]
 description: "pytest-plugins supercharges your test suite with structured JSON/Markdown reporting, consecutive failure detection, smart skip-on-fail, and verbose parameter IDs — all configurable via pytest.ini."
 ---

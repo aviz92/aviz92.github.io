@@ -1,7 +1,7 @@
 ---
 title: "ticket-assist: AI-Powered Slack Bot for Customer Support Ticket Classification"
 date: 2026-03-06 11:30:00 +0200
-categories: [AI, DevOps]
+categories: [AI]
 tags: [python, ai, llm, slack, automation, support, pydantic]
 description: "A production-ready Slack bot that listens for mentions, classifies support tickets using structured LLM output via Pydantic, and replies with AI-generated answers — powered by Claude, Gemini, or OpenAI."
 ---

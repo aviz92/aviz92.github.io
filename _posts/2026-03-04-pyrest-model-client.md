@@ -1,7 +1,7 @@
 ---
 title: "pyrest-model-client: Type-Safe, Model-Driven REST API Client for Python"
 date: 2026-03-04 10:30:00 +0200
-categories: [Backend, Core Foundations]
+categories: [Core Foundations]
 tags: [python, rest, api, pydantic, httpx, async, testing]
 description: "pyrest-model-client combines httpx and Pydantic into a model-driven REST client — define your API resources as typed Python classes, and get pagination, async support, and automatic response conversion out of the box."
 ---

@@ -1,7 +1,7 @@
 ---
 title: "pytest-reporter-html: Rich, Interactive HTML Reports for pytest — Zero Config"
 date: 2026-03-13 21:00:00 +0200
-categories: [Testing, Open Source]
+categories: [Pytest]
 tags: [python, pytest, testing, ci-cd, html, reporting, automation, devops]
 description: >-
   pytest-reporter-html generates rich, interactive HTML test reports with zero-config log capture,

@@ -1,7 +1,7 @@
 ---
 title: "cast-studio: Turn asciinema Recordings into GIF and MP4"
 date: 2026-03-08 10:00:00 +0200
-categories: [DevTools, Open Source]
+categories: [DevTools]
 tags: [python, asciinema, gif, mp4, ffmpeg, pillow, cli, terminal, demo]
 description: "cast-studio converts asciinema .cast files to GIF and MP4 — and ships a demo engine that makes every terminal recording reproducible."
 ---
