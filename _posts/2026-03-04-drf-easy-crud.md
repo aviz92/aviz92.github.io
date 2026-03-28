@@ -6,24 +6,13 @@ tags: [python, django, drf, rest-api, crud, filtering, pagination]
 description: "Stop writing the same GET/POST/PUT/PATCH/DELETE boilerplate in every ViewSet. drf-easy-crud gives you enterprise-grade CRUD with advanced filtering, pagination, and ForeignKey lookups out of the box."
 ---
 
-Every Django REST Framework project starts the same way: you create a model, a serializer, and then you write the same CRUD boilerplate — again. `drf-easy-crud` eliminates that repetition with a single utility class that handles all standard operations, plus production-ready filtering and pagination built in.
+Every Django REST Framework project starts the same way: model, serializer, ViewSet — and then you write the same CRUD boilerplate again. Manual queryset filtering, copy-pasted pagination setup, repetitive error handling across every endpoint, no consistent pattern across the team. The result is duplicated logic and hours spent on infrastructure instead of features. `drf-easy-crud` eliminates that repetition with a single utility class that handles all standard operations, plus production-ready filtering and pagination built in.
 
-## The Problem
+## Why I Built This
 
-A typical DRF ViewSet involves writing the same patterns over and over:
+After building my fourth DRF API I noticed I was copying the same ViewSet skeleton every time. The filtering logic, the pagination config, the error handling — all identical, all written from scratch again. On a team, every developer ends up with their own slightly different version of the same pattern. I wanted one place where all of that lived, with a consistent interface any team member could understand immediately.
 
-- Manual queryset filtering logic
-- Copy-pasted pagination setup
-- Repetitive error handling across every endpoint
-- No consistent pattern across your team
-
-The result is inconsistent code, duplicated logic, and hours wasted on infrastructure instead of features.
-
-## The Solution: `CRUDUtils`
-
-`drf-easy-crud` provides a single static utility class — `CRUDUtils` — that covers all five CRUD operations with a consistent, type-safe interface.
-
-### Installation
+## Installation
 
 ```bash
 pip install drf-easy-crud
@@ -32,7 +21,9 @@ pip install drf-easy-crud
 uv add drf-easy-crud
 ```
 
-### A Complete ViewSet in Minutes
+## Quick Start
+
+A complete, production-ready ViewSet with filtering, pagination, and error handling in under 40 lines:
 
 ```python
 from drf_easy_crud import CRUDUtils
@@ -82,129 +73,76 @@ class MyModelViewSet(viewsets.ViewSet):
         )
 ```
 
-That's a full, production-ready API endpoint — with filtering, pagination, error handling, and type hints — in under 40 lines.
+## Real-World Example
 
----
-
-## Advanced Features
-
-### Queryset Hooks
-
-Need to restrict results before applying request filters? Use `queryset_hook`:
+Here's a product catalog API with active-only results, custom pagination, newest-first ordering, and cross-model filtering — the kind of thing that takes hours to wire up manually:
 
 ```python
-def list(self, request: Request) -> Response:
-    return CRUDUtils.get(
-        request=request,
-        model_class=MyModel,
-        serializer_class=MyModelSerializer,
-        queryset_hook=lambda: MyModel.objects.filter(is_active=True),
-    )
+class ProductViewSet(viewsets.ViewSet):
+
+    def list(self, request: Request) -> Response:
+        return CRUDUtils.get(
+            request=request,
+            model_class=Product,
+            serializer_class=ProductSerializer,
+            queryset_hook=lambda: Product.objects.filter(is_active=True),
+            pagination_class=CustomPagination,
+            ordering_field="-created_at",
+        )
 ```
 
-### Custom Pagination
-
-The default is 20 items per page (max 100), but you can plug in your own pagination class:
-
-```python
-class CustomPagination(PageNumberPagination):
-    page_size = 50
-    max_page_size = 200
-
-def list(self, request: Request) -> Response:
-    return CRUDUtils.get(
-        request=request,
-        model_class=MyModel,
-        serializer_class=MyModelSerializer,
-        pagination_class=CustomPagination,
-    )
-```
-
-### Custom Ordering
-
-```python
-CRUDUtils.get(
-    request=request,
-    model_class=MyModel,
-    serializer_class=MyModelSerializer,
-    ordering_field="-created_at",  # Newest first
-)
-```
-
----
-
-## Powerful Filtering Out of the Box
-
-One of the standout features is the built-in `FilterUtils` — no need to configure `django-filter` or write custom filter backends.
-
-### Text Field Wildcards
-
-Pass filters directly as query params with intuitive wildcard patterns:
-
-| Pattern | Description | Example |
-|---------|-------------|---------|
-| `field=value*` | Starts with | `?name=test*` |
-| `field=*value` | Ends with | `?name=*test` |
-| `field=*value*` | Contains | `?name=*test*` |
-| `field=value` | Exact match (case-insensitive) | `?name=test` |
-
-### Numeric Comparison Operators
-
-| Pattern | Description | Example |
-|---------|-------------|---------|
-| `field=>=value` | Greater than or equal | `?age=>=25` |
-| `field=<=value` | Less than or equal | `?age=<=100` |
-| `field=>value` | Greater than | `?age=>25` |
-| `field=<value` | Less than | `?age=<25` |
-
-### ForeignKey Lookups
-
-Filter across related models using Django's double-underscore syntax — no extra configuration needed:
+Then filter via query params with no extra backend configuration:
 
 ```bash
 # Products in a category whose name starts with "electronics"
 GET /api/products/?category__name=electronics*
 
+# Active products priced under 100
+GET /api/products/?price=<100&is_active=true
+
 # Orders from a customer whose company name contains "acme"
-GET /api/orders/?customer__company__name=*acme*
-
-# Related model numeric filter
-GET /api/products/?category__priority=>=5
+GET /api/orders/?customer__company__name=*acme*&total=>=500
 ```
 
-### Combining Filters
-
-```bash
-GET /api/mymodel/?name=test*&age=>=18&status=active
-```
-
----
-
-## Standardized Pagination Response
-
-Every list endpoint returns a consistent, predictable structure:
+Every list response comes back in the same predictable structure:
 
 ```json
 {
   "count": 150,
-  "next": "http://example.com/api/mymodel/?page=2",
+  "next": "http://example.com/api/products/?page=2",
   "previous": null,
   "results": [...]
 }
 ```
 
-Control pagination via query params: `?page=2&page_size=50`
+## Key Features
 
----
+`CRUDUtils` is a static class — no instantiation, no subclassing required. Every method (`get`, `post`, `put`, `patch`, `delete`) has a consistent, type-safe signature so any team member can read any ViewSet without surprises.
 
-## Why It Matters at Scale
+The built-in `FilterUtils` handles filtering directly from query params with no `django-filter` configuration needed. Text fields support four wildcard patterns: `value*` (starts with), `*value` (ends with), `*value*` (contains), and `value` for case-insensitive exact match. Numeric fields support `>=`, `<=`, `>`, and `<` as inline operators in the query string — `?age=>=25` just works.
 
-In large projects with many models and endpoints, the benefits compound quickly:
+ForeignKey lookups use Django's double-underscore syntax directly in query params, with no extra setup:
 
-- **Consistency** — every endpoint behaves identically
-- **Less code to maintain** — CRUD logic lives in one place
-- **Faster onboarding** — new team members understand any endpoint instantly
-- **Built-in reliability** — error handling and logging are handled for you
+| Pattern | Description | Example |
+|---------|-------------|---------|
+| `field=value*` | Starts with | `?name=test*` |
+| `field=*value*` | Contains | `?name=*test*` |
+| `field=>=value` | Greater than or equal | `?age=>=25` |
+| `field=<value` | Less than | `?price=<100` |
+| `relation__field=value` | ForeignKey lookup | `?category__name=electronics*` |
+
+The `queryset_hook` parameter lets you restrict the base queryset before filters are applied — useful for multi-tenant APIs, soft-delete patterns, or any case where only a subset of records should be exposed:
+
+```python
+queryset_hook=lambda: MyModel.objects.filter(tenant=request.user.tenant)
+```
+
+Pagination defaults to 20 items per page (max 100) and is pluggable with any `PageNumberPagination` subclass. Ordering takes a single field string — prefix with `-` for descending.
+
+## The Stack Behind the Examples
+
+- [`custom-python-logger`](/posts/custom-python-logger) — error handling and logging built into `CRUDUtils` uses this under the hood
+- [`pyrest-model-client`](/posts/pyrest-model-client) — REST client I use to test these endpoints from other services
 
 ---
 
@@ -213,4 +151,4 @@ In large projects with many models and endpoints, the benefits compound quickly:
 - **PyPI**: [pypi.org/project/drf-easy-crud](https://pypi.org/project/drf-easy-crud)
 - **GitHub**: [github.com/aviz92/drf-easy-crud](https://github.com/aviz92/drf-easy-crud)
 
-Feedback, issues, and PRs are welcome.
+One class, five methods, every CRUD endpoint you'll ever need.
