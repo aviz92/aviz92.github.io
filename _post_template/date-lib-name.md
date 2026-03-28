@@ -33,6 +33,10 @@ uv add <lib-name>
 
 ## What's Next / Roadmap  ← optional but nice
 
+## The Stack Behind the Examples
+- [`<lib-name>`](/posts/<post-slug>) — one-liner description
+- [`<lib-name>`](/posts/<post-slug>) — one-liner description
+
 ---
 
 ## Links
