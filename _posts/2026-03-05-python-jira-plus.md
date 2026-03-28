@@ -13,6 +13,9 @@ Working with the JIRA API at scale reveals its rough edges quickly: large querie
 ```bash
 pip install python-jira-plus
 ```
+```bash
+uv add python-jira-plus
+```
 
 ## Configuration
 

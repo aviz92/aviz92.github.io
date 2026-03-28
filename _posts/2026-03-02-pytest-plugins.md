@@ -13,6 +13,9 @@ Running tests is easy. Understanding what happened, why it failed, and how to ac
 ```bash
 pip install pytest-plugins
 ```
+```bash
+uv add pytest-plugins
+```
 
 ---
 

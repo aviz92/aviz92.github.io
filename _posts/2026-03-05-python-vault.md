@@ -13,6 +13,9 @@ Hardcoded secrets in `.env` files work for local development but don't belong in
 ```bash
 pip install python-vault
 ```
+```bash
+uv add python-vault
+```
 
 ---
 

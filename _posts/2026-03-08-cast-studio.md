@@ -20,6 +20,15 @@ I wanted re-recording to be as simple as running a single command, with the same
 
 The config (`demo.cfg`) is a shell file you commit to your repo. It declares what to run, in what order, with what title and description for each step. When you want to re-record — after a new release, a new feature, a renamed command — you run one command and get the same demo, updated.
 
+### Installation
+
+```bash
+pip install cast-studio
+```
+```bash
+uv add cast-studio
+```
+
 ### .cfg structure:
 ```bash
 # ── project metadata ──────────────────────────────────────────────────────────

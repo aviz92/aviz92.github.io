@@ -13,6 +13,9 @@ The official `pygithub` package gives you raw API access. `python-github-plus` g
 ```bash
 pip install python-github-plus
 ```
+```bash
+uv add python-github-plus
+```
 
 ## Configuration
 

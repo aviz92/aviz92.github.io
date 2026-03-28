@@ -1,0 +1,15 @@
+<!-- The categories list -->
+{% if site.categories.size > 0 %}
+  <section>
+    <h2 class="panel-heading">Categories</h2>
+    <div class="d-flex flex-wrap mt-3 mb-1 me-3">
+      {% assign sorted_categories = site.categories | sort %}
+      {% for category in sorted_categories %}
+        {% assign url = category[0] | slugify | url_encode | prepend: '/categories/' | append: '/' %}
+        <a class="post-tag btn btn-outline-primary" href="{{ url | relative_url }}">
+          {{ category[0] }} ({{ category[1].size }})
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}

@@ -13,6 +13,9 @@ If you've written Django management commands, you know how clean the pattern is:
 ```bash
 pip install python-base-command
 ```
+```bash
+uv add python-base-command
+```
 
 ---
 

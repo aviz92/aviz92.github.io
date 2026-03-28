@@ -26,6 +26,9 @@ The result is inconsistent code, duplicated logic, and hours wasted on infrastru
 ### Installation
 
 ```bash
+pip install drf-easy-crud
+```
+```bash
 uv add drf-easy-crud
 ```
 

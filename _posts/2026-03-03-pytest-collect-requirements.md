@@ -13,6 +13,9 @@ In regulated industries, infrastructure automation, and large-scale CI systems, 
 ```bash
 pip install pytest-collect-requirements
 ```
+```bash
+uv add pytest-collect-requirements
+```
 
 ---
 

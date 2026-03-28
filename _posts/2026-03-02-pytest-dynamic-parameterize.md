@@ -13,6 +13,9 @@ description: "Generate test parameters at runtime from functions, config files, 
 ```bash
 pip install pytest-dynamic-parameterize
 ```
+```bash
+uv add pytest-dynamic-parameterize
+```
 
 ---
 

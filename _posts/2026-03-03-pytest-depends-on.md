@@ -13,6 +13,9 @@ In integration and end-to-end testing, tests often depend on each other. If `tes
 ```bash
 pip install pytest-depends-on
 ```
+```bash
+uv add pytest-depends-on
+```
 
 ---
 

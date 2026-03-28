@@ -21,6 +21,9 @@ three-stage data-status workflow, and CI-ready management commands — automatic
 ```bash
 pip install django-versioned-models
 ```
+```bash
+uv add django-versioned-models
+```
 
 ```python
 # settings.py

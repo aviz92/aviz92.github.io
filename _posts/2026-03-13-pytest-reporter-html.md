@@ -38,6 +38,9 @@ Beyond raw logs, the report gives you:
 ## Installation
 
 ```bash
+pip install pytest-reporter-html
+```
+```bash
 uv add pytest-reporter-html
 ```
 

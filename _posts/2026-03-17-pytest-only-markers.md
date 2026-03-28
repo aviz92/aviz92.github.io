@@ -96,9 +96,10 @@ No changes to `pytest.ini`. No `-k` hacks. No `skipif` conditions. The test itse
 ## Installation
 
 ```bash
-uv add pytest-only-markers
-# or
 pip install pytest-only-markers
+```
+```bash
+uv add pytest-only-markers
 ```
 
 Enable it via `pytest.ini`:

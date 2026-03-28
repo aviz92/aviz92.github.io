@@ -11,6 +11,9 @@ Working with REST APIs in Python usually means writing the same boilerplate repe
 ## Installation
 
 ```bash
+pip install pyrest-model-client
+```
+```bash
 uv add pyrest-model-client
 ```
 

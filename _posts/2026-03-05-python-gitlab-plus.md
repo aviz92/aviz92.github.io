@@ -13,6 +13,9 @@ description: "python-gitlab-plus extends the official python-gitlab package with
 ```bash
 pip install python-gitlab-plus
 ```
+```bash
+uv add python-gitlab-plus
+```
 
 ## Configuration
 

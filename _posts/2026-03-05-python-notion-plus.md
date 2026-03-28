@@ -13,6 +13,9 @@ The raw Notion API is powerful but verbose. Pagination is manual, property forma
 ```bash
 pip install python-notion-plus
 ```
+```bash
+uv add python-notion-plus
+```
 
 ## Configuration
 

@@ -13,6 +13,9 @@ Python's built-in `logging` module is powerful but verbose to configure. `custom
 ```bash
 pip install custom-python-logger
 ```
+```bash
+uv add custom-python-logger
+```
 
 ---
 
