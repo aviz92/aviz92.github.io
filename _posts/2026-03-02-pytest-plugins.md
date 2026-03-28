@@ -114,9 +114,11 @@ addopts =
 | `--result-each-test` | Print result after each test |
 | `--pytest-xfail-strict` | Treat `xpass` as failure |
 
-## The Stack Behind the Examples
+## Goes Well With
 
-- [`custom-python-logger`](/posts/custom-python-logger) — the logger powering `self.logger` in every command
+- [`custom-python-logger`](/posts/custom-python-logger) — log dependency resolution and test outcomes in a structured way for better CI reporting and debugging
+- [`pytest-collect-requirements`](/posts/pytest-collect-requirements) — collect test requirements from the same dynamic sources as your parameters for fully data-driven pipelines
+- [`pytest-depends-on`](/posts/pytest-depends-on) — express dependencies between tests that are parameterized from dynamic sources, ensuring proper execution order and skip logic
 
 ---
 

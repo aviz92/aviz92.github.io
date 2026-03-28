@@ -179,9 +179,9 @@ def test_greet_empty_name():
 
 `CommandError` propagates cleanly in tests but is caught and printed without a traceback when invoked from the CLI — unless you pass `--traceback`.
 
-## The Stack Behind the Examples
+## Goes Well With
 
-- [`custom-python-logger`](/posts/custom-python-logger) — the logger powering `self.logger` in every command
+- [`custom-python-logger`](/posts/custom-python-logger) — log dependency resolution and test outcomes in a structured way for better CI reporting and debugging
 
 ---
 

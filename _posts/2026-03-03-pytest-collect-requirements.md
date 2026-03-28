@@ -102,10 +102,10 @@ For large test suites, wrapping the marker in a helper function keeps requiremen
 | `--save-to` | Output file path (default: `logs/test_requirements.json`) |
 | `--execute-tests` | Run tests after collecting requirements |
 
-## The Stack Behind the Examples
+## Goes Well With
 
+- [`custom-python-logger`](/posts/custom-python-logger) — log dependency resolution and test outcomes in a structured way for better CI reporting and debugging
 - [`pytest-plugins`](/posts/pytest-plugins) — CI reporting layer that works alongside the requirements manifest in pipeline workflows
-- [`custom-python-logger`](/posts/custom-python-logger) — the logger powering `self.logger` in every command
 
 ---
 

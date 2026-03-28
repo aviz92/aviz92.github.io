@@ -139,7 +139,7 @@ queryset_hook=lambda: MyModel.objects.filter(tenant=request.user.tenant)
 
 Pagination defaults to 20 items per page (max 100) and is pluggable with any `PageNumberPagination` subclass. Ordering takes a single field string — prefix with `-` for descending.
 
-## The Stack Behind the Examples
+## Goes Well With
 
 - [`custom-python-logger`](/posts/custom-python-logger) — error handling and logging built into `CRUDUtils` uses this under the hood
 - [`pyrest-model-client`](/posts/pyrest-model-client) — REST client I use to test these endpoints from other services

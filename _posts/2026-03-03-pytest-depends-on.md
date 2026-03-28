@@ -108,10 +108,12 @@ def test_feature():
 
 Status tracking is automatic. The plugin hooks into the `call` phase and records every test outcome — no manual tracking, no shared state to manage.
 
-## The Stack Behind the Examples
+## Goes Well With
 
+- [`custom-python-logger`](/posts/custom-python-logger) — log dependency resolution and test outcomes in a structured way for better CI reporting and debugging
 - [`pytest-plugins`](/posts/pytest-plugins) — CI reporting layer that works alongside the requirements manifest in pipeline workflows
-- [`custom-python-logger`](/posts/custom-python-logger) — the logger powering `self.logger` in every command
+- [`pytest-collect-requirements`](/posts/pytest-collect-requirements) — collect test requirements from the same dynamic sources as your parameters for fully data-driven pipelines
+- [`pytest-dynamic-parameterize`](/posts/pytest-dynamic-parameterize) — express dependencies between tests that are parameterized from dynamic sources, ensuring proper execution order and skip logic
 
 ---
 

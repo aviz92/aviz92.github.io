@@ -227,6 +227,12 @@ No ordering required on the developer's part.
 | `deprecate_release --release-version v1.0.0` | Soft-hide old release (data preserved) |
 | `deprecate_release --release-version v1.0.0 --undo` | Restore a deprecated release |
 
+## Goes Well With
+
+- [`custom-python-logger`](/posts/custom-python-logger) — logging I wire up alongside the client for request tracing
+- [`drf-easy-crud`](/posts/drf-easy-crud) — the DRF API layer on the server side that `pyrest-model-client` talks to in my projects
+- [`django-versioned-models`](/posts/django-versioned-models) — versioned model queries I consume through this client
+
 ---
 
 ## Links

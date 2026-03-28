@@ -118,10 +118,12 @@ def my_params(config):
     return fetch_data_from_api()
 ```
 
-## The Stack Behind the Examples
+## Goes Well With
 
-- [`custom-python-logger`](/posts/custom-python-logger) — the logger powering `self.logger` in every command
-- [`pytest-plugins`](/posts/pytest-plugins) — overview of the pytest plugin ecosystem these libraries fit into
+- [`custom-python-logger`](/posts/custom-python-logger) — log dependency resolution and test outcomes in a structured way for better CI reporting and debugging
+- [`pytest-plugins`](/posts/pytest-plugins) — CI reporting layer that works alongside the requirements manifest in pipeline workflows
+- [`pytest-collect-requirements`](/posts/pytest-collect-requirements) — collect test requirements from the same dynamic sources as your parameters for fully data-driven pipelines
+- [`pytest-depends-on`](/posts/pytest-depends-on) — express dependencies between tests that are parameterized from dynamic sources, ensuring proper execution order and skip logic
 
 ---
 

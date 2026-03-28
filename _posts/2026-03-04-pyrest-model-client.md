@@ -6,7 +6,11 @@ tags: [python, rest, api, pydantic, httpx, async, testing]
 description: "pyrest-model-client combines httpx and Pydantic into a model-driven REST client — define your API resources as typed Python classes, and get pagination, async support, and automatic response conversion out of the box."
 ---
 
-Working with REST APIs in Python usually means writing the same boilerplate repeatedly: building headers, handling pagination, converting raw dicts into typed objects, managing timeouts and connection pools. `pyrest-model-client` wraps `httpx` and `Pydantic` into a clean, model-driven interface that handles all of that — synchronously and asynchronously.
+Working with REST APIs in Python usually means writing the same boilerplate repeatedly: building headers, handling pagination, converting raw dicts into typed objects, managing timeouts and connection pools. You end up with utility functions scattered across the codebase, each doing roughly the same thing with slightly different assumptions. `pyrest-model-client` wraps `httpx` and `Pydantic` into a clean, model-driven interface — synchronously and asynchronously — so that boilerplate disappears into a single consistent layer.
+
+## Why I Built This
+
+I kept writing the same REST client wrapper in every project that needed to talk to an external API. The pagination loop, the header builder, the dict-to-model conversion — it was always there, always slightly different, always untested. I wanted one library where API resources are proper Python classes with types and IDE autocomplete, and where fetching a paginated list of them is a three-line loop, not a function I write from scratch every time.
 
 ## Installation
 
@@ -17,14 +21,13 @@ pip install pyrest-model-client
 uv add pyrest-model-client
 ```
 
----
+## Quick Start
 
-## The Core Idea: API Resources as Python Classes
-
-Instead of passing raw strings and dicts around, you define your API resources as typed Pydantic models:
+Define your API resources as typed Pydantic models, set up the client, and start making requests:
 
 ```python
 from pyrest_model_client.base import BaseAPIModel
+from pyrest_model_client import RestApiClient, build_header
 
 class Product(BaseAPIModel):
     name: str
@@ -32,74 +35,11 @@ class Product(BaseAPIModel):
     description: str | None = None
     resource_path: str = "products"
 
-class User(BaseAPIModel):
-    name: str
-    email: str
-    resource_path: str = "users"
-```
+header = build_header(token="your_api_token")
+client = RestApiClient(base_url="https://api.example.com", header=header)
 
-`resource_path` ties the model to its API endpoint. From there, the model can generate its own endpoint and full URL:
-
-```python
-product = Product(name="Widget", price=9.99)
-product.get_endpoint()              # "products"
-product.get_endpoint(include_id=True)  # "products/42" (if id is set)
-product.get_resource_url(client)    # "https://api.example.com/products"
-```
-
----
-
-## Setting Up the Client
-
-```python
-from pyrest_model_client import RestApiClient, build_header
-
-header = build_header(token="your_api_token")  # Token auth by default
-
-client = RestApiClient(
-    base_url="https://api.example.com",
-    header=header,
-)
-```
-
-For Bearer auth or custom content types:
-
-```python
-header = build_header(
-    token="your_jwt_token",
-    authorization_type="Bearer",
-    content_type="application/json",
-)
-```
-
-### Custom Timeout and Connection Pool
-
-```python
-import httpx
-
-client = RestApiClient(
-    base_url="https://api.example.com",
-    header=header,
-    timeout=httpx.Timeout(60.0, connect=10.0),
-    add_trailing_slash=True,
-    limits=httpx.Limits(max_keepalive_connections=5, max_connections=10),
-)
-```
-
-If `timeout` is not provided, defaults are `30s` read and `10s` connect. Connection pool defaults to 5 keepalive / 10 max.
-
----
-
-## Making Requests
-
-All five standard operations:
-
-```python
 # GET list
 response = client.get("products")
-
-# GET single
-response = client.get("products/42")
 
 # POST
 new_product = client.post("products", data={"name": "Widget", "price": 9.99})
@@ -111,111 +51,14 @@ updated = client.put("products/42", data={"name": "Updated Widget", "price": 12.
 client.delete("products/42")
 ```
 
-By default, `.get()`, `.post()`, `.put()` return parsed JSON (`dict`). Pass `as_json=False` to get the raw `httpx.Response`.
+## Real-World Example
 
----
-
-## Paginated Fetching with Type Conversion
-
-The real power is combining `get_model_fields()` with pagination to fetch all pages and convert directly to typed instances:
-
-```python
-from pyrest_model_client import get_model_fields
-
-products = []
-params = None
-
-while res := client.get("products", params=params):
-    products.extend(get_model_fields(res["results"], model=Product))
-
-    if not res["next"]:
-        break
-    params = {"page": res["next"].split("/?page=")[-1]}
-
-# products is now a list[Product] — fully typed
-for p in products:
-    print(f"{p.name}: ${p.price}")
-```
-
-`get_model_fields()` converts a list of raw API response dicts into validated Pydantic model instances — field types are enforced, optional fields get defaults, and you get IDE autocomplete on the result.
-
----
-
-## Async Support
-
-`AsyncRestApiClient` mirrors the sync API with full `async/await` support, designed as a context manager:
-
-```python
-import asyncio
-from pyrest_model_client import AsyncRestApiClient, build_header
-
-async def fetch_all():
-    header = build_header(token="your_token")
-
-    async with AsyncRestApiClient(base_url="https://api.example.com", header=header) as client:
-        products = await client.get("products")
-        new_item = await client.post("products", data={"name": "Async Widget", "price": 5.99})
-        updated = await client.put("products/1", data={"name": "Updated"})
-        await client.delete("products/99")
-
-asyncio.run(fetch_all())
-```
-
-The `async with` block ensures `aclose()` is called automatically — no leaked connections.
-
----
-
-## How the Internals Work
-
-### Endpoint Normalization
-
-`normalize_endpoint()` handles three cases consistently:
-
-```python
-def normalize_endpoint(self, endpoint: str, add_trailing_slash: bool = True) -> str:
-    # Already a full URL → pass through unchanged
-    if endpoint.startswith("http://") or endpoint.startswith("https://"):
-        return endpoint
-
-    # Add trailing slash if configured
-    if add_trailing_slash and not endpoint.endswith("/"):
-        endpoint = endpoint + "/"
-
-    # Prepend base_url for relative paths
-    if not endpoint.startswith("http"):
-        endpoint = f'{self.base_url}/{endpoint.lstrip("/")}' if self.base_url else endpoint
-
-    return endpoint
-```
-
-This means you can pass `"products"`, `"products/42"`, or a full `"https://other-api.com/resource"` and the client handles each correctly.
-
-### Error Handling
-
-Every response calls `raise_for_status()` before returning. HTTP 4xx and 5xx responses raise `httpx.HTTPStatusError` immediately — no silent failures, no need to check status codes manually.
-
-### Async Reuses Sync Defaults
-
-`AsyncRestApiClient` reuses `RestApiClient`'s static methods for timeout and limit defaults:
-
-```python
-self.client = httpx.AsyncClient(
-    timeout=RestApiClient.get_default_timeout(timeout),
-    limits=RestApiClient.get_default_limits(limits),
-)
-```
-
-Single source of truth for configuration defaults across both clients.
-
----
-
-## Real-World Example: Fetching Test Data
-
-This is how `pyrest-model-client` is used in [`django-basic-app`](https://github.com/aviz92/django-basic-app) to fetch versioned test data from a running API:
+Here's how `pyrest-model-client` is used to fetch versioned, paginated data from a running API and convert it directly into typed model instances — ready for assertions, no dict key access:
 
 ```python
 from pyrest_model_client.base import BaseAPIModel
 from pyrest_model_client import RestApiClient, build_header, get_model_fields
+import os
 
 class Employee(BaseAPIModel):
     name: str
@@ -235,9 +78,58 @@ while res := client.get("employee", params=params):
     if not res["next"]:
         break
     params["page"] = res["next"].split("/?page=")[-1]
+
+# employees is now list[Employee] — fully typed, IDE-autocomplete-ready
 ```
 
-The result is a typed `list[Employee]` — ready for test assertions, no dict key access.
+The same pattern works against any paginated REST API. Swap the model, swap the endpoint, the loop stays identical.
+
+## Key Features
+
+`BaseAPIModel` is a Pydantic model extended with API awareness. Set `resource_path` on the class and the model knows its own endpoint — it can generate `"products"`, `"products/42"`, or a full `"https://api.example.com/products"` depending on what you need. This keeps endpoint logic tied to the resource definition, not scattered across call sites.
+
+`get_model_fields()` converts a list of raw API response dicts into validated Pydantic instances. Field types are enforced, optional fields get defaults, and you get full IDE autocomplete on the result — which matters a lot when you're writing tests against API responses.
+
+The client handles endpoint normalization transparently: pass `"products"`, `"products/42"`, or a full URL — it does the right thing in each case. Every response calls `raise_for_status()` before returning, so 4xx and 5xx errors surface immediately as `httpx.HTTPStatusError` without silent failures.
+
+Authentication and transport are fully configurable. `build_header` handles Token and Bearer auth out of the box. For custom timeouts and connection pools:
+
+```python
+import httpx
+
+client = RestApiClient(
+    base_url="https://api.example.com",
+    header=header,
+    timeout=httpx.Timeout(60.0, connect=10.0),
+    limits=httpx.Limits(max_keepalive_connections=5, max_connections=10),
+    add_trailing_slash=True,
+)
+```
+
+Defaults are 30s read / 10s connect and 5 keepalive / 10 max connections if not specified.
+
+`AsyncRestApiClient` mirrors the sync API with full `async/await` support, designed as a context manager so connections are always cleaned up:
+
+```python
+import asyncio
+from pyrest_model_client import AsyncRestApiClient, build_header
+
+async def fetch_all():
+    async with AsyncRestApiClient(base_url="https://api.example.com", header=build_header(token="your_token")) as client:
+        products = await client.get("products")
+        new_item = await client.post("products", data={"name": "Async Widget", "price": 5.99})
+        await client.delete("products/99")
+
+asyncio.run(fetch_all())
+```
+
+Both clients share the same timeout and limit defaults — one source of truth, no divergence.
+
+## Goes Well With
+
+- [`custom-python-logger`](/posts/custom-python-logger) — logging I wire up alongside the client for request tracing
+- [`drf-easy-crud`](/posts/drf-easy-crud) — the DRF API layer on the server side that `pyrest-model-client` talks to in my projects
+- [`django-versioned-models`](/posts/django-versioned-models) — versioned model queries I consume through this client
 
 ---
 
@@ -246,4 +138,4 @@ The result is a typed `list[Employee]` — ready for test assertions, no dict ke
 - **PyPI**: [pypi.org/project/pyrest-model-client](https://pypi.org/project/pyrest-model-client)
 - **GitHub**: [github.com/aviz92/pyrest-model-client](https://github.com/aviz92/pyrest-model-client)
 
-Feedback, issues, and PRs are welcome.
+Define the resource once. Get types, pagination, and async for free.
