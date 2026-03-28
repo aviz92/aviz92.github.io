@@ -40,7 +40,7 @@ uv add <lib-name>
 ---
 
 ## Links
-- **PyPI**: [pypi.org/project/custom-python-logger](https://pypi.org/project/custom-python-logger)
-- **GitHub**: [github.com/aviz92/custom-python-logger](https://github.com/aviz92/custom-python-logger)
+- **PyPI**: [pypi.org/project/<lib-name>](https://pypi.org/project/<lib-name>)
+- **GitHub**: [github.com/aviz92/<lib-name>](https://github.com/aviz92/<lib-name>)
 
 [One or two closing sentences — personal, not generic.]
