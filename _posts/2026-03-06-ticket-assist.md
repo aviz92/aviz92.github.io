@@ -6,13 +6,11 @@ tags: [python, ai, llm, slack, automation, support, pydantic]
 description: "A production-ready Slack bot that listens for mentions, classifies support tickets using structured LLM output via Pydantic, and replies with AI-generated answers — powered by Claude, Gemini, or OpenAI."
 ---
 
-`ticket-assist` is a production-ready Slack bot that brings AI-powered ticket classification directly into your support workflow. Mention the bot with a support request, and it responds with a structured classification — category, urgency, sentiment, confidence, and a ready-to-send answer — powered by your choice of LLM.
+Support teams spend a lot of time doing the same triage: read the ticket, figure out the category, assess urgency, draft a first response. It's repetitive, it's slow, and it's where response times slip. `ticket-assist` is a production-ready Slack bot that does that triage automatically — mention it with a support message and it replies with a structured classification and a ready-to-send answer, powered by your choice of LLM.
 
-## Architecture
+## Why I Built This
 
-Built on **Slack Bolt** + **Flask**, the bot exposes a `/slack/events` webhook endpoint that receives Slack's `app_mention` events. Incoming messages are processed through a structured LLM pipeline using Pydantic models for type-safe, validated responses.
-
----
+I wanted to see how far structured LLM output could go in a real support workflow. Not a chatbot that gives vague answers — something that commits to a category, an urgency level, a confidence score, and an actual response, all in a validated Pydantic schema. Slack was the right channel because that's where support requests actually land. The result is something you can drop into an existing support workflow and start getting AI-classified tickets immediately.
 
 ## Installation
 
@@ -22,9 +20,7 @@ cd ticket-assist
 uv sync
 ```
 
----
-
-## Configuration
+## Setup & Configuration
 
 ```env
 SLACK_BOT_TOKEN=xoxb-your-bot-token
@@ -37,83 +33,6 @@ GEMINI_API_KEY=your-gemini-key
 OPENAI_API_KEY=your-openai-key
 ```
 
----
-
-## Structured Ticket Classification
-
-The core of the bot is a Pydantic schema that defines exactly what the LLM must return:
-
-```python
-from slack_bot.functions import TicketClassification, SYSTEM_PROMPT
-
-response = llm.completions_create(
-    response_model=TicketClassification,
-    temperature=0,
-    max_retries=3,
-    messages=[
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": "My order #12345 hasn't arrived yet"},
-    ],
-)
-
-print(response.category)         # TicketCategory.ORDER_ISSUE
-print(response.urgency)          # TicketUrgency.HIGH
-print(response.sentiment)        # customer emotional state
-print(response.confidence)       # model confidence score
-print(response.ticket_complete)  # True / False
-print(response.answer)           # ready-to-send customer reply
-```
-
-Using Pydantic as the response model means the LLM output is always validated and structured — no parsing, no brittle string matching.
-
----
-
-## Event Handling
-
-When a user mentions the bot in any channel, `handle_mentions` strips the mention tag, runs the AI pipeline, and replies:
-
-```python
-@app.event("app_mention")
-def handle_mentions(body: dict[str, Any], say: Say) -> None:
-    text = body["event"]["text"]
-    mention = f"<@{SLACK_BOT_USER_ID}>"
-    text = text.replace(mention, "").strip()
-
-    say("thinking...")
-    response = ai_function(llm=llm, user_input=text)
-    say(response.answer)
-```
-
----
-
-## Quick Start
-
-```bash
-# 1. Install dependencies
-uv sync
-
-# 2. Install SSL certificates (macOS)
-/Applications/Python\ 3.13/Install\ Certificates.command
-
-# 3. Configure environment
-cp .env.example .env
-
-# 4. Get your bot user ID
-uv run python slack_bot/user_id.py
-
-# 5. Start the Flask server
-uv run python -m slack_bot.app
-
-# 6. In a new terminal, expose with ngrok
-ngrok http 5000
-```
-
-Then set `https://<your-ngrok-url>/slack/events` as the Event Subscriptions URL in your Slack app settings, and invite the bot to a channel with `/invite @YourBotName`.
-
----
-
-## Multi-LLM Support
-
 Switch providers with a single env var — no code changes:
 
 | Provider | `LLM_PROVIDER` |
@@ -122,10 +41,85 @@ Switch providers with a single env var — no code changes:
 | Google Gemini | `gemini` |
 | OpenAI | `openai` |
 
+## Quick Start
+
+```bash
+# 1. Install dependencies
+uv sync
+
+# 2. Configure environment
+cp .env.example .env
+
+# 3. Get your bot user ID
+uv run python slack_bot/user_id.py
+
+# 4. Start the Flask server
+uv run python -m slack_bot.app
+
+# 5. Expose with ngrok
+ngrok http 5000
+```
+
+Set `https://<your-ngrok-url>/slack/events` as the Event Subscriptions URL in your Slack app settings, then invite the bot to a channel with `/invite @YourBotName`.
+
+## Real-World Example
+
+A customer messages in Slack: `@ticket-assist My order #12345 hasn't arrived yet and I needed it for an event tomorrow`.
+
+The bot runs the classification pipeline and replies immediately:
+
+```python
+response.category    # TicketCategory.ORDER_ISSUE
+response.urgency     # TicketUrgency.HIGH
+response.sentiment   # "frustrated, time-sensitive"
+response.confidence  # 0.94
+response.ticket_complete  # True
+response.answer      # "I'm sorry to hear your order hasn't arrived..."
+```
+
+The answer field contains a ready-to-send customer reply — the support agent can post it directly or edit it first. Category, urgency, and sentiment give the team everything they need to route and prioritize without reading the full message.
+
+## Key Features
+
+The core of the bot is a Pydantic schema that defines exactly what the LLM must return. There's no parsing, no brittle string matching — the model either returns a valid `TicketClassification` or the request retries up to three times:
+
+```python
+response = llm.completions_create(
+    response_model=TicketClassification,
+    temperature=0,
+    max_retries=3,
+    messages=[
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": user_input},
+    ],
+)
+```
+
+Using Pydantic as the response model means every field is typed and validated before the bot replies. A classification without a confidence score or a missing urgency level is caught before it reaches the user — not after.
+
+The event handling is minimal by design. Built on Slack Bolt and Flask, the bot exposes a `/slack/events` webhook that receives `app_mention` events. When mentioned, it strips the mention tag, runs the AI pipeline, and calls `say()` with the generated answer:
+
+```python
+@app.event("app_mention")
+def handle_mentions(body: dict[str, Any], say: Say) -> None:
+    text = body["event"]["text"].replace(f"<@{SLACK_BOT_USER_ID}>", "").strip()
+    say("thinking...")
+    response = ai_function(llm=llm, user_input=text)
+    say(response.answer)
+```
+
+Multi-LLM support lets you swap providers without touching the classification logic. `temperature=0` keeps responses deterministic regardless of which model is behind it.
+
+## Goes Well With
+
+- [`python-jira-plus`](/posts/python-jira-plus) — create a Jira ticket automatically from the classification output
+- [`python-vault`](/posts/python-vault) — store Slack and LLM API tokens in Vault instead of plain env vars
+- [`custom-python-logger`](/posts/custom-python-logger) — structured logging for every classification event and LLM call
+
 ---
 
 ## Links
 
 - **GitHub**: [github.com/aviz92/ticket-assist](https://github.com/aviz92/ticket-assist)
 
-Feedback, issues, and PRs are welcome.
+Mention the bot. Get a classification. Route the ticket. Done.

@@ -94,7 +94,7 @@ Together these two methods cover the most common pattern: read a database, work 
 
 ## Goes Well With
 
-- [python-vault](/posts/python-vault) — I use Vault to store the GitHub access token securely in automation scripts
+- [`python-vault`](/posts/python-vault) — store Telegram and Notion tokens in Vault instead of a plain `.env`
 - [`python-jira-plus`](/posts/python-jira-plus) — I pair these in ticket automation scripts: close the Jira ticket when the PR merges
 - [`python-github-plus`](/posts/python-github-plus) — close Jira tickets automatically when a GitHub PR merges
 - [`python-gitlab-plus`](/posts/python-gitlab-plus) — same integration pattern for GitLab pipelines and MRs

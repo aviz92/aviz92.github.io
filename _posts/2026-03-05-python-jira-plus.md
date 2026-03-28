@@ -137,7 +137,7 @@ issue = jira_client.create_issue(
 
 ## Goes Well With
 
-- [python-vault](/posts/python-vault) — I use Vault to store the GitHub access token securely in automation scripts
+- [`python-vault`](/posts/python-vault) — store Telegram and Notion tokens in Vault instead of a plain `.env`
 - [`python-github-plus`](/posts/python-github-plus) — close Jira tickets automatically when a GitHub PR merges
 - [`python-gitlab-plus`](/posts/python-gitlab-plus) — same integration pattern for GitLab pipelines and MRs
 - [`custom-python-logger`](/posts/custom-python-logger) — structured logging for every Jira API call in automation scripts

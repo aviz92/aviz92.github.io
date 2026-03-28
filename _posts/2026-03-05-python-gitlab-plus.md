@@ -154,7 +154,7 @@ Tag management and project administration round out the service set — create a
 
 ## Goes Well With
 
-- [python-vault](/posts/python-vault) — I use Vault to store the GitHub access token securely in automation scripts
+- [`python-vault`](/posts/python-vault) — store Telegram and Notion tokens in Vault instead of a plain `.env`
 - [`python-jira-plus`](/posts/python-jira-plus) — I pair these in ticket automation scripts: close the Jira ticket when the PR merges
 - [`custom-python-logger`](/posts/custom-python-logger) — logging wired into every service call for audit trails in automation scripts
 
