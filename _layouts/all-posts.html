@@ -3,8 +3,11 @@ layout: default
 ---
 <section class="post archives">
   <header class="post__header">
-    <p class="kicker">Archives</p>
-    <h1 class="post__title">Every post, by year.</h1>
+    <div class="post-index__title-row" style="margin-bottom:1rem;">
+      <p class="kicker" style="margin:0;">All writing</p>
+      <a class="btn-ghost" href="{{ '/' | relative_url }}">← Back</a>
+    </div>
+    <h1 class="post__title">{{ site.posts.size }} posts, by year.</h1>
   </header>
 
   {% assign posts_by_year = site.posts | group_by_exp: 'post', 'post.date | date: "%Y"' %}

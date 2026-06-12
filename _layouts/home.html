@@ -86,7 +86,10 @@ layout: default
 
 <section class="post-index section-reveal" id="posts">
   <div class="post-index__header">
-    <h2 class="section-title">Latest writing</h2>
+    <div class="post-index__title-row">
+      <h2 class="section-title">Latest writing</h2>
+      <a class="btn-ghost" href="{{ '/all-posts/' | relative_url }}">View all posts →</a>
+    </div>
     <div class="filter-bar" role="group" aria-label="Filter posts by category">
       <button class="filter-btn active" data-filter="all">All <span class="filter-btn__count">{{ site.posts.size }}</span></button>
       {% for cat in primary_cats %}

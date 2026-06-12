@@ -949,7 +949,8 @@ pre.highlight,
 
 /* ---------- pagination ---------- */
 
-.post-pager {
+.post-pager,
+.archives-pager {
   display: flex;
   justify-content: center;
   margin-top: 2rem;
@@ -1010,7 +1011,22 @@ pre.highlight,
   margin-bottom: 1.5rem;
 }
 
+.post-index__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
 .post-index__header .section-title { margin: 0; }
+
+.post-count {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-faint);
+  margin-left: 0.5rem;
+}
 
 .filter-bar {
   display: flex;

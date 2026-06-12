@@ -142,6 +142,58 @@ document.addEventListener('DOMContentLoaded', () => {
     if (first) first.classList.add('card--featured');
   }
 
+  // ---- Archives / all-posts pagination ----
+  const ARCHIVE_PER_PAGE = 15;
+  const archiveRows = [...document.querySelectorAll('.archives__row')];
+  const archivePager = document.querySelector('.archives-pager');
+
+  if (archiveRows.length && archivePager) {
+    let archivePage = 1;
+    const archiveTotal = Math.max(1, Math.ceil(archiveRows.length / ARCHIVE_PER_PAGE));
+
+    function renderArchivePage(page) {
+      archivePage = Math.min(Math.max(page, 1), archiveTotal);
+      const start = (archivePage - 1) * ARCHIVE_PER_PAGE;
+      const end = start + ARCHIVE_PER_PAGE;
+
+      archiveRows.forEach((row, i) => {
+        row.style.display = i >= start && i < end ? '' : 'none';
+      });
+
+      document.querySelectorAll('.archives__group').forEach(group => {
+        const hasVisible = [...group.querySelectorAll('.archives__row')].some(r => r.style.display !== 'none');
+        group.style.display = hasVisible ? '' : 'none';
+      });
+
+      renderArchivePager(archivePage, archiveTotal);
+    }
+
+    function renderArchivePager(page, total) {
+      archivePager.textContent = '';
+      const inner = document.createElement('div');
+      inner.className = 'pager__inner';
+
+      const makeBtn = (label, targetPage, isActive = false) => {
+        const btn = document.createElement('button');
+        btn.className = 'pager__btn' + (isActive ? ' active' : '');
+        btn.textContent = label;
+        btn.addEventListener('click', () => {
+          renderArchivePage(targetPage);
+          document.querySelector('.post.archives')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        return btn;
+      };
+
+      if (page > 1) inner.append(makeBtn('← Prev', page - 1));
+      for (let i = 1; i <= total; i++) inner.append(makeBtn(String(i), i, i === page));
+      if (page < total) inner.append(makeBtn('Next →', page + 1));
+
+      archivePager.append(inner);
+    }
+
+    renderArchivePage(1);
+  }
+
   // ---- Section reveal on scroll ----
   const revealSections = document.querySelectorAll('.section-reveal');
 
