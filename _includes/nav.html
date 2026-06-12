@@ -1,0 +1,26 @@
+<header class="site-nav">
+  <nav class="site-nav__inner" aria-label="Primary">
+    <a class="site-nav__brand" href="{{ '/' | relative_url }}">
+      <span class="site-nav__mark" aria-hidden="true"></span>
+      Avi Zaguri
+    </a>
+
+    <input type="checkbox" id="nav-toggle" class="site-nav__toggle-box" aria-hidden="true">
+    <label for="nav-toggle" class="site-nav__toggle" aria-label="Toggle menu">Menu</label>
+
+    <ul class="site-nav__links">
+      <li>
+        <a href="{{ '/' | relative_url }}" {% if page.url == '/' %}class="active" aria-current="page"{% endif %}>Posts</a>
+      </li>
+      {% assign tabs = site.tabs | sort: 'order' %}
+      {% for tab in tabs %}
+        <li>
+          <a href="{{ tab.url | relative_url }}" {% if page.url == tab.url %}class="active" aria-current="page"{% endif %}>{{ tab.title | capitalize }}</a>
+        </li>
+      {% endfor %}
+      <li>
+        <a class="btn-pill" href="https://github.com/{{ site.github.username }}" target="_blank" rel="noopener">GitHub ↗</a>
+      </li>
+    </ul>
+  </nav>
+</header>

@@ -1,0 +1,55 @@
+---
+layout: default
+---
+<article class="post">
+  <header class="post__header">
+    <h1 class="post__title">{{ page.title }}</h1>
+    {% if page.description %}
+      <p class="post__lede">{{ page.description }}</p>
+    {% endif %}
+    <div class="post__byline">
+      <img class="post__avatar" src="{{ site.avatar | relative_url }}" alt="" width="44" height="44">
+      <div>
+        <p class="post__author">{{ site.social.name }}</p>
+        <p class="post__meta">
+          <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: '%B %-d, %Y' }}</time>
+          {% assign words = content | strip_html | number_of_words %}
+          {% assign mins = words | divided_by: 180 %}{% if mins < 1 %}{% assign mins = 1 %}{% endif %}
+          · {{ mins }} min read
+          {% if page.categories.size > 0 %}
+            · {% for cat in page.categories %}<a href="{{ '/categories/' | relative_url }}#{{ cat | slugify }}">{{ cat }}</a>{% unless forloop.last %}, {% endunless %}{% endfor %}
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <div class="prose">
+    {{ content }}
+  </div>
+
+  {% if page.tags.size > 0 %}
+    <footer class="post__tags">
+      {% for tag in page.tags %}
+        <a class="chip" href="{{ '/tags/' | relative_url }}#{{ tag | slugify }}">{{ tag }}</a>
+      {% endfor %}
+    </footer>
+  {% endif %}
+
+  <nav class="post-nav" aria-label="Post navigation">
+    {% if page.previous %}
+      <a class="post-nav__prev" href="{{ page.previous.url | relative_url }}">
+        <span class="post-nav__label">← Older</span>
+        <span class="post-nav__title">{{ page.previous.title }}</span>
+      </a>
+    {% else %}<span></span>{% endif %}
+    {% if page.next %}
+      <a class="post-nav__next" href="{{ page.next.url | relative_url }}">
+        <span class="post-nav__label">Newer →</span>
+        <span class="post-nav__title">{{ page.next.title }}</span>
+      </a>
+    {% endif %}
+  </nav>
+
+  {% include giscus.html %}
+</article>

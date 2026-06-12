@@ -1,0 +1,26 @@
+---
+layout: default
+---
+<section class="post archives">
+  <header class="post__header">
+    <p class="kicker">Archives</p>
+    <h1 class="post__title">Every post, by year.</h1>
+  </header>
+
+  {% assign posts_by_year = site.posts | group_by_exp: 'post', 'post.date | date: "%Y"' %}
+  {% for year in posts_by_year %}
+    <div class="archives__group">
+      <h2 class="archives__year">{{ year.name }}</h2>
+      <ul class="archives__list">
+        {% for post in year.items %}
+          <li class="archives__row">
+            <a href="{{ post.url | relative_url }}">
+              <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: '%b %-d' }}</time>
+              <span class="archives__title">{{ post.title }}</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+</section>

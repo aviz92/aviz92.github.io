@@ -1,0 +1,28 @@
+---
+layout: default
+---
+<section class="post taxonomy">
+  <header class="post__header">
+    <p class="kicker">Categories</p>
+    <h1 class="post__title">Browse by topic.</h1>
+  </header>
+
+  {% assign sorted_categories = site.categories | sort %}
+  <div class="taxonomy__cloud">
+    {% for category in sorted_categories %}
+      <a class="chip" href="#{{ category[0] | slugify }}">{{ category[0] }} <span class="taxonomy__count">{{ category[1].size }}</span></a>
+    {% endfor %}
+  </div>
+
+  {% for category in sorted_categories %}
+    <section class="taxonomy__group" id="{{ category[0] | slugify }}">
+      <h2 class="taxonomy__name">{{ category[0] }} <span class="taxonomy__count">({{ category[1].size }})</span></h2>
+      <div class="post-list">
+        {% assign sorted_posts = category[1] | sort: 'date' | reverse %}
+        {% for post in sorted_posts %}
+          {% include post-row.html post=post %}
+        {% endfor %}
+      </div>
+    </section>
+  {% endfor %}
+</section>

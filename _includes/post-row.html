@@ -1,0 +1,15 @@
+<article class="card">
+  <a href="{{ include.post.url | relative_url }}">
+    <p class="card__meta">
+      {% if include.post.categories.size > 0 %}
+        <span class="card__cat">{{ include.post.categories | first }}</span>
+      {% endif %}
+      <time datetime="{{ include.post.date | date_to_xmlschema }}">{{ include.post.date | date: '%b %-d, %Y' }}</time>
+    </p>
+    <h3 class="card__title">{{ include.post.title }}</h3>
+    {% if include.post.description %}
+      <p class="card__desc">{{ include.post.description | truncate: 140 }}</p>
+    {% endif %}
+    <p class="card__read">Read post <span aria-hidden="true">→</span></p>
+  </a>
+</article>
