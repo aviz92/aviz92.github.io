@@ -3,6 +3,7 @@ title: "django-versioned-models: Drop-in Release Management for Django"
 date: 2026-03-08
 categories: [Backend, Django]
 tags: [django, python, versioning, ci, open-source]
+description: "django-versioned-models packages release management into a single mixin — inherit from VersionedModel and get dataset locking, a three-stage data-status workflow, and CI-ready management commands automatically."
 ---
 
 Every time I needed to manage versioned configuration data in Django — feature flags, test

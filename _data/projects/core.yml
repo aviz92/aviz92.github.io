@@ -15,3 +15,23 @@
   github: https://github.com/aviz92/pyrest-model-client
   pypi: https://pypi.org/project/pyrest-model-client/
   post: /posts/pyrest-model-client/
+
+- name: python-base-toolkit
+  desc: "A production-ready suite of essential utilities designed to accelerate Python development."
+  github: https://github.com/aviz92/python-base-toolkit
+  pypi: https://pypi.org/project/python-base-toolkit/
+
+- name: python-custom-exceptions
+  desc: "A centralized library of reusable, semantic exception classes for cleaner error handling."
+  github: https://github.com/aviz92/python-custom-exceptions
+  pypi: https://pypi.org/project/python-custom-exceptions/
+
+- name: python-simple-email-sender
+  desc: "A minimalist SMTP client for sending emails and attachments with zero boilerplate."
+  github: https://github.com/aviz92/python-simple-email-sender
+  pypi: https://pypi.org/project/python-simple-email-sender/
+
+- name: python-databases
+  desc: "A unified, extensible interface for interacting with multiple database types through a single API."
+  github: https://github.com/aviz92/python-databases
+  pypi: https://pypi.org/project/python-databases/

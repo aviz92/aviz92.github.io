@@ -1250,7 +1250,8 @@ pre.highlight,
 .project-cat--clients  { color: #22d3ee; background: rgba(34, 211, 238, 0.12); }
 .project-cat--testing  { color: #fbbf24; background: rgba(251, 191, 36, 0.12); }
 .project-cat--ai       { color: #f472b6; background: rgba(244, 114, 182, 0.12); }
-.project-cat--devtools { color: var(--text-soft); background: var(--bg-raised); }
+.project-cat--devtools  { color: var(--text-soft); background: var(--bg-raised); }
+.project-cat--templates { color: #fb923c; background: rgba(251, 146, 60, 0.12); }
 
 .project-card__desc {
   flex: 1;
