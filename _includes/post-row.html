@@ -1,4 +1,4 @@
-<article class="card">
+<article class="card" data-category="{{ include.post.categories | first }}" data-subcategory="{{ include.post.categories | last }}">
   <a href="{{ include.post.url | relative_url }}">
     <p class="card__meta">
       {% if include.post.categories.size > 0 %}

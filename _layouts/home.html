@@ -1,9 +1,21 @@
 ---
 layout: default
 ---
-{% assign cat_count = site.categories | size %}
+{% comment %} Collect unique primary categories and unique sub-categories {% endcomment %}
+{% assign primary_cats = '' | split: '' %}
+{% assign all_sub_cats = '' | split: '' %}
+{% for post in site.posts %}
+  {% assign first_cat = post.categories | first %}
+  {% assign sub_cat = post.categories | last %}
+  {% unless primary_cats contains first_cat %}
+    {% assign primary_cats = primary_cats | push: first_cat %}
+  {% endunless %}
+  {% unless sub_cat == first_cat or all_sub_cats contains sub_cat %}
+    {% assign all_sub_cats = all_sub_cats | push: sub_cat %}
+  {% endunless %}
+{% endfor %}
 
-<section class="hero">
+<section class="hero" id="hero">
   <p class="hero__badge"><span class="hero__badge-dot" aria-hidden="true"></span> Automation · Python · DevOps · Open Source</p>
 
   <h1 class="hero__title">Building <span class="grad-text">production-grade</span> <br class="hero__br">software, one tool at a time.</h1>
@@ -13,7 +25,7 @@ layout: default
   <div class="hero__actions">
     {% assign latest = site.posts | first %}
     <a class="btn-glow" href="{{ latest.url | relative_url }}">Read the latest post</a>
-    <a class="btn-ghost" href="{{ '/about/' | relative_url }}">About me</a>
+    <a class="btn-ghost" href="#about">About me</a>
   </div>
 
   <div class="hero__chart" aria-hidden="true">
@@ -40,8 +52,12 @@ layout: default
       <p class="stat__label">Posts published</p>
     </div>
     <div class="stat">
-      <p class="stat__value">{{ cat_count }}</p>
-      <p class="stat__label">Topics covered</p>
+      <p class="stat__value">{{ primary_cats | size }}</p>
+      <p class="stat__label">Categories</p>
+    </div>
+    <div class="stat">
+      <p class="stat__value">{{ all_sub_cats | size }}</p>
+      <p class="stat__label">Sub-categories</p>
     </div>
     <div class="stat">
       <p class="stat__value">20+</p>
@@ -50,11 +66,88 @@ layout: default
   </div>
 </section>
 
-<section class="post-index">
-  <h2 class="section-title">Latest writing</h2>
-  <div class="post-grid">
+<section class="about-me section-reveal" id="about">
+  <div class="about-me__inner">
+    <div class="about-me__photo">
+      <img src="{{ '/assets/img/avatar.jpg' | relative_url }}" alt="Avi Zaguri" width="160" height="160" loading="lazy">
+    </div>
+    <div class="about-me__content">
+      <p class="kicker">About me</p>
+      <h2 class="about-me__name">Hi, I'm Avi 👋</h2>
+      <p class="about-me__bio">
+        Innovative and results-driven <strong>Infrastructure Architect</strong> with a strong background in designing and developing scalable automation solutions. Passionate about driving efficiency, reliability, and performance through modern automation frameworks, cloud technologies, and DevOps methodologies.
+      </p>
+      <p class="about-me__bio">
+        Beyond technical expertise, I thrive in collaborative environments, working closely with DevOps, R&amp;D, and QA teams to optimize workflows and enhance product quality.
+      </p>
+      <div class="about-me__skills">
+        <span class="chip">Python</span>
+        <span class="chip">Django</span>
+        <span class="chip">Pytest</span>
+        <span class="chip">AWS</span>
+        <span class="chip">Kubernetes</span>
+        <span class="chip">Docker</span>
+        <span class="chip">CI/CD</span>
+        <span class="chip">REST APIs</span>
+        <span class="chip">Open Source</span>
+      </div>
+      <div class="about-me__actions">
+        <a class="btn-ghost-glow" href="https://github.com/{{ site.github.username }}" target="_blank" rel="noopener">GitHub ↗</a>
+        <a class="btn-ghost-glow" href="https://www.linkedin.com/in/{{ site.linkedin.username }}" target="_blank" rel="noopener">LinkedIn ↗</a>
+        <a class="btn-ghost-glow" href="https://pypi.org/user/{{ site.pypi.username }}" target="_blank" rel="noopener">PyPI ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="post-index section-reveal" id="posts">
+  <div class="post-index__header">
+    <h2 class="section-title">Latest writing</h2>
+    <div class="filter-bar" role="group" aria-label="Filter posts by category">
+      <button class="filter-btn active" data-filter="all">All <span class="filter-btn__count">{{ site.posts.size }}</span></button>
+      {% for cat in primary_cats %}
+        {% assign posts_count = 0 %}
+        {% for post in site.posts %}
+          {% if post.categories contains cat %}
+            {% assign posts_count = posts_count | plus: 1 %}
+          {% endif %}
+        {% endfor %}
+        <button class="filter-btn" data-filter="{{ cat }}">{{ cat }} <span class="filter-btn__count">{{ posts_count }}</span></button>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% comment %} Sub-category filter bars, one per primary category {% endcomment %}
+  {% for cat in primary_cats %}
+    {% assign sub_cats_for = '' | split: '' %}
+    {% for post in site.posts %}
+      {% if post.categories.first == cat %}
+        {% assign sub = post.categories | last %}
+        {% unless sub == cat or sub_cats_for contains sub %}
+          {% assign sub_cats_for = sub_cats_for | push: sub %}
+        {% endunless %}
+      {% endif %}
+    {% endfor %}
+    {% if sub_cats_for.size > 0 %}
+      <div class="sub-filter-bar" data-parent="{{ cat }}">
+        <button class="filter-btn filter-btn--sub active" data-sub-filter="all">All {{ cat }}</button>
+        {% for sub in sub_cats_for %}
+          {% assign sub_count = 0 %}
+          {% for post in site.posts %}
+            {% if post.categories.first == cat and post.categories contains sub %}
+              {% assign sub_count = sub_count | plus: 1 %}
+            {% endif %}
+          {% endfor %}
+          <button class="filter-btn filter-btn--sub" data-sub-filter="{{ sub }}">{{ sub }} <span class="filter-btn__count">{{ sub_count }}</span></button>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endfor %}
+
+  <div class="post-grid" id="post-grid">
     {% for post in site.posts %}
       {% include post-row.html post=post %}
     {% endfor %}
   </div>
+  <p class="no-posts-msg" aria-live="polite" hidden>No posts in this category yet.</p>
 </section>

@@ -15,6 +15,12 @@ baseurl: ""
 github:
   username: aviz92
 
+linkedin:
+  username: avi-zaguri-41869b11b
+
+pypi:
+  username: aviz
+
 social:
   name: Avi Zaguri
   email: ""
