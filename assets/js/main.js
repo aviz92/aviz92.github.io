@@ -276,6 +276,27 @@ document.addEventListener('DOMContentLoaded', () => {
     renderArchivePage(1);
   }
 
+  // ---- Project category filter ----
+  const projCards = [...document.querySelectorAll('.project-card')];
+  const projSelect = document.querySelector('#proj-cat');
+
+  if (projCards.length && projSelect) {
+    const cats = [...new Set(projCards.map(c => c.dataset.cat))].sort();
+    cats.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat;
+      opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+      projSelect.append(opt);
+    });
+
+    projSelect.addEventListener('change', () => {
+      const val = projSelect.value;
+      projCards.forEach(card => {
+        card.hidden = val !== 'all' && card.dataset.cat !== val;
+      });
+    });
+  }
+
   // ---- Section reveal on scroll ----
   const revealSections = document.querySelectorAll('.section-reveal');
 

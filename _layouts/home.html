@@ -84,32 +84,48 @@ layout: default
   </div>
 </section>
 
+{% assign total_projects = 0 %}
+{% for cat_data in site.data.projects %}
+  {% assign total_projects = total_projects | plus: cat_data[1].size %}
+{% endfor %}
+
 <section class="oss-projects section-reveal" id="projects">
   <div class="oss-projects__header">
-    <p class="kicker">Open Source</p>
-    <h2 class="section-title">Tools I've shipped</h2>
-    <p class="oss-projects__sub">{{ site.data.projects | size }} packages across testing, infra, AI, and more.</p>
+    <div>
+      <p class="kicker">Open Source</p>
+      <h2 class="section-title">Tools I've shipped</h2>
+      <p class="oss-projects__sub">{{ total_projects }} packages across AI, Infra, Testing, and more.</p>
+    </div>
+    <div class="arc-select-wrap">
+      <label for="proj-cat">Category</label>
+      <select id="proj-cat" class="arc-select">
+        <option value="all">All categories</option>
+      </select>
+    </div>
   </div>
   <div class="project-grid">
-    {% for proj in site.data.projects %}
-    <div class="project-card">
-      <div class="project-card__top">
-        <code class="project-card__name">{{ proj.name }}</code>
-        <span class="project-card__cat project-cat--{{ proj.category | downcase }}">{{ proj.category }}</span>
+    {% for cat_data in site.data.projects %}
+      {% assign cat = cat_data[0] %}
+      {% for proj in cat_data[1] %}
+      <div class="project-card" data-cat="{{ cat }}">
+        <div class="project-card__top">
+          <code class="project-card__name">{{ proj.name }}</code>
+          <span class="project-card__cat project-cat--{{ cat }}">{{ cat }}</span>
+        </div>
+        <p class="project-card__desc">{{ proj.desc }}</p>
+        <div class="project-card__links">
+          {% if proj.post %}
+            <a href="{{ proj.post | relative_url }}" class="project-card__link">Post ↗</a>
+          {% endif %}
+          {% if proj.github %}
+            <a href="{{ proj.github }}" target="_blank" rel="noopener" class="project-card__link">GitHub ↗</a>
+          {% endif %}
+          {% if proj.pypi %}
+            <a href="{{ proj.pypi }}" target="_blank" rel="noopener" class="project-card__link">PyPI ↗</a>
+          {% endif %}
+        </div>
       </div>
-      <p class="project-card__desc">{{ proj.desc }}</p>
-      <div class="project-card__links">
-        {% if proj.post %}
-          <a href="{{ proj.post | relative_url }}" class="project-card__link">Post ↗</a>
-        {% endif %}
-        {% if proj.github %}
-          <a href="{{ proj.github }}" target="_blank" rel="noopener" class="project-card__link">GitHub ↗</a>
-        {% endif %}
-        {% if proj.pypi %}
-          <a href="{{ proj.pypi }}" target="_blank" rel="noopener" class="project-card__link">PyPI ↗</a>
-        {% endif %}
-      </div>
-    </div>
+      {% endfor %}
     {% endfor %}
   </div>
 </section>

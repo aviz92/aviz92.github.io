@@ -1,0 +1,29 @@
+- name: python-github-plus
+  desc: "Service-based GitHub client for branches, PRs, workflows, file ops, and tags — with robust error handling."
+  github: https://github.com/aviz92/python-github-plus
+  pypi: https://pypi.org/project/python-github-plus/
+  post: /posts/python-github-plus/
+
+- name: python-gitlab-plus
+  desc: "Extended GitLab client for MRs, pipelines, tags, and file ops — with built-in pipeline wait support."
+  github: https://github.com/aviz92/python-gitlab-plus
+  pypi: https://pypi.org/project/python-gitlab-plus/
+  post: /posts/python-gitlab-plus/
+
+- name: python-jira-plus
+  desc: "JIRA client with automatic retries, pagination, field validation, and cleaner issue creation and search."
+  github: https://github.com/aviz92/python-jira-plus
+  pypi: https://pypi.org/project/python-jira-plus/
+  post: /posts/python-jira-plus/
+
+- name: python-notion-plus
+  desc: "Notion API client with auto-pagination, database querying, and intuitive page formatting."
+  github: https://github.com/aviz92/python-notion-plus
+  pypi: https://pypi.org/project/python-notion-plus/
+  post: /posts/python-notion-plus/
+
+- name: python-vault
+  desc: "Minimal HashiCorp Vault client for AppRole auth and KV v2 secret retrieval — env-var configured."
+  github: https://github.com/aviz92/python-vault
+  pypi: https://pypi.org/project/python-vault/
+  post: /posts/python-vault/

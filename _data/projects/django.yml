@@ -1,0 +1,11 @@
+- name: django-versioned-models
+  desc: "Drop-in release management for Django — lock, branch, and ship versioned configuration datasets safely."
+  github: https://github.com/aviz92/django-versioned-models
+  pypi: https://pypi.org/project/django-versioned-models/
+  post: /posts/django-versioned-models/
+
+- name: drf-easy-crud
+  desc: "Enterprise-grade CRUD for DRF ViewSets with advanced filtering, pagination, and ForeignKey lookups."
+  github: https://github.com/aviz92/drf-easy-crud
+  pypi: https://pypi.org/project/drf-easy-crud/
+  post: /posts/drf-easy-crud/

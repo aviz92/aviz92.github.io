@@ -1,0 +1,17 @@
+- name: custom-python-logger
+  desc: "Colored output, custom log levels (STEP, EXCEPTION), and contextual fields — behind a single build_logger() call."
+  github: https://github.com/aviz92/custom-python-logger
+  pypi: https://pypi.org/project/custom-python-logger/
+  post: /posts/custom-python-logger/
+
+- name: python-base-command
+  desc: "Django's BaseCommand pattern — handle(), add_arguments(), call_command(), auto-discovery — for any Python project."
+  github: https://github.com/aviz92/python-base-command
+  pypi: https://pypi.org/project/python-base-command/
+  post: /posts/python-base-command/
+
+- name: pyrest-model-client
+  desc: "httpx + Pydantic in a model-driven REST client with pagination, async support, and typed responses."
+  github: https://github.com/aviz92/pyrest-model-client
+  pypi: https://pypi.org/project/pyrest-model-client/
+  post: /posts/pyrest-model-client/

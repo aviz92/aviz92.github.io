@@ -1,0 +1,14 @@
+- name: think-drop
+  desc: "Telegram → Notion pipeline: voice or text in, auto-classified summary out — powered by any LLM."
+  github: https://github.com/aviz92/think-drop
+  post: /posts/think-drop/
+
+- name: ticket-assist
+  desc: "Slack bot that classifies support tickets with structured LLM output and replies with AI-generated answers."
+  github: https://github.com/aviz92/ticket-assist
+  post: /posts/ticket-assist/
+
+- name: ai-marketplace
+  desc: "CLI that distributes reusable AI-agent context — skills, plugins, rules — into any project. Author once, render many."
+  github: https://github.com/aviz92/ai-marketplace
+  post: /posts/ai-marketplace/
