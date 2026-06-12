@@ -950,7 +950,8 @@ pre.highlight,
 /* ---------- pagination ---------- */
 
 .post-pager,
-.archives-pager {
+.archives-pager,
+.project-pager {
   display: flex;
   justify-content: center;
   margin-top: 2rem;
@@ -1196,6 +1197,8 @@ pre.highlight,
 @media (max-width: 36rem) {
   .project-grid { grid-template-columns: 1fr; }
 }
+
+.project-card[hidden] { display: none; }
 
 .project-card {
   display: flex;

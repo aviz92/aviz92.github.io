@@ -276,9 +276,12 @@ document.addEventListener('DOMContentLoaded', () => {
     renderArchivePage(1);
   }
 
-  // ---- Project category filter ----
+  // ---- Project category filter + pagination ----
+  const PROJECTS_PER_PAGE = 9;
   const projCards = [...document.querySelectorAll('.project-card')];
   const projSelect = document.querySelector('#proj-cat');
+  const projPager = document.querySelector('.project-pager');
+  let projPage = 1;
 
   if (projCards.length && projSelect) {
     const cats = [...new Set(projCards.map(c => c.dataset.cat))].sort();
@@ -289,12 +292,52 @@ document.addEventListener('DOMContentLoaded', () => {
       projSelect.append(opt);
     });
 
-    projSelect.addEventListener('change', () => {
+    function renderProjects() {
       const val = projSelect.value;
-      projCards.forEach(card => {
-        card.hidden = val !== 'all' && card.dataset.cat !== val;
-      });
+      const filtered = projCards.filter(c => val === 'all' || c.dataset.cat === val);
+      const totalPages = Math.max(1, Math.ceil(filtered.length / PROJECTS_PER_PAGE));
+      projPage = Math.min(projPage, totalPages);
+
+      const start = (projPage - 1) * PROJECTS_PER_PAGE;
+      const visible = new Set(filtered.slice(start, start + PROJECTS_PER_PAGE));
+      projCards.forEach(card => { card.hidden = !visible.has(card); });
+
+      renderProjPager(projPage, totalPages);
+    }
+
+    function renderProjPager(page, total) {
+      if (!projPager) return;
+      projPager.textContent = '';
+      if (total <= 1) return;
+
+      const inner = document.createElement('div');
+      inner.className = 'pager__inner';
+
+      const makeBtn = (label, targetPage, isActive = false) => {
+        const btn = document.createElement('button');
+        btn.className = 'pager__btn' + (isActive ? ' active' : '');
+        btn.textContent = label;
+        btn.addEventListener('click', () => {
+          projPage = targetPage;
+          renderProjects();
+          document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        return btn;
+      };
+
+      if (page > 1) inner.append(makeBtn('← Prev', page - 1));
+      for (let i = 1; i <= total; i++) inner.append(makeBtn(String(i), i, i === page));
+      if (page < total) inner.append(makeBtn('Next →', page + 1));
+
+      projPager.append(inner);
+    }
+
+    projSelect.addEventListener('change', () => {
+      projPage = 1;
+      renderProjects();
     });
+
+    renderProjects();
   }
 
   // ---- Section reveal on scroll ----
