@@ -17,7 +17,3 @@
 - name: python-telegram-bot-template
   desc: "Modular Telegram bot starter with async handlers, inline keyboards, and multi-step conversation flows."
   github: https://github.com/aviz92/python-telegram-bot-template
-
-- name: python-slack-bot-template
-  desc: "Production-ready Slack bot with Flask event handling, AI-powered ticket classification, and multi-LLM support."
-  github: https://github.com/aviz92/python-slack-bot-template
