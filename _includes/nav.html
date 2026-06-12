@@ -25,9 +25,11 @@
         <li><a href="{{ '/' | relative_url }}">Home</a></li>
         {% assign tabs = site.tabs | sort: 'order' %}
         {% for tab in tabs %}
-          <li>
-            <a href="{{ tab.url | relative_url }}" {% if page.url == tab.url %}class="active" aria-current="page"{% endif %}>{{ tab.title | capitalize }}</a>
-          </li>
+          {% unless tab.title == 'categories' or tab.title == 'tags' %}
+            <li>
+              <a href="{{ tab.url | relative_url }}" {% if page.url == tab.url %}class="active" aria-current="page"{% endif %}>{{ tab.title | capitalize }}</a>
+            </li>
+          {% endunless %}
         {% endfor %}
       {% endif %}
       <li class="site-nav__socials">

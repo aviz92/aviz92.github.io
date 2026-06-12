@@ -142,30 +142,89 @@ document.addEventListener('DOMContentLoaded', () => {
     if (first) first.classList.add('card--featured');
   }
 
-  // ---- Archives / all-posts pagination ----
+  // ---- Archives / all-posts: cascading dropdowns + pagination ----
   const ARCHIVE_PER_PAGE = 15;
   const archiveRows = [...document.querySelectorAll('.archives__row')];
   const archivePager = document.querySelector('.archives-pager');
+  const catSel = document.querySelector('#arc-cat');
+  const subSel = document.querySelector('#arc-sub');
+  const tagSel = document.querySelector('#arc-tag');
+  const archiveNoMsg = document.querySelector('.post.archives .no-posts-msg');
 
-  if (archiveRows.length && archivePager) {
+  if (archiveRows.length && catSel) {
     let archivePage = 1;
-    const archiveTotal = Math.max(1, Math.ceil(archiveRows.length / ARCHIVE_PER_PAGE));
+
+    function buildOptions(select, values, allLabel) {
+      const prev = select.value;
+      select.textContent = '';
+      const allOpt = document.createElement('option');
+      allOpt.value = 'all';
+      allOpt.textContent = allLabel;
+      select.append(allOpt);
+      values.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        if (v === prev) opt.selected = true;
+        select.append(opt);
+      });
+      if (prev !== 'all' && !values.includes(prev)) select.value = 'all';
+    }
+
+    function updateSubOptions() {
+      if (!subSel) return;
+      const cat = catSel.value;
+      const rows = cat === 'all' ? archiveRows : archiveRows.filter(r => r.dataset.category === cat);
+      const subs = [...new Set(
+        rows.filter(r => r.dataset.subcategory && r.dataset.subcategory !== r.dataset.category)
+            .map(r => r.dataset.subcategory)
+      )].sort();
+      buildOptions(subSel, subs, 'All sub-categories');
+    }
+
+    function updateTagOptions() {
+      if (!tagSel) return;
+      const cat = catSel.value;
+      const sub = subSel ? subSel.value : 'all';
+      const rows = archiveRows.filter(r => {
+        const mc = cat === 'all' || r.dataset.category === cat;
+        const ms = sub === 'all' || r.dataset.subcategory === sub;
+        return mc && ms;
+      });
+      const tags = [...new Set(
+        rows.flatMap(r => (r.dataset.tags || '').split(' ').filter(Boolean))
+      )].sort();
+      buildOptions(tagSel, tags, 'All tags');
+    }
+
+    function getFilteredArchiveRows() {
+      const cat = catSel.value;
+      const sub = subSel ? subSel.value : 'all';
+      const tag = tagSel ? tagSel.value : 'all';
+      return archiveRows.filter(row => {
+        const mc = cat === 'all' || row.dataset.category === cat;
+        const ms = sub === 'all' || row.dataset.subcategory === sub;
+        const mt = tag === 'all' || (row.dataset.tags || '').split(' ').includes(tag);
+        return mc && ms && mt;
+      });
+    }
 
     function renderArchivePage(page) {
-      archivePage = Math.min(Math.max(page, 1), archiveTotal);
+      const filtered = getFilteredArchiveRows();
+      const total = Math.max(1, Math.ceil(filtered.length / ARCHIVE_PER_PAGE));
+      archivePage = Math.min(Math.max(page, 1), total);
       const start = (archivePage - 1) * ARCHIVE_PER_PAGE;
-      const end = start + ARCHIVE_PER_PAGE;
+      const visible = new Set(filtered.slice(start, start + ARCHIVE_PER_PAGE));
 
-      archiveRows.forEach((row, i) => {
-        row.style.display = i >= start && i < end ? '' : 'none';
-      });
+      archiveRows.forEach(row => { row.style.display = visible.has(row) ? '' : 'none'; });
 
       document.querySelectorAll('.archives__group').forEach(group => {
         const hasVisible = [...group.querySelectorAll('.archives__row')].some(r => r.style.display !== 'none');
         group.style.display = hasVisible ? '' : 'none';
       });
 
-      renderArchivePager(archivePage, archiveTotal);
+      if (archiveNoMsg) archiveNoMsg.hidden = filtered.length > 0;
+      if (archivePager) renderArchivePager(archivePage, total);
     }
 
     function renderArchivePager(page, total) {
@@ -191,6 +250,29 @@ document.addEventListener('DOMContentLoaded', () => {
       archivePager.append(inner);
     }
 
+    catSel.addEventListener('change', () => {
+      archivePage = 1;
+      updateSubOptions();
+      updateTagOptions();
+      renderArchivePage(1);
+    });
+
+    subSel?.addEventListener('change', () => {
+      archivePage = 1;
+      updateTagOptions();
+      renderArchivePage(1);
+    });
+
+    tagSel?.addEventListener('change', () => {
+      archivePage = 1;
+      renderArchivePage(1);
+    });
+
+    // Init: populate all selects from row data, then render
+    const allCats = [...new Set(archiveRows.map(r => r.dataset.category).filter(Boolean))].sort();
+    buildOptions(catSel, allCats, 'All categories');
+    updateSubOptions();
+    updateTagOptions();
     renderArchivePage(1);
   }
 

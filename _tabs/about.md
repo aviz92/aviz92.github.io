@@ -1,6 +1,6 @@
 ---
 title: about
-order: 4
+order: 2
 ---
 
 # Hi, I'm Avi 👋
