@@ -14,9 +14,10 @@ layout: default
     {% assign all_sub_cats = all_sub_cats | push: sub_cat %}
   {% endunless %}
 {% endfor %}
+{% assign about_tab = site.tabs | where: 'title', 'about' | first %}
 
 <section class="hero" id="hero">
-  <p class="hero__badge"><span class="hero__badge-dot" aria-hidden="true"></span> Automation · Python · DevOps · Open Source</p>
+  <p class="hero__badge"><span class="hero__badge-dot" aria-hidden="true"></span> Infrastructure · Python · Open Source</p>
 
   <h1 class="hero__title">Building <span class="grad-text">production-grade</span> <br class="hero__br">software, one tool at a time.</h1>
 
@@ -73,23 +74,8 @@ layout: default
     </div>
     <div class="about-me__content">
       <p class="kicker">About me</p>
-      <h2 class="about-me__name">Hi, I'm Avi 👋</h2>
-      <p class="about-me__bio">
-        Innovative and results-driven <strong>Infrastructure Architect</strong> with a strong background in designing and developing scalable automation solutions. Passionate about driving efficiency, reliability, and performance through modern automation frameworks, cloud technologies, and DevOps methodologies.
-      </p>
-      <p class="about-me__bio">
-        Beyond technical expertise, I thrive in collaborative environments, working closely with DevOps, R&amp;D, and QA teams to optimize workflows and enhance product quality.
-      </p>
-      <div class="about-me__skills">
-        <span class="chip">Python</span>
-        <span class="chip">Django</span>
-        <span class="chip">Pytest</span>
-        <span class="chip">AWS</span>
-        <span class="chip">Kubernetes</span>
-        <span class="chip">Docker</span>
-        <span class="chip">CI/CD</span>
-        <span class="chip">REST APIs</span>
-        <span class="chip">Open Source</span>
+      <div class="about-me__text">
+        {{ about_tab.content }}
       </div>
       <div class="about-me__actions">
         <a class="btn-ghost-glow" href="https://github.com/{{ site.github.username }}" target="_blank" rel="noopener">GitHub ↗</a>
@@ -117,7 +103,6 @@ layout: default
     </div>
   </div>
 
-  {% comment %} Sub-category filter bars, one per primary category {% endcomment %}
   {% for cat in primary_cats %}
     {% assign sub_cats_for = '' | split: '' %}
     {% for post in site.posts %}
@@ -150,4 +135,5 @@ layout: default
     {% endfor %}
   </div>
   <p class="no-posts-msg" aria-live="polite" hidden>No posts in this category yet.</p>
+  <div class="post-pager"></div>
 </section>

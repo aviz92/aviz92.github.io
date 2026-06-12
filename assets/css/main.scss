@@ -396,9 +396,6 @@ img { max-width: 100%; height: auto; }
   gap: 1.1rem;
 }
 
-.post-grid .card:first-child,
-.post-grid .card--featured { grid-column: 1 / -1; }
-
 @media (max-width: 44rem) {
   .post-grid { grid-template-columns: 1fr; }
 }
@@ -450,8 +447,6 @@ img { max-width: 100%; height: auto; }
   margin: 0 0 0.55rem;
 }
 
-.post-grid .card:first-child .card__title,
-.post-grid .card--featured .card__title { font-size: 1.45rem; }
 
 .card__desc {
   margin: 0 0 1rem;
@@ -921,10 +916,73 @@ pre.highlight,
   margin: 1.25rem 0 1.6rem;
 }
 
+.about-me__text {
+  margin-bottom: 1.5rem;
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--text-bright);
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    margin: 0 0 1rem;
+  }
+
+  p {
+    font-size: 0.98rem;
+    color: var(--text-soft);
+    line-height: 1.75;
+    margin: 0 0 0.85rem;
+
+    &:last-child { margin-bottom: 0; }
+  }
+
+  strong { color: var(--text-bright); }
+}
+
 .about-me__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.9rem;
+}
+
+/* ---------- pagination ---------- */
+
+.post-pager {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.pager__inner {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pager__btn {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover {
+    color: var(--text-bright);
+    border-color: var(--border-bright);
+  }
+
+  &.active {
+    color: var(--cyan);
+    border-color: rgba(34, 211, 238, 0.5);
+    background: rgba(34, 211, 238, 0.06);
+  }
 }
 
 @media (max-width: 44rem) {

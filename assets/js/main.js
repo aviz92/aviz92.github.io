@@ -34,76 +34,111 @@ document.addEventListener('DOMContentLoaded', () => {
     block.prepend(header);
   });
 
-  // ---- Category + sub-category filter ----
+  // ---- Category filter + sub-category filter + pagination ----
+  const POSTS_PER_PAGE = 6;
+  let currentPage = 1;
+  let activeFilter = 'all';
+  let activeSubFilter = 'all';
+
   const filterBtns = document.querySelectorAll('.filter-btn:not(.filter-btn--sub)');
   const subFilterBars = document.querySelectorAll('.sub-filter-bar');
-  const cards = document.querySelectorAll('#post-grid .card');
+  const cards = [...document.querySelectorAll('#post-grid .card')];
   const noPostsMsg = document.querySelector('.no-posts-msg');
+  const pager = document.querySelector('.post-pager');
 
   if (filterBtns.length && cards.length) {
-    updateFeaturedCard();
+    applyFiltersAndPagination();
 
     filterBtns.forEach(btn => {
       btn.addEventListener('click', () => {
-        const cat = btn.dataset.filter;
+        activeFilter = btn.dataset.filter;
+        activeSubFilter = 'all';
+        currentPage = 1;
 
         filterBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        // Filter cards by primary category
-        let visibleCount = 0;
-        cards.forEach(card => {
-          const match = cat === 'all' || card.dataset.category === cat;
-          card.classList.toggle('card--hidden', !match);
-          if (match) visibleCount++;
-        });
-
-        if (noPostsMsg) noPostsMsg.hidden = visibleCount > 0;
-        updateFeaturedCard();
-
-        // Show matching sub-filter bar, hide others
         subFilterBars.forEach(bar => {
-          const show = cat !== 'all' && bar.dataset.parent === cat;
+          const show = activeFilter !== 'all' && bar.dataset.parent === activeFilter;
           bar.classList.toggle('is-open', show);
           if (show) {
             bar.querySelectorAll('.filter-btn--sub').forEach(b => b.classList.remove('active'));
             bar.querySelector('[data-sub-filter="all"]').classList.add('active');
           }
         });
+
+        applyFiltersAndPagination();
       });
     });
 
-    // Sub-category filter
     subFilterBars.forEach(bar => {
       bar.querySelectorAll('.filter-btn--sub').forEach(btn => {
         btn.addEventListener('click', () => {
-          const subCat = btn.dataset.subFilter;
-          const parent = bar.dataset.parent;
+          activeSubFilter = btn.dataset.subFilter;
+          currentPage = 1;
 
           bar.querySelectorAll('.filter-btn--sub').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
 
-          let visibleCount = 0;
-          cards.forEach(card => {
-            if (card.dataset.category !== parent) {
-              card.classList.add('card--hidden');
-              return;
-            }
-            const match = subCat === 'all' || card.dataset.subcategory === subCat;
-            card.classList.toggle('card--hidden', !match);
-            if (match) visibleCount++;
-          });
-
-          if (noPostsMsg) noPostsMsg.hidden = visibleCount > 0;
-          updateFeaturedCard();
+          applyFiltersAndPagination();
         });
       });
     });
   }
 
+  function getFilteredCards() {
+    return cards.filter(card => {
+      const matchCat = activeFilter === 'all' || card.dataset.category === activeFilter;
+      const matchSub = activeSubFilter === 'all' || card.dataset.subcategory === activeSubFilter;
+      return matchCat && matchSub;
+    });
+  }
+
+  function applyFiltersAndPagination() {
+    const filtered = getFilteredCards();
+    const totalPages = Math.max(1, Math.ceil(filtered.length / POSTS_PER_PAGE));
+    currentPage = Math.min(currentPage, totalPages);
+
+    const start = (currentPage - 1) * POSTS_PER_PAGE;
+    const pageSet = new Set(filtered.slice(start, start + POSTS_PER_PAGE));
+
+    cards.forEach(card => card.classList.toggle('card--hidden', !pageSet.has(card)));
+
+    if (noPostsMsg) noPostsMsg.hidden = filtered.length > 0;
+    updateFeaturedCard();
+    renderPagination(currentPage, totalPages);
+  }
+
+  function renderPagination(page, total) {
+    if (!pager) return;
+    pager.textContent = '';
+
+    const inner = document.createElement('div');
+    inner.className = 'pager__inner';
+
+    const makeBtn = (label, targetPage, isActive = false) => {
+      const btn = document.createElement('button');
+      btn.className = 'pager__btn' + (isActive ? ' active' : '');
+      btn.textContent = label;
+      btn.dataset.page = targetPage;
+      btn.addEventListener('click', () => {
+        currentPage = targetPage;
+        applyFiltersAndPagination();
+        document.getElementById('posts')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      return btn;
+    };
+
+    if (page > 1) inner.append(makeBtn('← Prev', page - 1));
+    for (let i = 1; i <= total; i++) inner.append(makeBtn(String(i), i, i === page));
+    if (page < total) inner.append(makeBtn('Next →', page + 1));
+
+    pager.append(inner);
+  }
+
   function updateFeaturedCard() {
     cards.forEach(c => c.classList.remove('card--featured'));
-    const first = [...cards].find(c => !c.classList.contains('card--hidden'));
+    const first = cards.find(c => !c.classList.contains('card--hidden'));
     if (first) first.classList.add('card--featured');
   }
 
@@ -127,8 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
       );
 
       revealSections.forEach(s => {
-        const rect = s.getBoundingClientRect();
-        if (rect.top < window.innerHeight) {
+        if (s.getBoundingClientRect().top < window.innerHeight) {
           s.classList.add('visible');
         } else {
           revealObserver.observe(s);
@@ -154,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       { rootMargin: '-35% 0px -65% 0px' }
     );
-
     sections.forEach(s => spyObserver.observe(s));
   }
 
