@@ -1157,6 +1157,117 @@ pre.highlight,
   margin: 0;
 }
 
+/* ---------- oss projects ---------- */
+
+.oss-projects {
+  margin-bottom: 5rem;
+}
+
+.oss-projects__header {
+  margin-bottom: 2rem;
+
+  .section-title { margin-bottom: 0.25rem; }
+}
+
+.oss-projects__sub {
+  font-size: 0.88rem;
+  color: var(--text-soft);
+  margin: 0;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 56rem) {
+  .project-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 36rem) {
+  .project-grid { grid-template-columns: 1fr; }
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem 1.35rem 1.1rem;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+
+  &:hover {
+    background: var(--bg-card-hover);
+    border-color: rgba(34, 211, 238, 0.35);
+    transform: translateY(-2px);
+  }
+}
+
+.project-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.project-card__name {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 5px;
+  padding: 0.12em 0.45em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 68%;
+}
+
+.project-card__cat {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.18rem 0.65rem;
+  flex-shrink: 0;
+}
+
+.project-cat--core     { color: #a78bfa; background: rgba(167, 139, 250, 0.12); }
+.project-cat--django   { color: #6ee7b7; background: rgba(110, 231, 183, 0.12); }
+.project-cat--clients  { color: #22d3ee; background: rgba(34, 211, 238, 0.12); }
+.project-cat--testing  { color: #fbbf24; background: rgba(251, 191, 36, 0.12); }
+.project-cat--ai       { color: #f472b6; background: rgba(244, 114, 182, 0.12); }
+.project-cat--devtools { color: var(--text-soft); background: var(--bg-raised); }
+
+.project-card__desc {
+  flex: 1;
+  font-size: 0.86rem;
+  color: var(--text-soft);
+  line-height: 1.6;
+  margin: 0 0 1rem;
+}
+
+.project-card__links {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.project-card__link {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-faint);
+  transition: color 0.15s;
+
+  &:hover { color: var(--cyan); }
+}
+
 /* ---------- section reveal animation ---------- */
 
 .section-reveal {

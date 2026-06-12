@@ -84,6 +84,36 @@ layout: default
   </div>
 </section>
 
+<section class="oss-projects section-reveal" id="projects">
+  <div class="oss-projects__header">
+    <p class="kicker">Open Source</p>
+    <h2 class="section-title">Tools I've shipped</h2>
+    <p class="oss-projects__sub">{{ site.data.projects | size }} packages across testing, infra, AI, and more.</p>
+  </div>
+  <div class="project-grid">
+    {% for proj in site.data.projects %}
+    <div class="project-card">
+      <div class="project-card__top">
+        <code class="project-card__name">{{ proj.name }}</code>
+        <span class="project-card__cat project-cat--{{ proj.category | downcase }}">{{ proj.category }}</span>
+      </div>
+      <p class="project-card__desc">{{ proj.desc }}</p>
+      <div class="project-card__links">
+        {% if proj.post %}
+          <a href="{{ proj.post | relative_url }}" class="project-card__link">Post ↗</a>
+        {% endif %}
+        {% if proj.github %}
+          <a href="{{ proj.github }}" target="_blank" rel="noopener" class="project-card__link">GitHub ↗</a>
+        {% endif %}
+        {% if proj.pypi %}
+          <a href="{{ proj.pypi }}" target="_blank" rel="noopener" class="project-card__link">PyPI ↗</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
 <section class="post-index section-reveal" id="posts">
   <div class="post-index__header">
     <div class="post-index__title-row">
