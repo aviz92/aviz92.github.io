@@ -15,6 +15,10 @@ layout: default
   {% endunless %}
 {% endfor %}
 {% assign about_tab = site.tabs | where: 'title', 'about' | first %}
+{% assign total_projects = 0 %}
+{% for cat_data in site.data.projects %}
+  {% assign total_projects = total_projects | plus: cat_data[1].size %}
+{% endfor %}
 
 <section class="hero" id="hero">
   <h1 class="hero__title">Building <span class="grad-text">production-grade</span> <br class="hero__br">software, one tool at a time.</h1>
@@ -59,7 +63,7 @@ layout: default
       <p class="stat__label">Sub-categories</p>
     </div>
     <div class="stat">
-      <p class="stat__value">20+</p>
+      <p class="stat__value">{{ total_projects }}+</p>
       <p class="stat__label">Open-source tools</p>
     </div>
   </div>
@@ -84,17 +88,12 @@ layout: default
   </div>
 </section>
 
-{% assign total_projects = 0 %}
-{% for cat_data in site.data.projects %}
-  {% assign total_projects = total_projects | plus: cat_data[1].size %}
-{% endfor %}
-
 <section class="oss-projects section-reveal" id="projects">
   <div class="oss-projects__header">
     <div>
       <p class="kicker">Open Source</p>
       <h2 class="section-title">Tools I've shipped</h2>
-      <p class="oss-projects__sub">{{ total_projects }} packages across AI, Infra, Testing, and more.</p>
+      <p class="oss-projects__sub">{{ total_projects }}+ packages across AI, Infra, Testing, and more.</p>
     </div>
     <div class="arc-select-wrap">
       <label for="proj-cat">Category</label>
