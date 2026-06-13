@@ -16,8 +16,18 @@ layout: default
 {% endfor %}
 {% assign about_tab = site.tabs | where: 'title', 'about' | first %}
 {% assign total_projects = 0 %}
+{% assign tools_count = 0 %}
+{% assign pypi_count = 0 %}
 {% for cat_data in site.data.projects %}
   {% assign total_projects = total_projects | plus: cat_data[1].size %}
+  {% unless cat_data[0] == 'templates' %}
+    {% assign tools_count = tools_count | plus: cat_data[1].size %}
+  {% endunless %}
+  {% for proj in cat_data[1] %}
+    {% if proj.pypi %}
+      {% assign pypi_count = pypi_count | plus: 1 %}
+    {% endif %}
+  {% endfor %}
 {% endfor %}
 
 <section class="hero" id="hero">
@@ -55,15 +65,15 @@ layout: default
       <p class="stat__label">Posts published</p>
     </div>
     <div class="stat">
-      <p class="stat__value">{{ primary_cats | size }}</p>
-      <p class="stat__label">Categories</p>
-    </div>
-    <div class="stat">
-      <p class="stat__value">{{ all_sub_cats | size }}</p>
-      <p class="stat__label">Sub-categories</p>
-    </div>
-    <div class="stat">
       <p class="stat__value">{{ total_projects }}+</p>
+      <p class="stat__label">GitHub projects</p>
+    </div>
+    <div class="stat">
+      <p class="stat__value">{{ pypi_count }}+</p>
+      <p class="stat__label">PyPI packages</p>
+    </div>
+    <div class="stat">
+      <p class="stat__value">{{ tools_count }}+</p>
       <p class="stat__label">Open-source tools</p>
     </div>
   </div>
