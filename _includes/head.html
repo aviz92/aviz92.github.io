@@ -1,0 +1,30 @@
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#08080f">
+
+  {% seo title=false %}
+  <title>
+    {%- if page.title -%}
+      {{ page.title }} · {{ site.title }}
+    {%- else -%}
+      {{ site.title }} — {{ site.tagline }}
+    {%- endif -%}
+  </title>
+
+  <link rel="icon" href="data:image/svg+xml,{{ '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%2322d3ee"/><stop offset="1" stop-color="%23a78bfa"/></linearGradient></defs><rect width="32" height="32" rx="8" fill="%2308080f"/><text x="16" y="23" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="18" font-weight="700" fill="url(%23g)">A</text></svg>' | uri_escape }}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+  <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ '/feed.xml' | relative_url }}">
+
+  <script defer src="{{ '/assets/js/main.js' | relative_url }}"></script>
+
+  {% if site.goatcounter.code != "" and jekyll.environment == "production" %}
+  <script data-goatcounter="https://{{ site.goatcounter.code }}.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  {% endif %}
+</head>

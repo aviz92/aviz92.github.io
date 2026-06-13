@@ -1,0 +1,47 @@
+---
+layout: default
+---
+<section class="post archives">
+  <header class="post__header">
+    <p class="kicker">Archives</p>
+    <h1 class="post__title">Every post, by year.</h1>
+  </header>
+
+  <div class="archives-filters">
+    <div class="arc-select-wrap">
+      <label for="arc-cat">Category</label>
+      <select id="arc-cat" class="arc-select"><option value="all">All categories</option></select>
+    </div>
+    <div class="arc-select-wrap">
+      <label for="arc-sub">Sub-category</label>
+      <select id="arc-sub" class="arc-select"><option value="all">All sub-categories</option></select>
+    </div>
+    <div class="arc-select-wrap">
+      <label for="arc-tag">Tag</label>
+      <select id="arc-tag" class="arc-select"><option value="all">All tags</option></select>
+    </div>
+  </div>
+
+  {% assign posts_by_year = site.posts | group_by_exp: 'post', 'post.date | date: "%Y"' %}
+  {% for year in posts_by_year %}
+    <div class="archives__group">
+      <h2 class="archives__year">{{ year.name }}</h2>
+      <ul class="archives__list">
+        {% for post in year.items %}
+          <li class="archives__row"
+              data-category="{{ post.categories | first }}"
+              data-subcategory="{{ post.categories | last }}"
+              data-tags="{{ post.tags | join: ' ' }}">
+            <a href="{{ post.url | relative_url }}">
+              <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: '%b %-d' }}</time>
+              <span class="archives__title">{{ post.title }}</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+
+  <p class="no-posts-msg" hidden>No posts match this filter.</p>
+  <div class="archives-pager"></div>
+</section>

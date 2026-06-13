@@ -1,0 +1,186 @@
+---
+layout: default
+---
+{% comment %} Collect unique primary categories and unique sub-categories {% endcomment %}
+{% assign primary_cats = '' | split: '' %}
+{% assign all_sub_cats = '' | split: '' %}
+{% for post in site.posts %}
+  {% assign first_cat = post.categories | first %}
+  {% assign sub_cat = post.categories | last %}
+  {% unless primary_cats contains first_cat %}
+    {% assign primary_cats = primary_cats | push: first_cat %}
+  {% endunless %}
+  {% unless sub_cat == first_cat or all_sub_cats contains sub_cat %}
+    {% assign all_sub_cats = all_sub_cats | push: sub_cat %}
+  {% endunless %}
+{% endfor %}
+{% assign about_tab = site.tabs | where: 'title', 'about' | first %}
+{% assign total_projects = 0 %}
+{% for cat_data in site.data.projects %}
+  {% assign total_projects = total_projects | plus: cat_data[1].size %}
+{% endfor %}
+
+<section class="hero" id="hero">
+  <h1 class="hero__title">Building <span class="grad-text">production-grade</span> <br class="hero__br">software, one tool at a time.</h1>
+
+  <p class="hero__desc">{{ site.description | strip_newlines }}</p>
+
+  <div class="hero__actions">
+    {% assign latest = site.posts | first %}
+    <a class="btn-glow" href="{{ latest.url | relative_url }}">Read the latest post</a>
+    <a class="btn-ghost" href="#about">About me</a>
+  </div>
+
+  <div class="hero__chart" aria-hidden="true">
+    <svg viewBox="0 0 800 220" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="curve" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#a78bfa"/>
+          <stop offset="1" stop-color="#22d3ee"/>
+        </linearGradient>
+        <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="rgba(34,211,238,0.18)"/>
+          <stop offset="1" stop-color="rgba(34,211,238,0)"/>
+        </linearGradient>
+      </defs>
+      <path class="hero__area" d="M0,200 C180,196 320,170 470,110 C600,58 700,30 790,16 L790,220 L0,220 Z" fill="url(#fill)"/>
+      <path class="hero__line" d="M0,200 C180,196 320,170 470,110 C600,58 700,30 790,16" fill="none" stroke="url(#curve)" stroke-width="3" stroke-linecap="round"/>
+      <circle class="hero__point" cx="790" cy="16" r="5" fill="#22d3ee"/>
+    </svg>
+  </div>
+
+  <div class="hero__stats">
+    <div class="stat">
+      <p class="stat__value">{{ site.posts.size }}</p>
+      <p class="stat__label">Posts published</p>
+    </div>
+    <div class="stat">
+      <p class="stat__value">{{ primary_cats | size }}</p>
+      <p class="stat__label">Categories</p>
+    </div>
+    <div class="stat">
+      <p class="stat__value">{{ all_sub_cats | size }}</p>
+      <p class="stat__label">Sub-categories</p>
+    </div>
+    <div class="stat">
+      <p class="stat__value">{{ total_projects }}+</p>
+      <p class="stat__label">Open-source tools</p>
+    </div>
+  </div>
+</section>
+
+<section class="about-me section-reveal" id="about">
+  <div class="about-me__inner">
+    <div class="about-me__photo">
+      <img src="{{ '/assets/img/avatar.jpg' | relative_url }}" alt="Avi Zaguri" width="160" height="160" loading="lazy">
+    </div>
+    <div class="about-me__content">
+      <p class="kicker">About me</p>
+      <div class="about-me__text">
+        {{ about_tab.content }}
+      </div>
+      <div class="about-me__actions">
+        <a class="btn-ghost-glow" href="https://github.com/{{ site.github.username }}" target="_blank" rel="noopener">GitHub ↗</a>
+        <a class="btn-ghost-glow" href="https://www.linkedin.com/in/{{ site.linkedin.username }}" target="_blank" rel="noopener">LinkedIn ↗</a>
+        <a class="btn-ghost-glow" href="https://pypi.org/user/{{ site.pypi.username }}" target="_blank" rel="noopener">PyPI ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="oss-projects section-reveal" id="projects">
+  <div class="oss-projects__header">
+    <div>
+      <p class="kicker">Open Source</p>
+      <h2 class="section-title">Tools I've shipped</h2>
+      <p class="oss-projects__sub">{{ total_projects }}+ packages across AI, Infra, Testing, and more.</p>
+    </div>
+    <div class="arc-select-wrap">
+      <label for="proj-cat">Category</label>
+      <select id="proj-cat" class="arc-select">
+        <option value="all">All categories</option>
+      </select>
+    </div>
+  </div>
+  <div class="project-grid">
+    {% for cat_data in site.data.projects %}
+      {% assign cat = cat_data[0] %}
+      {% for proj in cat_data[1] %}
+      <div class="project-card" data-cat="{{ cat }}">
+        <div class="project-card__top">
+          <code class="project-card__name">{{ proj.name }}</code>
+          <span class="project-card__cat project-cat--{{ cat }}">{{ cat }}</span>
+        </div>
+        <p class="project-card__desc">{{ proj.desc }}</p>
+        <div class="project-card__links">
+          {% if proj.post %}
+            <a href="{{ proj.post | relative_url }}" class="project-card__link">Post ↗</a>
+          {% endif %}
+          {% if proj.github %}
+            <a href="{{ proj.github }}" target="_blank" rel="noopener" class="project-card__link">GitHub ↗</a>
+          {% endif %}
+          {% if proj.pypi %}
+            <a href="{{ proj.pypi }}" target="_blank" rel="noopener" class="project-card__link">PyPI ↗</a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    {% endfor %}
+  </div>
+  <div class="project-pager"></div>
+</section>
+
+<section class="post-index section-reveal" id="posts">
+  <div class="post-index__header">
+    <div class="post-index__title-row">
+      <h2 class="section-title">Latest writing</h2>
+      <a class="btn-ghost" href="{{ '/all-posts/' | relative_url }}">View all posts →</a>
+    </div>
+    <div class="filter-bar" role="group" aria-label="Filter posts by category">
+      <button class="filter-btn active" data-filter="all">All <span class="filter-btn__count">{{ site.posts.size }}</span></button>
+      {% for cat in primary_cats %}
+        {% assign posts_count = 0 %}
+        {% for post in site.posts %}
+          {% if post.categories contains cat %}
+            {% assign posts_count = posts_count | plus: 1 %}
+          {% endif %}
+        {% endfor %}
+        <button class="filter-btn" data-filter="{{ cat }}">{{ cat }} <span class="filter-btn__count">{{ posts_count }}</span></button>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% for cat in primary_cats %}
+    {% assign sub_cats_for = '' | split: '' %}
+    {% for post in site.posts %}
+      {% if post.categories.first == cat %}
+        {% assign sub = post.categories | last %}
+        {% unless sub == cat or sub_cats_for contains sub %}
+          {% assign sub_cats_for = sub_cats_for | push: sub %}
+        {% endunless %}
+      {% endif %}
+    {% endfor %}
+    {% if sub_cats_for.size > 0 %}
+      <div class="sub-filter-bar" data-parent="{{ cat }}">
+        <button class="filter-btn filter-btn--sub active" data-sub-filter="all">All {{ cat }}</button>
+        {% for sub in sub_cats_for %}
+          {% assign sub_count = 0 %}
+          {% for post in site.posts %}
+            {% if post.categories.first == cat and post.categories contains sub %}
+              {% assign sub_count = sub_count | plus: 1 %}
+            {% endif %}
+          {% endfor %}
+          <button class="filter-btn filter-btn--sub" data-sub-filter="{{ sub }}">{{ sub }} <span class="filter-btn__count">{{ sub_count }}</span></button>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endfor %}
+
+  <div class="post-grid" id="post-grid">
+    {% for post in site.posts %}
+      {% include post-row.html post=post %}
+    {% endfor %}
+  </div>
+  <p class="no-posts-msg" aria-live="polite" hidden>No posts in this category yet.</p>
+  <div class="post-pager"></div>
+</section>

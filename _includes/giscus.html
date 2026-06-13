@@ -1,0 +1,22 @@
+{% if page.comments and site.comments.provider == 'giscus' %}
+  {% assign giscus = site.comments.giscus %}
+  <section class="post-comments">
+    <p class="section-label">Comments</p>
+    <script src="https://giscus.app/client.js"
+            data-repo="{{ giscus.repo }}"
+            data-repo-id="{{ giscus.repo_id }}"
+            data-category="{{ giscus.category }}"
+            data-category-id="{{ giscus.category_id }}"
+            data-mapping="{{ giscus.mapping | default: 'pathname' }}"
+            data-strict="{{ giscus.strict | default: 0 }}"
+            data-reactions-enabled="{{ giscus.reactions_enabled | default: 1 }}"
+            data-emit-metadata="0"
+            data-input-position="{{ giscus.input_position | default: 'bottom' }}"
+            data-theme="dark"
+            data-lang="{{ giscus.lang | default: 'en' }}"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </section>
+{% endif %}

@@ -23,22 +23,23 @@ That split is the whole design. The universal artifacts ride on conventions that
 
 ## Quick start
 
-It's not on PyPI yet, so install from a local checkout or straight from GitHub. Install the CLI once, then run it from the root of any project:
+### 1. Fork the repo
+
+Start by forking [`ai-marketplace`](https://github.com/aviz92/ai-marketplace) on GitHub. This gives you your own catalog — you can add your own skills and rules, customize existing ones, and still pull upstream when new artifacts are added. Running directly from the original repo works for a quick try, but a fork is the right setup for anything you plan to maintain.
+
+### 2. Add your own skills and rules
+
+The catalog lives in `skills/`, `rules/`, and `plugins/` at the repo root. Drop in a directory with a `metadata.yaml` and a `skill.md` (or `rule.md`) and it shows up in the picker automatically. The authoring format is covered in detail [below](#authoring-your-own-artifacts).
+
+### 3. Run the CLI
+
+From the root of any project you want to set up:
 
 ```bash
-uv tool install /path/to/ai-marketplace
-agents-marketplace
+uvx --from git+https://github.com/<your-fork>/ai-marketplace agents-marketplace
 ```
 
-Or run it without installing anything:
-
-```bash
-uvx --from /path/to/ai-marketplace agents-marketplace
-# or directly from GitHub:
-uvx --from git+https://github.com/aviz92/ai-marketplace agents-marketplace
-```
-
-The TUI then walks you through the flow:
+The TUI walks you through the rest:
 
 1. Pick artifacts from the catalog (it shows installed status and available updates).
 2. Review which AI tools were detected in your project and on your system.
@@ -140,4 +141,4 @@ I maintain a growing set of reusable agent context — code-review skills, a pre
 
 `ai-marketplace` makes the authored artifact the single source of truth and pushes the per-agent fragmentation down into a render step where it belongs. Author once, render many — and let a committed manifest plus a non-zero CI exit keep the whole team honest.
 
-The project is [on GitHub](https://github.com/aviz92/ai-marketplace) under an MIT license. PyPI publishing is on the way; until then, `uvx --from git+https://github.com/aviz92/ai-marketplace agents-marketplace` is the fastest way to try it.
+The project is [on GitHub](https://github.com/aviz92/ai-marketplace) under an MIT license. `uvx --from git+https://github.com/aviz92/ai-marketplace agents-marketplace` is the fastest way to try it.

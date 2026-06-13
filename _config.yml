@@ -1,7 +1,4 @@
-# The Site Configuration
-
-# Import the theme
-theme: jekyll-theme-chirpy
+# The Site Configuration — custom terminal theme
 
 lang: en
 timezone: Asia/Jerusalem
@@ -9,13 +6,20 @@ timezone: Asia/Jerusalem
 title: Avi Zaguri
 tagline: "Infrastructure Architect | Python Expert | Open Source Builder"
 description: >-
-  Thoughts on automation architecture, Python, DevOps,
+  Thoughts on AI, Python, infrastructure architecture,
   and building production-grade open-source tools.
 
 url: "https://aviz92.github.io"
+baseurl: ""
 
 github:
   username: aviz92
+
+linkedin:
+  username: avi-zaguri-41869b11b
+
+pypi:
+  username: aviz
 
 social:
   name: Avi Zaguri
@@ -23,26 +27,12 @@ social:
   links:
     - https://github.com/aviz92
 
-webmaster_verifications:
-  google:
-  bing:
-
-analytics:
-  google:
-    id:
-
-pageviews:
-  provider:
-
-theme_mode: dark
-
-cdn:
-
 avatar: "/assets/img/avatar.jpg"
 
-social_preview_image:
-
-toc: true
+# GoatCounter analytics — sign up free at goatcounter.com, then set your code
+# (e.g. code: aviz92 for https://aviz92.goatcounter.com)
+goatcounter:
+  code: ""
 
 comments:
   provider: giscus
@@ -57,22 +47,10 @@ comments:
     lang: en
     reactions_enabled: 1
 
-assets:
-  self_host:
-    enabled:
-    env:
-
-pwa:
-  enabled: true
-  cache:
-    enabled: true
-    deny_paths:
-
-paginate: 10
-
-baseurl: ""
-
-# ------------ The following options are not recommended to be modified ------------------
+plugins:
+  - jekyll-seo-tag
+  - jekyll-feed
+  - jekyll-sitemap
 
 kramdown:
   footnote_backlink: "&#8617;&#xfe0e;"
@@ -82,8 +60,7 @@ kramdown:
     span:
       line_numbers: false
     block:
-      line_numbers: true
-      start_line: 1
+      line_numbers: false
 
 collections:
   tabs:
@@ -93,11 +70,14 @@ collections:
 defaults:
   - scope:
       path: ""
+    values:
+      image: /assets/img/og-default.png
+  - scope:
+      path: ""
       type: posts
     values:
       layout: post
       comments: true
-      toc: true
       permalink: /posts/:title/
   - scope:
       path: _drafts
@@ -113,31 +93,12 @@ defaults:
 sass:
   style: compressed
 
-compress_html:
-  clippings: all
-  comments: all
-  endings: all
-  profile: false
-  blanklines: false
-  ignore:
-    envs: [development]
-
 exclude:
   - "*.gem"
   - "*.gemspec"
-  - docs
   - tools
   - README.md
   - LICENSE
-  - purgecss.js
   - "*.config.js"
-  - "package*.json"
-
-jekyll-archives:
-  enabled: [categories, tags]
-  layouts:
-    category: category
-    tag: tag
-  permalinks:
-    tag: /tags/:name/
-    category: /categories/:name/
+  - package*.json
+  - _post_template

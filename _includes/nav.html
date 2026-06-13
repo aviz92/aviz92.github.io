@@ -1,0 +1,43 @@
+<header class="site-nav">
+  <nav class="site-nav__inner" aria-label="Primary">
+    <a class="site-nav__brand" href="{{ '/' | relative_url }}">
+      <span class="site-nav__mark" aria-hidden="true"></span>
+      Avi Zaguri
+    </a>
+
+    <input type="checkbox" id="nav-toggle" class="site-nav__toggle-box" aria-hidden="true">
+    <label for="nav-toggle" class="site-nav__toggle" aria-label="Toggle menu">Menu</label>
+
+    <ul class="site-nav__links">
+      {% if page.url == '/' %}
+        <li><a href="#hero" class="nav-section-link active" data-section="hero">Home</a></li>
+        <li><a href="#about" class="nav-section-link" data-section="about">About</a></li>
+        <li><a href="#projects" class="nav-section-link" data-section="projects">Projects</a></li>
+        <li><a href="#posts" class="nav-section-link" data-section="posts">Posts</a></li>
+        {% assign tabs = site.tabs | sort: 'order' %}
+        {% for tab in tabs %}
+          {% unless tab.title == 'about' or tab.title == 'categories' or tab.title == 'tags' %}
+            <li>
+              <a href="{{ tab.url | relative_url }}">{{ tab.title | capitalize }}</a>
+            </li>
+          {% endunless %}
+        {% endfor %}
+      {% else %}
+        <li><a href="{{ '/' | relative_url }}">Home</a></li>
+        {% assign tabs = site.tabs | sort: 'order' %}
+        {% for tab in tabs %}
+          {% unless tab.title == 'categories' or tab.title == 'tags' %}
+            <li>
+              <a href="{{ tab.url | relative_url }}" {% if page.url == tab.url %}class="active" aria-current="page"{% endif %}>{{ tab.title | capitalize }}</a>
+            </li>
+          {% endunless %}
+        {% endfor %}
+      {% endif %}
+      <li class="site-nav__socials">
+        <a class="btn-pill" href="https://www.linkedin.com/in/{{ site.linkedin.username }}" target="_blank" rel="noopener">LinkedIn ↗</a>
+        <a class="btn-pill" href="https://github.com/{{ site.github.username }}" target="_blank" rel="noopener">GitHub ↗</a>
+        <a class="btn-pill" href="https://pypi.org/user/{{ site.pypi.username }}" target="_blank" rel="noopener">PyPI ↗</a>
+      </li>
+    </ul>
+  </nav>
+</header>

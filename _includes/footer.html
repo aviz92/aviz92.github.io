@@ -1,0 +1,21 @@
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__about">
+      <p class="site-footer__name">Avi Zaguri</p>
+      <p class="site-footer__desc">{{ site.description | strip_newlines }}</p>
+    </div>
+    <div class="site-footer__links">
+      {% for contact in site.data.contact %}
+        {%- assign link = contact.url -%}
+        {%- if contact.type == 'github' and link == nil -%}
+          {%- assign link = 'https://github.com/' | append: site.github.username -%}
+        {%- endif -%}
+        {%- if link -%}
+          <a href="{{ link }}" target="_blank" rel="noopener">{{ contact.type | capitalize }}</a>
+        {%- endif -%}
+      {% endfor %}
+      <a href="{{ '/feed.xml' | relative_url }}">RSS</a>
+    </div>
+    <p class="site-footer__copy">© {{ 'now' | date: '%Y' }} {{ site.social.name }}</p>
+  </div>
+</footer>

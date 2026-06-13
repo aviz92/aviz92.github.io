@@ -1,0 +1,40 @@
+- name: custom-python-logger
+  desc: "Colored output, custom log levels (STEP, EXCEPTION), and contextual fields — behind a single build_logger() call."
+  github: https://github.com/aviz92/custom-python-logger
+  pypi: https://pypi.org/project/custom-python-logger/
+  post: /posts/custom-python-logger/
+
+- name: python-base-command
+  desc: "Django's BaseCommand pattern — handle(), add_arguments(), call_command(), auto-discovery — for any Python project."
+  github: https://github.com/aviz92/python-base-command
+  pypi: https://pypi.org/project/python-base-command/
+  post: /posts/python-base-command/
+
+- name: pyrest-model-client
+  desc: "httpx + Pydantic in a model-driven REST client with pagination, async support, and typed responses."
+  github: https://github.com/aviz92/pyrest-model-client
+  pypi: https://pypi.org/project/pyrest-model-client/
+  post: /posts/pyrest-model-client/
+
+- name: python-base-toolkit
+  desc: "A production-ready suite of essential utilities designed to accelerate Python development."
+  github: https://github.com/aviz92/python-base-toolkit
+  pypi: https://pypi.org/project/python-base-toolkit/
+  post: /posts/python-base-toolkit/
+
+- name: python-custom-exceptions
+  desc: "A centralized library of reusable, semantic exception classes for cleaner error handling."
+  github: https://github.com/aviz92/python-custom-exceptions
+  pypi: https://pypi.org/project/python-custom-exceptions/
+  post: /posts/python-custom-exceptions/
+
+- name: python-simple-email-sender
+  desc: "A minimalist SMTP client for sending emails and attachments with zero boilerplate."
+  github: https://github.com/aviz92/python-simple-email-sender
+  pypi: https://pypi.org/project/python-simple-email-sender/
+  post: /posts/python-simple-email-sender/
+
+- name: python-databases
+  desc: "A unified, extensible interface for interacting with multiple database types through a single API."
+  github: https://github.com/aviz92/python-databases
+  pypi: https://pypi.org/project/python-databases/

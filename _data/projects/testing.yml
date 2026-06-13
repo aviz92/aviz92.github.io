@@ -1,0 +1,35 @@
+- name: pytest-dynamic-parameterize
+  desc: "Runtime test parameterization from functions, config files, or APIs — replaces static @pytest.mark.parametrize."
+  github: https://github.com/aviz92/pytest-dynamic-parameterize
+  pypi: https://pypi.org/project/pytest-dynamic-parameterize/
+  post: /posts/pytest-dynamic-parameterize/
+
+- name: pytest-plugins
+  desc: "Structured JSON/Markdown reporting, consecutive failure detection, smart skip-on-fail, and verbose param IDs."
+  github: https://github.com/aviz92/pytest-plugins
+  pypi: https://pypi.org/project/pytest-plugins/
+  post: /posts/pytest-plugins/
+
+- name: pytest-collect-requirements
+  desc: "Annotate tests with requirements, collect them into structured JSON — without running the suite."
+  github: https://github.com/aviz92/pytest-collect-requirements
+  pypi: https://pypi.org/project/pytest-collect-requirements/
+  post: /posts/pytest-collect-requirements/
+
+- name: pytest-depends-on
+  desc: "Explicit test dependencies — automatically skip dependents when prerequisites fail."
+  github: https://github.com/aviz92/pytest-depends-on
+  pypi: https://pypi.org/project/pytest-depends-on/
+  post: /posts/pytest-depends-on/
+
+- name: pytest-reporter-html
+  desc: "Rich, interactive HTML test reports with zero-config log capture, step tracking, and real-time filtering."
+  github: https://github.com/aviz92/pytest-reporter-html
+  pypi: https://pypi.org/project/pytest-reporter-html/
+  post: /posts/pytest-reporter-html/
+
+- name: pytest-only-markers
+  desc: "Flag tests with ONLY_* markers and run only those — one decorator, one flag, full CI isolation."
+  github: https://github.com/aviz92/pytest-only-markers
+  pypi: https://pypi.org/project/pytest-only-markers/
+  post: /posts/pytest-only-markers/
