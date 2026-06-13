@@ -1,5 +1,5 @@
 ---
-title: "ai-marketplace: Author AI Agent Context Once, Render It for Every Coding Agent"
+title: "ai-agents-marketplace: Author AI Agent Context Once, Render It for Every Coding Agent"
 date: 2026-06-12 00:00:00 +0200
 categories: [AI, DevTools]
 tags: [ai, cli, automation, python, devtools]
@@ -8,7 +8,7 @@ description: "agents-marketplace is an interactive CLI that distributes reusable
 
 Every AI coding agent wants its context in a different place and a different shape. Cursor reads `.cursor/rules/*.mdc` with `globs` and `alwaysApply` frontmatter. Copilot wants `.github/instructions/*.instructions.md` with an `applyTo` field. Claude Code, Codex, and Gemini each expect their own rules directory and their own top-level instructions file. The moment you work across more than one agent — or a team does — you end up hand-maintaining the same guidance in five incompatible formats, and they drift apart immediately.
 
-`ai-marketplace` solves that with a single principle: **author once, render many.** It ships an interactive CLI (`agents-marketplace`) that distributes three kinds of reusable agent context — **skills** 🧠, **plugins** 🔌, and **rules** 📏 — into any project, rendering each artifact into the native format every supported agent actually reads.
+`ai-agents-marketplace` solves that with a single principle: **author once, render many.** It ships an interactive CLI (`agents-marketplace`) that distributes three kinds of reusable agent context — **skills** 🧠, **plugins** 🔌, and **rules** 📏 — into any project, rendering each artifact into the native format every supported agent actually reads.
 
 ---
 
@@ -25,7 +25,7 @@ That split is the whole design. The universal artifacts ride on conventions that
 
 ### 1. Fork the repo
 
-Start by forking [`ai-marketplace`](https://github.com/aviz92/ai-marketplace) on GitHub. This gives you your own catalog — you can add your own skills and rules, customize existing ones, and still pull upstream when new artifacts are added. Running directly from the original repo works for a quick try, but a fork is the right setup for anything you plan to maintain.
+Start by forking [`ai-agents-marketplace`](https://github.com/aviz92/ai-agents-marketplace) on GitHub. This gives you your own catalog — you can add your own skills and rules, customize existing ones, and still pull upstream when new artifacts are added. Running directly from the original repo works for a quick try, but a fork is the right setup for anything you plan to maintain.
 
 ### 2. Add your own skills and rules
 
@@ -36,7 +36,7 @@ The catalog lives in `skills/`, `rules/`, and `plugins/` at the repo root. Drop 
 From the root of any project you want to set up:
 
 ```bash
-uvx --from git+https://github.com/<your-fork>/ai-marketplace agents-marketplace
+uvx --from git+https://github.com/<your-fork>/ai-agents-marketplace agents-marketplace
 ```
 
 The TUI walks you through the rest:
@@ -68,7 +68,7 @@ Agents that read a single top-level instructions file — rather than auto-disco
 This is where the tool earns its keep on a team. Commit an `agents-marketplace.yaml` to your project root — think of it like VS Code's `.vscode/extensions.json` — and every teammate gets the same agent setup after cloning, with no install step:
 
 ```bash
-uvx --from git+https://github.com/aviz92/ai-marketplace agents-marketplace sync
+uvx --from git+https://github.com/aviz92/ai-agents-marketplace agents-marketplace sync
 ```
 
 The manifest is small and readable:
@@ -139,6 +139,6 @@ There's no separate update database — versioning is baked into the rendered ou
 
 I maintain a growing set of reusable agent context — code-review skills, a pre-push checklist, Python and infrastructure rules — and I want the same guidance applied whether I'm in Claude Code on one machine or Cursor on another, and whether a teammate just cloned the repo or has been on it for months. Hand-syncing five formats doesn't scale, and copy-paste drift quietly erodes the value of having written the rules at all.
 
-`ai-marketplace` makes the authored artifact the single source of truth and pushes the per-agent fragmentation down into a render step where it belongs. Author once, render many — and let a committed manifest plus a non-zero CI exit keep the whole team honest.
+`ai-agents-marketplace` makes the authored artifact the single source of truth and pushes the per-agent fragmentation down into a render step where it belongs. Author once, render many — and let a committed manifest plus a non-zero CI exit keep the whole team honest.
 
-The project is [on GitHub](https://github.com/aviz92/ai-marketplace) under an MIT license. `uvx --from git+https://github.com/aviz92/ai-marketplace agents-marketplace` is the fastest way to try it.
+The project is [on GitHub](https://github.com/aviz92/ai-agents-marketplace) under an MIT license. `uvx --from git+https://github.com/aviz92/ai-agents-marketplace agents-marketplace` is the fastest way to try it.
