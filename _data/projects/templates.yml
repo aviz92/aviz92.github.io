@@ -1,19 +1,24 @@
 - name: dev-template-repository
   desc: "Standardized GitHub repository template with pre-configured tooling, CI workflows, and project structure for rapid bootstrapping."
   github: https://github.com/aviz92/dev-template-repository
+  post: /posts/how-i-structure-python-projects/
 
 - name: fast-api-template
   desc: "Production-ready FastAPI starter with pre-configured authentication, JWT support, database integration, and example routes."
   github: https://github.com/aviz92/fast-api-template
+  post: /posts/python-project-templates/
 
 - name: django-basic-app
   desc: "Production-ready Django REST Framework starter with enterprise-grade CRUD utilities, versioned models, and advanced filtering."
   github: https://github.com/aviz92/django-basic-app
+  post: /posts/python-project-templates/
 
 - name: docker-mcp-service-template
   desc: "Dockerized MCP service template for rapid deployment of Model Context Protocol services with Claude Desktop integration."
   github: https://github.com/aviz92/docker-mcp-service-template
+  post: /posts/python-project-templates/
 
 - name: python-telegram-bot-template
   desc: "Modular Telegram bot starter with async handlers, inline keyboards, and multi-step conversation flows."
   github: https://github.com/aviz92/python-telegram-bot-template
+  post: /posts/python-project-templates/
