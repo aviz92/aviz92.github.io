@@ -29,6 +29,11 @@ social:
 
 avatar: "/assets/img/avatar.jpg"
 
+# GoatCounter analytics — sign up free at goatcounter.com, then set your code
+# (e.g. code: aviz92 for https://aviz92.goatcounter.com)
+goatcounter:
+  code: ""
+
 comments:
   provider: giscus
   giscus:
@@ -63,6 +68,10 @@ collections:
     sort_by: order
 
 defaults:
+  - scope:
+      path: ""
+    values:
+      image: /assets/img/og-default.png
   - scope:
       path: ""
       type: posts
