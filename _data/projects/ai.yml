@@ -8,7 +8,7 @@
   github: https://github.com/aviz92/ticket-assist
   post: /posts/ticket-assist/
 
-- name: ai-marketplace
+- name: ai-agents-marketplace
   desc: "CLI that distributes reusable AI-agent context — skills, plugins, rules — into any project. Author once, render many."
-  github: https://github.com/aviz92/ai-marketplace
-  post: /posts/ai-marketplace/
+  github: https://github.com/aviz92/ai-agents-marketplace
+  post: /posts/ai-agents-marketplace/

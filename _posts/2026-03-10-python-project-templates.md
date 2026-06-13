@@ -62,15 +62,15 @@ That's all you add. The rest — server lifecycle, Docker build, Claude Desktop 
 
 ---
 
-### A Note on ai-marketplace
+### A Note on ai-agents-marketplace
 
-[`ai-marketplace`](https://github.com/aviz92/ai-marketplace) deserves a mention here even though it's not a project template in the traditional sense. It's a CLI that distributes reusable AI-agent context — skills, plugins, and rules — into any project, rendering each artifact into the native format every supported coding agent expects.
+[`ai-agents-marketplace`](https://github.com/aviz92/ai-agents-marketplace) deserves a mention here even though it's not a project template in the traditional sense. It's a CLI that distributes reusable AI-agent context — skills, plugins, and rules — into any project, rendering each artifact into the native format every supported coding agent expects.
 
 The reason it belongs in this section: if you're building a project and want AI coding agents to have proper context about your codebase, you'd run `agents-marketplace` after cloning your template. It's the last step of the setup flow.
 
 One important usage note: **fork the repo before running it in a project you plan to maintain long-term.** The marketplace ships with a curated set of skills and rules, and new ones get added over time. If you fork it, you can pull upstream changes to get new features while keeping any customizations you've made to the rules for your specific project. Running directly from the original repo works fine for a quick setup, but a fork gives you the ability to sync selectively as the marketplace evolves.
 
-→ [github.com/aviz92/ai-marketplace](https://github.com/aviz92/ai-marketplace)
+→ [github.com/aviz92/ai-agents-marketplace](https://github.com/aviz92/ai-agents-marketplace)
 
 ---
 
