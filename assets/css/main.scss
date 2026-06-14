@@ -196,10 +196,9 @@ img { max-width: 100%; height: auto; }
 }
 
 .site-nav__mark {
-  width: 0.95rem;
-  height: 0.95rem;
-  border-radius: 5px;
-  background: var(--grad);
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
 }
 
 .site-nav__links {
