@@ -5,13 +5,16 @@
 # [tool.uv]
 # exclude-newer = "2026-11-02T00:00:00Z"
 # ///
-"""Refresh _data/pypi_stats.json with last-month download counts from pypistats.org.
+"""Refresh _data/pypi_stats.json with download counts and latest releases.
+
+Downloads (last month) come from pypistats.org; the latest version and its release
+date come from the PyPI JSON API.
 
 Runs in its own read-only CI job before every site build (see
 .github/workflows/pages-deploy.yml). Dependencies are pinned in the adjacent
 ``fetch_pypi_stats.py.lock``; run locally with
 ``uv run --locked --script tools/fetch_pypi_stats.py``. A failed lookup never breaks the
-build: the package keeps its previous count from the existing data file.
+build: the package keeps its previous values from the existing data file.
 """
 
 import json
@@ -30,9 +33,12 @@ logger = get_logger(__name__)
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PROJECTS_DIR = REPO_ROOT / "_data" / "projects"
 STATS_FILE = REPO_ROOT / "_data" / "pypi_stats.json"
-API_URL = "https://pypistats.org/api/packages/{name}/recent"
+DOWNLOADS_URL = "https://pypistats.org/api/packages/{name}/recent"
+RELEASE_URL = "https://pypi.org/pypi/{name}/json"
 REQUEST_TIMEOUT_SECONDS = 15
-REQUEST_PAUSE_SECONDS = 0.5  # pypistats is a free community service — stay polite
+REQUEST_PAUSE_SECONDS = 1.0  # pypistats is a free, rate-limited community service — stay polite
+
+Release = dict[str, str]  # {"version": "4.2.0", "released": "2026-11-01", "released_at": "<ISO 8601>"}
 
 
 def get_pypi_package_names(projects_dir: Path = PROJECTS_DIR) -> list[str]:
@@ -44,56 +50,80 @@ def get_pypi_package_names(projects_dir: Path = PROJECTS_DIR) -> list[str]:
     return names
 
 
-def load_previous_counts(stats_file: Path = STATS_FILE) -> dict[str, int]:
-    """Return per-package counts from the last run, or an empty dict."""
+def load_previous_stats(stats_file: Path = STATS_FILE) -> dict[str, Any]:
+    """Return the last run's data file contents, or an empty dict."""
     if not stats_file.exists():
         return {}
-    return json.loads(stats_file.read_text()).get("packages", {})
+    return json.loads(stats_file.read_text())
 
 
-def fetch_last_month_downloads(name: str) -> int | None:
-    """Return last-month downloads for ``name``, or None if the lookup fails."""
-    url = API_URL.format(name=name.lower())
+def fetch_json(url: str) -> dict[str, Any] | None:
+    """GET ``url`` as JSON, or None if the request fails."""
     try:
         with urllib.request.urlopen(url, timeout=REQUEST_TIMEOUT_SECONDS) as response:
-            return int(json.load(response)["data"]["last_month"])
-    except (urllib.error.URLError, KeyError, ValueError, TimeoutError) as exc:
-        logger.warning(f"Could not fetch downloads for {name}: {exc}")
+            return json.load(response)
+    except (urllib.error.URLError, ValueError, TimeoutError) as exc:
+        logger.warning(f"Request failed for {url}: {exc}")
         return None
 
 
-def collect_counts(names: list[str], previous: dict[str, int]) -> dict[str, int]:
-    """Fetch every package, falling back to its previous count on failure."""
+def fetch_last_month_downloads(name: str) -> int | None:
+    """Return last-month downloads for ``name``, or None if unavailable."""
+    data = fetch_json(DOWNLOADS_URL.format(name=name.lower()))
+    try:
+        return int(data["data"]["last_month"]) if data else None
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def fetch_latest_release(name: str) -> Release | None:
+    """Return the latest version of ``name`` and the date it was uploaded, or None."""
+    data = fetch_json(RELEASE_URL.format(name=name.lower()))
+    if not data or not data.get("urls"):
+        return None
+    uploaded = data["urls"][0].get("upload_time_iso_8601", "")
+    return {"version": data["info"]["version"], "released": uploaded[:10], "released_at": uploaded}
+
+
+def collect(names: list[str], previous: dict[str, Any]) -> tuple[dict[str, int], dict[str, Release]]:
+    """Fetch downloads and releases per package, falling back to previous values on failure."""
+    old_counts: dict[str, int] = previous.get("packages", {})
+    old_releases: dict[str, Release] = previous.get("releases", {})
     counts: dict[str, int] = {}
+    releases: dict[str, Release] = {}
     for name in names:
-        fetched = fetch_last_month_downloads(name)
-        if fetched is not None:
-            counts[name] = fetched
-        elif name in previous:
-            counts[name] = previous[name]
+        count = fetch_last_month_downloads(name)
+        if count is None:
+            count = old_counts.get(name)
+        if count is not None:
+            counts[name] = count
+
+        release = fetch_latest_release(name) or old_releases.get(name)
+        if release:
+            releases[name] = release
         time.sleep(REQUEST_PAUSE_SECONDS)
-    return counts
+    return counts, releases
 
 
-def write_stats(counts: dict[str, int], stats_file: Path = STATS_FILE) -> None:
-    """Write totals and per-package counts for Jekyll to read as site.data.pypi_stats."""
+def write_stats(counts: dict[str, int], releases: dict[str, Release], stats_file: Path = STATS_FILE) -> None:
+    """Write totals, per-package counts and latest releases for Jekyll (site.data.pypi_stats)."""
     payload = {
         "updated": datetime.now(UTC).strftime("%Y-%m-%d"),
         "last_month_total": sum(counts.values()),
         "packages": dict(sorted(counts.items())),
+        "releases": dict(sorted(releases.items())),
     }
     stats_file.write_text(json.dumps(payload, indent=2) + "\n")
-    logger.info(f"Wrote {len(counts)} packages, {payload['last_month_total']} downloads last month")
+    logger.info(f"Wrote {len(counts)} download counts and {len(releases)} releases")
 
 
 def main() -> None:
     names = get_pypi_package_names()
-    previous = load_previous_counts()
-    counts = collect_counts(names, previous)
-    if not counts:
-        logger.warning("No download counts available — keeping the existing data file")
+    counts, releases = collect(names, load_previous_stats())
+    if not counts and not releases:
+        logger.warning("Nothing fetched — keeping the existing data file")
         return
-    write_stats(counts)
+    write_stats(counts, releases)
 
 
 if __name__ == "__main__":

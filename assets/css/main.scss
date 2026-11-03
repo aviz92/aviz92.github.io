@@ -2027,6 +2027,24 @@ pre.highlight,
 
 .pkg-card__prompt { color: var(--accent); }
 
+.pkg-card__release {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: -0.25rem 0 0.6rem;
+  font-size: 0.76rem;
+  color: var(--text-faint);
+}
+
+.pkg-card__version {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--accent-2);
+  background: rgba(var(--accent-2-rgb), 0.12);
+  border-radius: 999px;
+  padding: 0.08rem 0.55rem;
+}
+
 .pkg-card__copy {
   flex-shrink: 0;
   font-family: var(--font-body);
