@@ -30,8 +30,10 @@ layout: default
 
 <section class="hero" id="hero">
   <p class="eyebrow rv">Infrastructure Architect · Python · Open Source</p>
-  <h1 class="hero__title rv">From one-off scripts<br> to <span class="grad-text">systems.</span></h1>
-  <p class="hero__desc rv">{{ site.description | strip_newlines }}</p>
+  {% assign templates_count = site.data.projects.templates.size %}
+  <h1 class="hero__title rv">Build it once.<br> <span class="grad-text">Use it everywhere.</span></h1>
+  {% assign pypi_round = pypi_count | divided_by: 10 | times: 10 %}
+  <p class="hero__desc rv">Reusable Python infrastructure — {% if pypi_count > pypi_round %}more than {{ pypi_round }}{% else %}{{ pypi_count }}{% endif %} packages on PyPI and the stories behind them.</p>
 
   <div class="hero__actions rv">
     {% assign latest = site.posts | first %}
@@ -59,7 +61,6 @@ layout: default
     <span class="hero__marker" aria-hidden="true"></span>
   </div>
 
-  {% assign templates_count = site.data.projects.templates.size %}
   {% assign downloads = site.data.pypi_stats.last_month_total | default: 0 %}
   {% assign downloads_k = downloads | divided_by: 100 | divided_by: 10.0 %}
   {% comment %} ascending left → right, so the numbers climb with the curve {% endcomment %}
