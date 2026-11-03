@@ -97,8 +97,8 @@ layout: default
     {% endif %}
   </ul>
 
-  <a class="next" href="#about" aria-label="Next: about me"><span aria-hidden="true">↓</span></a>
 </section>
+<a class="next" href="#about" aria-label="Next: about me"><span aria-hidden="true">↓</span></a>
 
 <section class="about-me section-reveal" id="about">
   <div class="about-me__inner">
@@ -117,8 +117,8 @@ layout: default
       </div>
     </div>
   </div>
-  <a class="next" href="#process" aria-label="Next: how a package is born"><span aria-hidden="true">↓</span></a>
 </section>
+<a class="next" href="#process" aria-label="Next: how a package is born"><span aria-hidden="true">↓</span></a>
 
 <section class="process" id="process">
   <header class="sec-head rv">
@@ -133,8 +133,8 @@ layout: default
     <li class="process__step"><span class="process__dot">4</span><b>I ship it</b><span>Published to PyPI, versioned, open source.</span></li>
     <li class="process__step"><span class="process__dot">5</span><b>I write it up</b><span>The problem, the fix, and the patterns behind it.</span></li>
   </ol>
-  <a class="next" href="#work" aria-label="Next: projects by category"><span aria-hidden="true">↓</span></a>
 </section>
+<a class="next" href="#work" aria-label="Next: projects by category"><span aria-hidden="true">↓</span></a>
 
 <section class="work" id="work">
   <header class="sec-head rv">
@@ -202,6 +202,7 @@ layout: default
   {% assign release_keys = release_keys | push: release_key %}
 {% endfor %}
 {% assign release_keys = release_keys | sort | reverse %}
+{% if release_keys.size > 0 %}<a class="next" href="#packages" aria-label="Next: latest packages"><span aria-hidden="true">↓</span></a>{% else %}<a class="next" href="#posts" aria-label="Next: latest writing"><span aria-hidden="true">↓</span></a>{% endif %}
 {% if release_keys.size > 0 %}
 <section class="packages" id="packages">
   <header class="sec-head writing__head rv">
@@ -253,6 +254,7 @@ layout: default
     {% endfor %}
   </div>
 </section>
+<a class="next" href="#posts" aria-label="Next: latest writing"><span aria-hidden="true">↓</span></a>
 {% endif %}
 
 <section class="writing" id="posts">
@@ -269,6 +271,7 @@ layout: default
     {% endfor %}
   </div>
 </section>
+<a class="next next--last" href="#contact" aria-label="Next: let's talk"><span aria-hidden="true">↓</span></a>
 
 <section class="contact" id="contact">
   <div class="contact__card rv">

@@ -37,13 +37,21 @@
 
   --radius-card: 22px;
 
+  --section-gap: 4.5rem;
+  --section-space: 3.5rem;  /* gap on each side of the arrow between two home sections */
+
   --wide: 68rem;
   --narrow: 44rem;
 }
 
 * { box-sizing: border-box; }
 
-html { scroll-padding-top: 6.5rem; scroll-behavior: smooth; }
+/* anchored sections land one --section-gap below the navbar's real bottom edge
+   (--nav-bottom is measured in main.js), matching the gap left below the last section */
+html {
+  scroll-padding-top: calc(var(--nav-bottom, 4.75rem) + var(--section-gap));
+  scroll-behavior: smooth;
+}
 
 body {
   margin: 0;
@@ -301,7 +309,7 @@ img { max-width: 100%; height: auto; }
 .site-main {
   max-width: var(--wide);
   margin: 0 auto;
-  padding: 4.5rem 1.5rem 6rem;
+  padding: 4.5rem 1.5rem var(--section-gap);
   min-height: 70vh;
 }
 
@@ -338,6 +346,7 @@ img { max-width: 100%; height: auto; }
 
 .eyebrow {
   display: inline-flex;
+  vertical-align: top;  /* no baseline gap above it, so section spacing stays exact */
   align-items: center;
   gap: 0.6rem;
   margin: 0 0 0.9rem;
@@ -372,13 +381,13 @@ img { max-width: 100%; height: auto; }
   color: var(--accent);
 }
 
-/* round "continue" arrow linking a section to the next */
+/* round "continue" arrow between two sections: same gap above and below it */
 .next {
   display: grid;
   place-items: center;
   width: 2.9rem;
   height: 2.9rem;
-  margin: 3rem auto 0;
+  margin: 0 auto var(--section-space);
   border: 1px solid var(--border-bright);
   border-radius: 50%;
   color: var(--text-soft);
@@ -456,7 +465,7 @@ img { max-width: 100%; height: auto; }
   position: relative;
   text-align: center;
   padding-top: 2rem;
-  margin-bottom: 7rem;
+  margin-bottom: var(--section-space);
 }
 
 .hero__title {
@@ -785,7 +794,6 @@ img { max-width: 100%; height: auto; }
     line-height: 1.25;
     color: var(--text-bright);
     margin: 2.4rem 0 0.9rem;
-    scroll-margin-top: 5.5rem;
   }
 
   h1 { font-size: 1.6rem; }
@@ -1004,7 +1012,6 @@ pre.highlight,
   font-weight: 700;
   color: var(--text-bright);
   margin: 0 0 0.9rem;
-  scroll-margin-top: 5.5rem;
 }
 
 .taxonomy__count {
@@ -1131,7 +1138,7 @@ pre.highlight,
 /* ---------- about me ---------- */
 
 .about-me {
-  margin-bottom: 5rem;
+  margin-bottom: var(--section-space);
   padding: 2.75rem 2.5rem;
   background: var(--bg-glass);
   border: 1px solid var(--border);
@@ -1616,8 +1623,14 @@ pre.highlight,
   color: var(--text-faint);
 }
 
+/* compact on phones: one row of links, no repeated tagline — keeps the closing
+   "Let's talk" card, navbar and footer on one screen at the end of the page */
 @media (max-width: 44rem) {
-  .site-footer__copy { margin-left: 0; }
+  .site-footer__inner { padding: 1.5rem 1.5rem; gap: 0.75rem 1.5rem; }
+  .site-footer__desc { display: none; }
+  .site-footer__name { margin: 0; }
+  .site-footer__links { flex-direction: row; flex-wrap: wrap; gap: 0.4rem 1.1rem; }
+  .site-footer__copy { margin-left: 0; flex-basis: 100%; }
 }
 
 /* ---------- 404 ---------- */
@@ -1627,7 +1640,7 @@ pre.highlight,
 
 /* ---------- selected work: pinned numbered story ---------- */
 
-.work { margin-bottom: 8rem; }
+.work { margin-bottom: var(--section-space); }
 
 .story {
   display: grid;
@@ -1730,7 +1743,7 @@ pre.highlight,
   &.on { opacity: 1; }
 
   &:first-child { min-height: 50vh; justify-content: flex-start; padding-top: 4rem; }
-  &:last-child { min-height: 60vh; }
+  &:last-child { min-height: 0; padding-bottom: 0; }
 }
 
 .story__inline { display: none; }
@@ -1846,7 +1859,7 @@ pre.highlight,
 
 /* ---------- process: five steps on a line that fills with scroll ---------- */
 
-.process { margin-bottom: 8rem; }
+.process { margin-bottom: var(--section-space); }
 
 .process__steps {
   position: relative;
@@ -1941,7 +1954,28 @@ pre.highlight,
 
 /* ---------- contact ---------- */
 
-.contact { margin-top: 7rem; }
+/* The closing section fills the space between the navbar and the footer (--nav-bottom /
+   --footer-h are measured in main.js) and the card stretches into it, so at the end of the
+   page — and when "Let's talk" is clicked — the gap above and below the card is the same
+   --section-space used between every other section. */
+.contact {
+  display: flex;
+  min-height: calc(100vh - var(--nav-bottom, 4.75rem) - var(--footer-h, 12rem));
+  min-height: calc(100svh - var(--nav-bottom, 4.75rem) - var(--footer-h, 12rem));
+  padding: var(--section-space) 0;
+  margin-bottom: calc(-1 * var(--section-gap));  /* cancel main's bottom padding: section meets the footer */
+  scroll-margin-top: calc(-1 * var(--section-gap));
+
+  .contact__card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+/* the arrow into the closing section: its own top padding provides the gap */
+.next--last { margin-bottom: 0; }
 
 .contact__card {
   text-align: center;
@@ -1980,7 +2014,6 @@ pre.highlight,
 
 /* ---------- latest writing teaser (home) ---------- */
 
-.writing { margin-top: 2rem; }
 
 .writing__head {
   display: flex;
@@ -2005,7 +2038,8 @@ pre.highlight,
 
 /* ---------- package teaser (home) ---------- */
 
-.packages { margin: 2rem 0 6rem; }
+.packages,
+.writing { margin-bottom: var(--section-space); }
 
 .post-grid--teaser .project-card { flex: 1; }
 
