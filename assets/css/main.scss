@@ -1725,6 +1725,82 @@ pre.highlight,
   }
 }
 
+/* package carousel inside the stage: one package of the category at a time */
+.pkg-carousel { width: 100%; }
+
+.pkg-carousel__slides { display: grid; }
+
+.pkg-slide {
+  grid-area: 1 / 1;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(14px);
+  transition: opacity 0.45s var(--ease), transform 0.6s var(--ease), visibility 0s 0.45s;
+
+  &.on {
+    opacity: 1;
+    visibility: inherit;  /* stay hidden (and unclickable) while its category's set is hidden */
+    transform: none;
+    transition: opacity 0.45s var(--ease), transform 0.6s var(--ease), visibility 0s;
+  }
+}
+
+.pkg-slide__summary {
+  margin: 0.85rem 0.25rem 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-soft);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pkg-carousel__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  margin-top: 0.9rem;
+}
+
+.pkg-carousel__btn {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0 0 0.15rem;
+  border: 1px solid var(--border-bright);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-bright);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.3s var(--ease);
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.08);
+  }
+
+  &[data-dir="-1"]:hover { transform: translateX(-2px); }
+  &[data-dir="1"]:hover { transform: translateX(2px); }
+}
+
+.pkg-carousel__count {
+  min-width: 3.2rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+
+  b { color: var(--text-bright); font-weight: 600; }
+}
+
 .story__steps {
   list-style: none;
   margin: 0;
@@ -1855,7 +1931,7 @@ pre.highlight,
   .story__stage {
     top: calc(var(--nav-bottom, 4.75rem) + 0.75rem);
     z-index: 2;
-    height: 15rem;
+    height: 20.5rem;
     margin-bottom: 1.5rem;
     border-radius: 22px;
     box-shadow:
@@ -1876,6 +1952,8 @@ pre.highlight,
   .story__sets { padding: 2.9rem 2.25rem 0.9rem 1rem; }
 
   .story__set .term__body { padding: 0.8rem 1rem 1rem; font-size: 0.74rem; line-height: 1.7; }
+  .pkg-slide__summary { margin-top: 0.6rem; font-size: 0.8rem; -webkit-line-clamp: 1; }
+  .pkg-carousel__nav { margin-top: 0.6rem; }
 
   .story__inline { display: none; }
 
@@ -1885,7 +1963,7 @@ pre.highlight,
     justify-content: flex-start;
     padding: 1.5rem 0 2.5rem;
     /* land #cat-* links below the pinned stage, not behind it */
-    scroll-margin-top: 11.5rem;
+    scroll-margin-top: 18rem;
   }
 
   .story__step:last-child { min-height: 0; padding-bottom: 0; }
@@ -1996,7 +2074,13 @@ pre.highlight,
   display: flex;
   min-height: calc(100vh - var(--nav-bottom, 4.75rem) - var(--footer-h, 12rem));
   min-height: calc(100svh - var(--nav-bottom, 4.75rem) - var(--footer-h, 12rem));
-  padding: var(--section-space) 0;
+  /* equal gap above and below the card: --section-space when it fits, otherwise both
+     shrink by the same amount (--contact-content-h = card's natural height, from main.js) */
+  padding: clamp(
+    0.75rem,
+    (100svh - var(--nav-bottom, 4.75rem) - var(--footer-h, 12rem) - var(--contact-content-h, 23rem)) / 2,
+    var(--section-space)
+  ) 0;
   margin-bottom: calc(-1 * var(--section-gap));  /* cancel main's bottom padding: section meets the footer */
   scroll-margin-top: calc(-1 * var(--section-gap));
 
@@ -2013,7 +2097,7 @@ pre.highlight,
 
 .contact__card {
   text-align: center;
-  padding: 4rem 1.5rem;
+  padding: clamp(1.75rem, 5svh, 4rem) 1.5rem;  /* tighter on short windows so it fits with navbar + footer */
   border: 1px solid var(--border);
   border-radius: 28px;
   background:

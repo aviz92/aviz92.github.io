@@ -505,6 +505,33 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.hero__stats').addEventListener('mouseleave', stopPointing);
   }
 
+  // ---- Package carousels inside the category stage: arrows + swipe, wraps around ----
+  document.querySelectorAll('[data-pkgs]').forEach(set => {
+    const slides = [...set.querySelectorAll('[data-slide]')];
+    const counter = set.querySelector('.pkg-carousel__count b');
+    if (slides.length < 2) return;
+    let current = Math.max(0, slides.findIndex(slide => slide.classList.contains('on')));
+
+    const show = (index) => {
+      current = (index + slides.length) % slides.length;
+      slides.forEach((slide, j) => slide.classList.toggle('on', j === current));
+      if (counter) counter.textContent = String(current + 1);
+    };
+
+    set.querySelectorAll('[data-dir]').forEach(btn => {
+      btn.addEventListener('click', () => show(current + Number(btn.dataset.dir)));
+    });
+
+    let touchX = null;
+    set.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+    set.addEventListener('touchend', e => {
+      if (touchX === null) return;
+      const dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 40) show(current + (dx < 0 ? 1 : -1));
+      touchX = null;
+    });
+  });
+
   // ---- Selected work: the step crossing the viewport middle drives the pinned stage ----
   const storySteps = [...document.querySelectorAll('.story__step')];
 
@@ -583,16 +610,26 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---- Expose navbar bottom edge and footer height for spacing measured from them ----
   const navInner = document.querySelector('.site-nav__inner');
   const footer = document.querySelector('.site-footer');
+  const contactCard = document.querySelector('.contact__card');
   const rootStyle = document.documentElement.style;
   const measureFrame = () => {
     if (navInner) rootStyle.setProperty('--nav-bottom', `${Math.round(navInner.getBoundingClientRect().bottom)}px`);
     if (footer) rootStyle.setProperty('--footer-h', `${Math.round(footer.offsetHeight)}px`);
+    if (contactCard?.firstElementChild) {
+      // natural height = content + padding (the card itself is stretched to fill its section)
+      const cs = getComputedStyle(contactCard);
+      const first = contactCard.firstElementChild.getBoundingClientRect();
+      const last = contactCard.lastElementChild.getBoundingClientRect();
+      const natural = last.bottom - first.top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+      rootStyle.setProperty('--contact-content-h', `${Math.round(natural)}px`);
+    }
   };
   measureFrame();
   if ('ResizeObserver' in window) {
     const frameObserver = new ResizeObserver(measureFrame);
-    [navInner, footer].filter(Boolean).forEach(el => frameObserver.observe(el));
+    [navInner, footer, contactCard].filter(Boolean).forEach(el => frameObserver.observe(el));
   }
+  window.addEventListener('resize', measureFrame);  // svh-based card padding changes with height only
 
   // ---- Scroll-spy: active nav section link ----
   const sections = document.querySelectorAll('section[id]');

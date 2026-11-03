@@ -74,7 +74,7 @@ layout: default
     </li>
     <li class="rv">
       <a class="stat" href="#work">
-        <span class="stat__value" data-count="{{ pypi_count }}" data-suffix="+">{{ pypi_count }}+</span>
+        <span class="stat__value" data-count="{{ pypi_count }}">{{ pypi_count }}</span>
         <span class="stat__label">PyPI packages</span>
         <span class="stat__hint">Browse by category →</span>
       </a>
@@ -144,17 +144,35 @@ layout: default
   </header>
 
   <div class="story">
-    <div class="story__stage" aria-hidden="true">
-      <div class="story__num"><span>01</span></div>
-      <div class="story__rail">
+    <div class="story__stage">
+      <div class="story__num" aria-hidden="true"><span>01</span></div>
+      <div class="story__rail" aria-hidden="true">
         {% for key in story_cats %}<i{% if forloop.first %} class="on"{% endif %}></i>{% endfor %}
       </div>
       <div class="story__sets">
         {% for key in story_cats %}
           {% assign num = forloop.index | prepend: '0' | slice: -2, 2 %}
-          {% assign feat = story_feats[forloop.index0] %}
-          <div class="story__set{% if forloop.first %} on{% endif %}">
-            {% include term-card.html proj=feat cat=key num=num %}
+          {% assign items = site.data.projects[key] %}
+          {% assign label = site.data.categories[key].label | default: key %}
+          {% comment %} carousel through the category's packages, starting at the first {% endcomment %}
+          <div class="story__set{% if forloop.first %} on{% endif %}" data-pkgs>
+            <div class="pkg-carousel" role="group" aria-roledescription="carousel" aria-label="{{ label }} packages">
+              <div class="pkg-carousel__slides">
+                {% for proj in items %}
+                  <div class="pkg-slide{% if forloop.first %} on{% endif %}" data-slide aria-label="{{ forloop.index }} of {{ items.size }}">
+                    {% include term-card.html proj=proj cat=key num=num %}
+                    <p class="pkg-slide__summary">{{ proj.desc | truncate: 90 }}</p>
+                  </div>
+                {% endfor %}
+              </div>
+              {% if items.size > 1 %}
+                <div class="pkg-carousel__nav">
+                  <button type="button" class="pkg-carousel__btn" data-dir="-1" aria-label="Previous {{ label }} package">‹</button>
+                  <span class="pkg-carousel__count" aria-live="polite"><b>1</b> / {{ items.size }}</span>
+                  <button type="button" class="pkg-carousel__btn" data-dir="1" aria-label="Next {{ label }} package">›</button>
+                </div>
+              {% endif %}
+            </div>
           </div>
         {% endfor %}
       </div>
