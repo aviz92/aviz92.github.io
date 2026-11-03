@@ -3,6 +3,7 @@
   github: https://github.com/aviz92/python-github-plus
   pypi: https://pypi.org/project/python-github-plus/
   post: /posts/python-github-plus/
+  featured: true
 
 - name: python-gitlab-plus
   desc: "Extended GitLab client for MRs, pipelines, tags, and file ops — with built-in pipeline wait support."

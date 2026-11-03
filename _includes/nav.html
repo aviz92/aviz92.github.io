@@ -2,7 +2,7 @@
   <nav class="site-nav__inner" aria-label="Primary">
     <a class="site-nav__brand" href="{{ '/' | relative_url }}">
       <img class="site-nav__mark" src="{{ '/assets/img/favicon-192x192.png' | relative_url }}" alt="" aria-hidden="true">
-      Avi Zaguri
+      <span class="site-nav__name">Avi Zaguri</span>
     </a>
 
     <input type="checkbox" id="nav-toggle" class="site-nav__toggle-box" aria-hidden="true">
@@ -11,6 +11,7 @@
     <ul class="site-nav__links">
       {% if page.url == '/' %}
         <li><a href="#hero" class="nav-section-link active" data-section="hero">Home</a></li>
+        <li><a href="#work" class="nav-section-link" data-section="work">Work</a></li>
         <li><a href="#about" class="nav-section-link" data-section="about">About</a></li>
         <li><a href="#projects" class="nav-section-link" data-section="projects">Projects</a></li>
         <li><a href="#posts" class="nav-section-link" data-section="posts">Posts</a></li>
@@ -33,10 +34,8 @@
           {% endunless %}
         {% endfor %}
       {% endif %}
-      <li class="site-nav__socials">
-        <a class="btn-pill" href="https://github.com/{{ site.github.username }}" target="_blank" rel="noopener">GitHub ↗</a>
-        <a class="btn-pill" href="https://pypi.org/user/{{ site.pypi.username }}" target="_blank" rel="noopener">PyPI ↗</a>
-        <a class="btn-pill" href="https://www.linkedin.com/in/{{ site.linkedin.username }}" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <li class="site-nav__cta">
+        <a class="btn-glow" href="{{ '/#contact' | relative_url }}">Let's talk</a>
       </li>
     </ul>
   </nav>

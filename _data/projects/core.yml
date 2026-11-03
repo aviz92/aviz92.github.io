@@ -3,6 +3,7 @@
   github: https://github.com/aviz92/custom-python-logger
   pypi: https://pypi.org/project/custom-python-logger/
   post: /posts/custom-python-logger/
+  featured: true
 
 - name: python-base-command
   desc: "Django's BaseCommand pattern — handle(), add_arguments(), call_command(), auto-discovery — for any Python project."

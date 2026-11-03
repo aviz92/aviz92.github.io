@@ -291,10 +291,13 @@ document.addEventListener('DOMContentLoaded', () => {
       opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
       projSelect.append(opt);
     });
+    // cross-category view used by the hero "PyPI packages" stat
+    projSelect.append(new Option('On PyPI', 'pypi'));
 
     function renderProjects() {
       const val = projSelect.value;
-      const filtered = projCards.filter(c => val === 'all' || c.dataset.cat === val);
+      const filtered = projCards.filter(c =>
+        val === 'all' || c.dataset.cat === val || (val === 'pypi' && 'pypi' in c.dataset));
       const totalPages = Math.max(1, Math.ceil(filtered.length / PROJECTS_PER_PAGE));
       projPage = Math.min(projPage, totalPages);
 
@@ -340,33 +343,186 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProjects();
   }
 
-  // ---- Section reveal on scroll ----
-  const revealSections = document.querySelectorAll('.section-reveal');
+  // ---- Reveal on scroll: .section-reveal sections and .rv elements ----
+  // Items inside [data-stagger] get increasing delays so a group cascades in.
+  document.querySelectorAll('[data-stagger]').forEach(group => {
+    group.querySelectorAll('.rv').forEach((el, i) => el.style.setProperty('--d', `${i * 0.08}s`));
+  });
 
-  if (revealSections.length) {
+  const revealEls = document.querySelectorAll('.section-reveal, .rv');
+  const reveal = el => el.classList.add('visible', 'in');
+
+  if (revealEls.length) {
     if (!('IntersectionObserver' in window)) {
-      revealSections.forEach(s => s.classList.add('visible'));
+      revealEls.forEach(reveal);
     } else {
       const revealObserver = new IntersectionObserver(
         (entries) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
-              entry.target.classList.add('visible');
+              reveal(entry.target);
               revealObserver.unobserve(entry.target);
             }
           });
         },
         { rootMargin: '0px 0px -60px 0px', threshold: 0.05 }
       );
+      // wait two frames so above-the-fold items paint hidden first and animate in
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        revealEls.forEach(el => revealObserver.observe(el));
+      }));
+    }
+  }
 
-      revealSections.forEach(s => {
-        if (s.getBoundingClientRect().top < window.innerHeight) {
-          s.classList.add('visible');
-        } else {
-          revealObserver.observe(s);
+  // ---- Deck buttons: jump to the project grid pre-filtered ----
+  const projCatSelect = document.querySelector('#proj-cat');
+
+  document.querySelectorAll('[data-proj-cat]').forEach(link => {
+    link.addEventListener('click', () => {
+      if (!projCatSelect) return;
+      projCatSelect.value = link.dataset.projCat;
+      projCatSelect.dispatchEvent(new Event('change'));
+    });
+  });
+
+  // ---- Hero stats count up from zero once they scroll into view ----
+  const counters = [...document.querySelectorAll('[data-count]')];
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (counters.length && !reduceMotion && 'IntersectionObserver' in window) {
+    const countUp = (el) => {
+      const target = Number(el.dataset.count);
+      const suffix = el.dataset.suffix || '';
+      const start = performance.now();
+      const duration = 1400;
+      const tick = (now) => {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 4); // ease-out, matches --ease
+        el.textContent = `${Math.round(target * eased)}${suffix}`;
+        if (t < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+
+    const countObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          countUp(entry.target);
+          countObserver.unobserve(entry.target);
         }
       });
+    }, { threshold: 0.6 });
+    counters.forEach(el => countObserver.observe(el));
+  }
+
+  // hero stat cards take turns showing their "Show me" hint while on screen
+  const statLinks = [...document.querySelectorAll('.hero__stats .stat')];
+
+  if (statLinks.length && !reduceMotion && 'IntersectionObserver' in window) {
+    const statList = document.querySelector('.hero__stats');
+    let hinted = -1;
+    let hintTimer = null;
+    const nextHint = () => {
+      statLinks.forEach(l => l.classList.remove('hint'));
+      hinted = (hinted + 1) % statLinks.length;
+      statLinks[hinted].classList.add('hint');
+    };
+    const stopHints = () => {
+      clearInterval(hintTimer);
+      hintTimer = null;
+      statLinks.forEach(l => l.classList.remove('hint'));
+    };
+    statList.addEventListener('mouseenter', stopHints);
+
+    new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !hintTimer && !statList.matches(':hover')) {
+        hintTimer = setInterval(nextHint, 2400);
+      } else if (!entry.isIntersecting) {
+        stopHints();
+      }
+    }, { threshold: 0.6 }).observe(statList);
+  }
+
+  // ---- Selected work: the step crossing the viewport middle drives the pinned stage ----
+  const storySteps = [...document.querySelectorAll('.story__step')];
+
+  if (storySteps.length && 'IntersectionObserver' in window) {
+    const storySets = [...document.querySelectorAll('.story__set')];
+    const railTicks = [...document.querySelectorAll('.story__rail i')];
+    const storyNum = document.querySelector('.story__num');
+    const storyNumText = storyNum.querySelector('span');
+    let activeStep = 0;
+
+    const setActiveStep = (i) => {
+      if (i === activeStep) return;
+      activeStep = i;
+      [storySteps, storySets, railTicks].forEach(group => {
+        group.forEach((el, j) => el.classList.toggle('on', j === i));
+      });
+      storyNum.classList.add('swap');
+      storyNumText.textContent = String(i + 1).padStart(2, '0');
+      void storyNum.offsetWidth; // restart the numeral's slide-in transition
+      storyNum.classList.remove('swap');
+    };
+
+    const stepObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) setActiveStep(Number(entry.target.dataset.i));
+        });
+      },
+      { rootMargin: '-45% 0px -45% 0px' }
+    );
+    storySteps.forEach(step => stepObserver.observe(step));
+  }
+
+  // ---- Scroll-linked motion: progress bar, nav collapse, process line, deck ----
+  // One passive listener, throttled to a frame; all reads happen before writes.
+  const progressBar = document.querySelector('.progress');
+  const siteNav = document.querySelector('.site-nav');
+  const processSteps = document.querySelector('.process__steps');
+  const processFill = document.querySelector('.process__fill');
+  const processItems = processSteps ? [...processSteps.querySelectorAll('.process__step')] : [];
+  const deckCards = [...document.querySelectorAll('.deck__card')];
+  let scrollTicking = false;
+
+  function updateScrollMotion() {
+    const y = window.scrollY;
+    const vh = window.innerHeight;
+    const maxScroll = document.documentElement.scrollHeight - vh;
+    const processRect = processSteps ? processSteps.getBoundingClientRect() : null;
+    const deckTops = deckCards.map(card => card.getBoundingClientRect().top);
+    const deckHeights = deckCards.map(card => card.offsetHeight);
+
+    if (progressBar) progressBar.style.transform = `scaleX(${maxScroll > 0 ? y / maxScroll : 0})`;
+    if (siteNav) siteNav.classList.toggle('is-scrolled', y > 80);
+
+    if (processRect && processFill) {
+      // 0 as the steps rise into the lower part of the viewport, 1 once they pass the middle
+      const raw = (vh * 0.85 - processRect.top) / (vh * 0.4 + processRect.height * 0.5);
+      const p = Math.min(1, Math.max(0, raw));
+      processFill.style.setProperty('--p', p.toFixed(3));
+      const last = Math.max(1, processItems.length - 1);
+      processItems.forEach((step, i) => step.classList.toggle('lit', p > 0 && p >= i / last - 0.001));
     }
+
+    deckCards.forEach((card, i) => {
+      const nextTop = deckTops[i + 1];
+      card.classList.toggle('under', nextTop !== undefined && nextTop - deckTops[i] < deckHeights[i] * 0.5);
+    });
+
+    scrollTicking = false;
+  }
+
+  if (progressBar || processFill || deckCards.length) {
+    window.addEventListener('scroll', () => {
+      if (!scrollTicking) {
+        scrollTicking = true;
+        requestAnimationFrame(updateScrollMotion);
+      }
+    }, { passive: true });
+    window.addEventListener('resize', updateScrollMotion);
+    updateScrollMotion();
   }
 
   // ---- Scroll-spy: active nav section link ----

@@ -1,0 +1,30 @@
+# Display names and one-line blurbs for the project categories in _data/projects/.
+# Keys must match the project file names. Order here is the order of the category deck on the home page.
+
+testing:
+  label: Testing
+  blurb: pytest plugins for dependencies, markers, parametrization and HTML reports.
+
+clients:
+  label: API clients
+  blurb: The "Plus" series — GitHub, GitLab, Jira, Notion and Vault clients with retries and pagination built in.
+
+core:
+  label: Core Python
+  blurb: The building blocks I reuse everywhere — logging, exceptions, commands, databases, email.
+
+ai:
+  label: AI tools
+  blurb: Agent context distribution and LLM-powered bots.
+
+django:
+  label: Django
+  blurb: Versioned models and zero-boilerplate DRF CRUD.
+
+devtools:
+  label: Dev tools
+  blurb: Reproducible terminal recordings, rendered to GIF and MP4.
+
+templates:
+  label: Templates
+  blurb: Production-ready starters for services, APIs, bots and MCP servers.

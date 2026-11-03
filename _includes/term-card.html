@@ -1,0 +1,22 @@
+{%- comment -%}
+  Terminal-style visual for a featured project.
+  Params: proj (project hash), cat (category key), num (display number, e.g. "01")
+{%- endcomment -%}
+{%- assign cat_info = site.data.categories[include.cat] -%}
+<div class="term">
+  <div class="term__bar">
+    <span class="term__dots"><i></i><i></i><i></i></span>
+    <span class="term__title">~/{{ include.proj.name }}</span>
+  </div>
+  <div class="term__body">
+    {%- if include.proj.pypi %}
+    <p><span class="term__prompt">$</span> pip install {{ include.proj.name }}</p>
+    <p class="term__ok">✓ Successfully installed {{ include.proj.name }}</p>
+    {%- else %}
+    <p><span class="term__prompt">$</span> git clone github.com/{{ site.github.username }}/{{ include.proj.name }}</p>
+    <p class="term__ok">✓ Cloned {{ include.proj.name }}</p>
+    {%- endif %}
+    <p class="term__muted"># {{ cat_info.label | default: include.cat }}</p>
+  </div>
+  <span class="term__num" aria-hidden="true">{{ include.num }}</span>
+</div>

@@ -30,12 +30,24 @@ layout: default
   {% endfor %}
 {% endfor %}
 
+{% comment %} Featured projects (featured: true in _data/projects/*.yml), in category-file order {% endcomment %}
+{% assign featured = '' | split: '' %}
+{% assign featured_cats = '' | split: '' %}
+{% for cat_data in site.data.projects %}
+  {% for proj in cat_data[1] %}
+    {% if proj.featured %}
+      {% assign featured = featured | push: proj %}
+      {% assign featured_cats = featured_cats | push: cat_data[0] %}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+
 <section class="hero" id="hero">
-  <h1 class="hero__title">Building <span class="grad-text">production-grade</span> <br class="hero__br">software, one tool at a time.</h1>
+  <p class="eyebrow rv">Infrastructure Architect · Python · Open Source</p>
+  <h1 class="hero__title rv">From one-off scripts<br> to <span class="grad-text">systems.</span></h1>
+  <p class="hero__desc rv">{{ site.description | strip_newlines }}</p>
 
-  <p class="hero__desc">{{ site.description | strip_newlines }}</p>
-
-  <div class="hero__actions">
+  <div class="hero__actions rv">
     {% assign latest = site.posts | first %}
     <a class="btn-glow" href="{{ latest.url | relative_url }}">Read the latest post</a>
     <a class="btn-ghost" href="#about">About me</a>
@@ -54,29 +66,109 @@ layout: default
         </linearGradient>
       </defs>
       <path class="hero__area" d="M0,200 C180,196 320,170 470,110 C600,58 700,30 790,16 L790,220 L0,220 Z" fill="url(#fill)"/>
-      <path class="hero__line" d="M0,200 C180,196 320,170 470,110 C600,58 700,30 790,16" fill="none" stroke="url(#curve)" stroke-width="3" stroke-linecap="round"/>
+      <path class="hero__line" pathLength="1" d="M0,200 C180,196 320,170 470,110 C600,58 700,30 790,16" fill="none" stroke="url(#curve)" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
       <circle class="hero__point" cx="790" cy="16" r="5" fill="#22d3ee"/>
     </svg>
   </div>
 
-  <div class="hero__stats">
-    <div class="stat">
-      <p class="stat__value">{{ site.posts.size }}</p>
-      <p class="stat__label">Posts published</p>
+  <ul class="hero__stats" data-stagger>
+    <li class="rv">
+      <a class="stat" href="#posts">
+        <span class="stat__value" data-count="{{ site.posts.size }}">{{ site.posts.size }}</span>
+        <span class="stat__label">Posts published</span>
+        <span class="stat__hint">Read them →</span>
+      </a>
+    </li>
+    <li class="rv">
+      <a class="stat" href="#projects" data-proj-cat="all">
+        <span class="stat__value" data-count="{{ total_projects }}" data-suffix="+">{{ total_projects }}+</span>
+        <span class="stat__label">GitHub projects</span>
+        <span class="stat__hint">Browse all →</span>
+      </a>
+    </li>
+    <li class="rv">
+      <a class="stat" href="#projects" data-proj-cat="pypi">
+        <span class="stat__value" data-count="{{ pypi_count }}" data-suffix="+">{{ pypi_count }}+</span>
+        <span class="stat__label">PyPI packages</span>
+        <span class="stat__hint">Show packages →</span>
+      </a>
+    </li>
+    <li class="rv">
+      <a class="stat" href="#explore">
+        <span class="stat__value" data-count="{{ tools_count }}" data-suffix="+">{{ tools_count }}+</span>
+        <span class="stat__label">Open-source tools</span>
+        <span class="stat__hint">Explore by category →</span>
+      </a>
+    </li>
+  </ul>
+
+  <a class="next" href="#work" aria-label="Next: selected work"><span aria-hidden="true">↓</span></a>
+</section>
+
+<section class="work" id="work">
+  <header class="sec-head rv">
+    <p class="eyebrow">Selected work</p>
+    <h2 class="sec-title">What I've built</h2>
+    <p class="sec-meta">{{ featured.size }} highlights · {{ total_projects }}+ projects in total</p>
+  </header>
+
+  <div class="story" style="--n: {{ featured.size }}">
+    <div class="story__stage" aria-hidden="true">
+      <div class="story__num"><span>01</span></div>
+      <div class="story__rail">
+        {% for proj in featured %}<i{% if forloop.first %} class="on"{% endif %}></i>{% endfor %}
+      </div>
+      <div class="story__sets">
+        {% for proj in featured %}
+          {% assign num = forloop.index | prepend: '0' | slice: -2, 2 %}
+          {% assign cat = featured_cats[forloop.index0] %}
+          <div class="story__set{% if forloop.first %} on{% endif %}">
+            {% include term-card.html proj=proj cat=cat num=num %}
+          </div>
+        {% endfor %}
+      </div>
     </div>
-    <div class="stat">
-      <p class="stat__value">{{ total_projects }}+</p>
-      <p class="stat__label">GitHub projects</p>
-    </div>
-    <div class="stat">
-      <p class="stat__value">{{ pypi_count }}+</p>
-      <p class="stat__label">PyPI packages</p>
-    </div>
-    <div class="stat">
-      <p class="stat__value">{{ tools_count }}+</p>
-      <p class="stat__label">Open-source tools</p>
-    </div>
+
+    <ol class="story__steps">
+      {% for proj in featured %}
+        {% assign num = forloop.index | prepend: '0' | slice: -2, 2 %}
+        {% assign cat = featured_cats[forloop.index0] %}
+        <li class="story__step{% if forloop.first %} on{% endif %}" data-i="{{ forloop.index0 }}">
+          <div class="story__inline" aria-hidden="true">
+            {% include term-card.html proj=proj cat=cat num=num %}
+          </div>
+          <h3 class="story__name">{{ proj.name }} <span class="story__idx">{{ num }}</span></h3>
+          <p class="story__cat">{{ site.data.categories[cat].label | default: cat }}</p>
+          <p class="story__desc">{{ proj.desc }}</p>
+          <ul class="tags">
+            {% if proj.pypi %}<li>PyPI</li>{% endif %}
+            <li>Open source</li>
+            <li>Python</li>
+          </ul>
+          <div class="story__actions">
+            {% if proj.github %}<a class="btn-glow" href="{{ proj.github }}" target="_blank" rel="noopener">GitHub ↗</a>{% endif %}
+            {% if proj.post %}<a class="btn-ghost" href="{{ proj.post | relative_url }}">Read the story →</a>{% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ol>
   </div>
+</section>
+
+<section class="process" id="process">
+  <header class="sec-head rv">
+    <p class="eyebrow">How a tool is born</p>
+    <h2 class="sec-title">Five steps</h2>
+  </header>
+  <ol class="process__steps">
+    <span class="process__line" aria-hidden="true"><span class="process__fill"></span></span>
+    <li class="process__step"><span class="process__dot">1</span><b>It annoys me twice</b><span>The same problem shows up in a second project.</span></li>
+    <li class="process__step"><span class="process__dot">2</span><b>I fix it properly</b><span>Reusable and stable — not another one-off patch.</span></li>
+    <li class="process__step"><span class="process__dot">3</span><b>I package it</b><span>One install instead of twenty lines of setup.</span></li>
+    <li class="process__step"><span class="process__dot">4</span><b>I ship it</b><span>Published to PyPI, versioned, open source.</span></li>
+    <li class="process__step"><span class="process__dot">5</span><b>I write it up</b><span>The problem, the fix, and the patterns behind it.</span></li>
+  </ol>
+  <a class="next" href="#about" aria-label="Next: about me"><span aria-hidden="true">↓</span></a>
 </section>
 
 <section class="about-me section-reveal" id="about">
@@ -85,7 +177,7 @@ layout: default
       <img src="{{ '/assets/img/avatar.jpg' | relative_url }}" alt="Avi Zaguri" width="160" height="160" loading="lazy">
     </div>
     <div class="about-me__content">
-      <p class="kicker">About me</p>
+      <p class="eyebrow">About me</p>
       <div class="about-me__text">
         {{ about_tab.content }}
       </div>
@@ -96,6 +188,34 @@ layout: default
       </div>
     </div>
   </div>
+</section>
+
+<section class="deck-section" id="explore">
+  <header class="sec-head rv">
+    <p class="eyebrow">Explore</p>
+    <h2 class="sec-title">Tools by category</h2>
+  </header>
+  <ol class="deck">
+    {% for cat_entry in site.data.categories %}
+      {% assign key = cat_entry[0] %}
+      {% assign items = site.data.projects[key] %}
+      {% if items %}
+        <li class="deck__card" style="--i: {{ forloop.index0 }}">
+          <span class="deck__count" aria-hidden="true">{{ items.size }}</span>
+          <div class="deck__body">
+            <p class="eyebrow">{{ items.size }} {% if items.size == 1 %}project{% else %}projects{% endif %}</p>
+            <h3 class="deck__title">{{ cat_entry[1].label }}</h3>
+            <p class="deck__blurb">{{ cat_entry[1].blurb }}</p>
+            <ul class="tags">
+              {% for proj in items limit: 4 %}<li><code>{{ proj.name }}</code></li>{% endfor %}
+              {% if items.size > 4 %}<li>+{{ items.size | minus: 4 }} more</li>{% endif %}
+            </ul>
+            <a class="btn-glow" href="#projects" data-proj-cat="{{ key }}">See all {{ cat_entry[1].label }} →</a>
+          </div>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ol>
 </section>
 
 <section class="oss-projects section-reveal" id="projects">
@@ -116,7 +236,7 @@ layout: default
     {% for cat_data in site.data.projects %}
       {% assign cat = cat_data[0] %}
       {% for proj in cat_data[1] %}
-      <div class="project-card" data-cat="{{ cat }}">
+      <div class="project-card" data-cat="{{ cat }}"{% if proj.pypi %} data-pypi{% endif %}>
         <div class="project-card__top">
           <code class="project-card__name">{{ proj.name }}</code>
           <span class="project-card__cat project-cat--{{ cat }}">{{ cat }}</span>
@@ -193,4 +313,17 @@ layout: default
   </div>
   <p class="no-posts-msg" aria-live="polite" hidden>No posts in this category yet.</p>
   <div class="post-pager"></div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="contact__card rv">
+    <p class="eyebrow">Get in touch</p>
+    <h2 class="contact__title">Let's talk.</h2>
+    <p class="contact__desc">Copied the same boilerplate into your fifth project? Tell me about it.</p>
+    <div class="contact__actions">
+      <a class="btn-glow" href="https://www.linkedin.com/in/{{ site.linkedin.username }}" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a class="btn-ghost" href="https://github.com/{{ site.github.username }}" target="_blank" rel="noopener">GitHub ↗</a>
+      <a class="btn-ghost" href="https://pypi.org/user/{{ site.pypi.username }}" target="_blank" rel="noopener">PyPI ↗</a>
+    </div>
+  </div>
 </section>

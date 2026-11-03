@@ -27,6 +27,7 @@
   github: https://github.com/aviz92/pytest-reporter-html
   pypi: https://pypi.org/project/pytest-reporter-html/
   post: /posts/pytest-reporter-html/
+  featured: true
 
 - name: pytest-only-markers
   desc: "Flag tests with ONLY_* markers and run only those — one decorator, one flag, full CI isolation."

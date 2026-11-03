@@ -3,6 +3,7 @@
   github: https://github.com/aviz92/django-versioned-models
   pypi: https://pypi.org/project/django-versioned-models/
   post: /posts/django-versioned-models/
+  featured: true
 
 - name: drf-easy-crud
   desc: "Enterprise-grade CRUD for DRF ViewSets with advanced filtering, pagination, and ForeignKey lookups."
