@@ -1,0 +1,21 @@
+{%- comment -%}
+  Sort projects by last-month PyPI downloads (site.data.pypi_stats), most first.
+  Projects without a count (templates, bots, forks) go last, keeping their data-file order.
+  Param: items (array of projects). Result: assigns `sorted_items` in the caller's scope.
+  Keys look like "<downloads, zero-padded>|<999 - position>|<name>" so a plain string sort
+  orders by downloads and breaks ties by original position.
+{%- endcomment -%}
+{%- assign sbd_keys = '' | split: '' -%}
+{%- for sbd_item in include.items -%}
+  {%- assign sbd_downloads = site.data.pypi_stats.packages[sbd_item.name] | default: 0 -%}
+  {%- assign sbd_position = 999 | minus: forloop.index0 -%}
+  {%- capture sbd_key -%}{{ sbd_downloads | prepend: '0000000000' | slice: -10, 10 }}|{{ sbd_position | prepend: '000' | slice: -3, 3 }}|{{ sbd_item.name }}{%- endcapture -%}
+  {%- assign sbd_keys = sbd_keys | push: sbd_key -%}
+{%- endfor -%}
+{%- assign sbd_keys = sbd_keys | sort | reverse -%}
+{%- assign sorted_items = '' | split: '' -%}
+{%- for sbd_key in sbd_keys -%}
+  {%- assign sbd_name = sbd_key | split: '|' | last -%}
+  {%- assign sbd_proj = include.items | where: 'name', sbd_name | first -%}
+  {%- assign sorted_items = sorted_items | push: sbd_proj -%}
+{%- endfor -%}

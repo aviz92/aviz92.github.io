@@ -13,19 +13,33 @@ layout: default
   {% endfor %}
 {% endfor %}
 
-{% comment %} One story step per category (order from _data/categories.yml).
-   Each shows its featured project (featured: true), else its first one. {% endcomment %}
-{% assign story_cats = '' | split: '' %}
-{% assign story_feats = '' | split: '' %}
+{% comment %} One story step per category, most-downloaded categories first (ties keep the
+   _data/categories.yml order). Each shows its featured project (featured: true), else its first. {% endcomment %}
+{% assign cat_keys = '' | split: '' %}
 {% for cat_entry in site.data.categories %}
   {% assign key = cat_entry[0] %}
   {% assign items = site.data.projects[key] %}
   {% if items %}
-    {% assign feat = items | where: 'featured', true | first %}
-    {% unless feat %}{% assign feat = items | first %}{% endunless %}
-    {% assign story_cats = story_cats | push: key %}
-    {% assign story_feats = story_feats | push: feat %}
+    {% assign cat_total = 0 %}
+    {% for proj in items %}
+      {% assign proj_dl = site.data.pypi_stats.packages[proj.name] | default: 0 %}
+      {% assign cat_total = cat_total | plus: proj_dl %}
+    {% endfor %}
+    {% assign cat_position = 999 | minus: forloop.index0 %}
+    {% capture cat_sort_key %}{{ cat_total | prepend: '0000000000' | slice: -10, 10 }}|{{ cat_position | prepend: '000' | slice: -3, 3 }}|{{ key }}{% endcapture %}
+    {% assign cat_keys = cat_keys | push: cat_sort_key %}
   {% endif %}
+{% endfor %}
+{% assign cat_keys = cat_keys | sort | reverse %}
+{% assign story_cats = '' | split: '' %}
+{% assign story_feats = '' | split: '' %}
+{% for cat_sort_key in cat_keys %}
+  {% assign key = cat_sort_key | split: '|' | last %}
+  {% assign items = site.data.projects[key] %}
+  {% assign feat = items | where: 'featured', true | first %}
+  {% unless feat %}{% assign feat = items | first %}{% endunless %}
+  {% assign story_cats = story_cats | push: key %}
+  {% assign story_feats = story_feats | push: feat %}
 {% endfor %}
 
 <section class="hero" id="hero">
@@ -62,7 +76,7 @@ layout: default
   </div>
 
   {% assign downloads = site.data.pypi_stats.last_month_total | default: 0 %}
-  {% assign downloads_k = downloads | divided_by: 100 | divided_by: 10.0 %}
+  {% assign downloads_k = downloads | divided_by: 100.0 | round | divided_by: 10.0 %}
   {% comment %} ascending left → right, so the numbers climb with the curve {% endcomment %}
   <ul class="hero__stats" data-stagger>
     <li class="rv">
@@ -152,7 +166,8 @@ layout: default
       <div class="story__sets">
         {% for key in story_cats %}
           {% assign num = forloop.index | prepend: '0' | slice: -2, 2 %}
-          {% assign items = site.data.projects[key] %}
+          {% assign cat_items = site.data.projects[key] %}{% include sort-by-downloads.html items=cat_items %}
+          {% assign items = sorted_items %}
           {% assign label = site.data.categories[key].label | default: key %}
           {% comment %} carousel through the category's packages, starting at the first {% endcomment %}
           <div class="story__set{% if forloop.first %} on{% endif %}" data-pkgs>
@@ -182,7 +197,8 @@ layout: default
       {% for key in story_cats %}
         {% assign num = forloop.index | prepend: '0' | slice: -2, 2 %}
         {% assign info = site.data.categories[key] %}
-        {% assign items = site.data.projects[key] %}
+        {% assign cat_items = site.data.projects[key] %}{% include sort-by-downloads.html items=cat_items %}
+        {% assign items = sorted_items %}
         {% assign feat = story_feats[forloop.index0] %}
         <li class="story__step{% if forloop.first %} on{% endif %}" id="cat-{{ key }}" data-i="{{ forloop.index0 }}">
           <div class="story__inline" aria-hidden="true">
