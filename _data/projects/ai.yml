@@ -12,3 +12,4 @@
   desc: "CLI that distributes reusable AI-agent context — skills, plugins, rules — into any project. Author once, render many."
   github: https://github.com/aviz92/ai-agents-marketplace
   post: /posts/ai-agents-marketplace/
+  featured: true

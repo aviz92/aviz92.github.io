@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ---- Category filter + sub-category filter + pagination ----
-  const POSTS_PER_PAGE = 6;
+  const POSTS_PER_PAGE = 8;
   let currentPage = 1;
   let activeFilter = 'all';
   let activeSubFilter = 'all';
@@ -284,17 +284,16 @@ document.addEventListener('DOMContentLoaded', () => {
   let projPage = 1;
 
   if (projCards.length && projSelect) {
-    const cats = [...new Set(projCards.map(c => c.dataset.cat))].sort();
-    cats.forEach(cat => {
-      const opt = document.createElement('option');
-      opt.value = cat;
-      opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
-      projSelect.append(opt);
-    });
+    // ?cat=<category|pypi> preselects the filter, so other pages can link straight into a view
+    const requestedCat = new URLSearchParams(window.location.search).get('cat');
+    if (requestedCat && [...projSelect.options].some(o => o.value === requestedCat)) {
+      projSelect.value = requestedCat;
+    }
 
     function renderProjects() {
       const val = projSelect.value;
-      const filtered = projCards.filter(c => val === 'all' || c.dataset.cat === val);
+      const filtered = projCards.filter(c =>
+        val === 'all' || c.dataset.cat === val || (val === 'pypi' && 'pypi' in c.dataset));
       const totalPages = Math.max(1, Math.ceil(filtered.length / PROJECTS_PER_PAGE));
       projPage = Math.min(projPage, totalPages);
 
@@ -335,38 +334,250 @@ document.addEventListener('DOMContentLoaded', () => {
     projSelect.addEventListener('change', () => {
       projPage = 1;
       renderProjects();
+      const url = new URL(window.location.href);
+      if (projSelect.value === 'all') url.searchParams.delete('cat');
+      else url.searchParams.set('cat', projSelect.value);
+      history.replaceState(null, '', url);
     });
 
     renderProjects();
   }
 
-  // ---- Section reveal on scroll ----
-  const revealSections = document.querySelectorAll('.section-reveal');
+  // ---- Reveal on scroll: .section-reveal sections and .rv elements ----
+  // Items inside [data-stagger] get increasing delays so a group cascades in.
+  document.querySelectorAll('[data-stagger]').forEach(group => {
+    group.querySelectorAll('.rv').forEach((el, i) => el.style.setProperty('--d', `${i * 0.08}s`));
+  });
 
-  if (revealSections.length) {
+  const revealEls = document.querySelectorAll('.section-reveal, .rv');
+  const reveal = el => el.classList.add('visible', 'in');
+
+  if (revealEls.length) {
     if (!('IntersectionObserver' in window)) {
-      revealSections.forEach(s => s.classList.add('visible'));
+      revealEls.forEach(reveal);
     } else {
       const revealObserver = new IntersectionObserver(
         (entries) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
-              entry.target.classList.add('visible');
+              reveal(entry.target);
               revealObserver.unobserve(entry.target);
             }
           });
         },
         { rootMargin: '0px 0px -60px 0px', threshold: 0.05 }
       );
+      // wait two frames so above-the-fold items paint hidden first and animate in
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        revealEls.forEach(el => revealObserver.observe(el));
+      }));
+    }
+  }
 
-      revealSections.forEach(s => {
-        if (s.getBoundingClientRect().top < window.innerHeight) {
-          s.classList.add('visible');
-        } else {
-          revealObserver.observe(s);
+  // ---- Install commands: uv (default) or pip, remembered per visitor ----
+  const pmButtons = [...document.querySelectorAll('[data-pm]')];
+  const pmTargets = [...document.querySelectorAll('[data-pm-cmd]')];
+
+  if (pmButtons.length && pmTargets.length) {
+    const setPackageManager = (pm) => {
+      pmTargets.forEach(el => { el.textContent = el.dataset[pm]; });
+      pmButtons.forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.pm === pm)));
+      try { localStorage.setItem('pm', pm); } catch (e) { /* storage unavailable: choice lasts this visit */ }
+    };
+
+    let savedPm = null;
+    try { savedPm = localStorage.getItem('pm'); } catch (e) { /* ignore */ }
+    if (savedPm === 'pip') setPackageManager('pip');
+
+    pmButtons.forEach(btn => btn.addEventListener('click', () => setPackageManager(btn.dataset.pm)));
+  }
+
+  document.querySelectorAll('.pkg-card__copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cmd = btn.parentElement.querySelector('[data-pm-cmd]').textContent;
+      navigator.clipboard?.writeText(cmd).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1600);
+      });
+    });
+  });
+
+  // ---- Hero stats count up from zero once they scroll into view ----
+  const counters = [...document.querySelectorAll('[data-count]')];
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (counters.length && !reduceMotion && 'IntersectionObserver' in window) {
+    const countUp = (el) => {
+      const target = Number(el.dataset.count);
+      const suffix = el.dataset.suffix || '';
+      const decimals = Number(el.dataset.decimals || 0);
+      const start = performance.now();
+      const duration = 1400;
+      const tick = (now) => {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 4); // ease-out, matches --ease
+        el.textContent = `${(target * eased).toFixed(decimals)}${suffix}`;
+        if (t < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+
+    const countObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          countUp(entry.target);
+          countObserver.unobserve(entry.target);
         }
       });
+    }, { threshold: 0.6 });
+    counters.forEach(el => countObserver.observe(el));
+  }
+
+  // ---- Hero chart ↔ stat cards: a marker rides the curve to the active card ----
+  const chart = document.querySelector('.hero__chart');
+  const curve = chart?.querySelector('.hero__line');
+  const marker = chart?.querySelector('.hero__marker');
+  const drop = chart?.querySelector('.hero__drop');
+  const statLinks = [...document.querySelectorAll('.hero__stats .stat')];
+
+  // the curve rises left to right, so binary-search its length for the point at user-space x
+  const pointAtX = (x) => {
+    let lo = 0;
+    let hi = curve.getTotalLength();
+    for (let i = 0; i < 24; i++) {
+      const mid = (lo + hi) / 2;
+      if (curve.getPointAtLength(mid).x < x) lo = mid; else hi = mid;
     }
+    return curve.getPointAtLength(hi);
+  };
+
+  const pointTo = (card) => {
+    if (!chart || !curve || !card) return;
+    const chartBox = chart.getBoundingClientRect();
+    const cardBox = card.getBoundingClientRect();
+    const view = curve.ownerSVGElement.viewBox.baseVal;
+    const x = cardBox.left + cardBox.width / 2 - chartBox.left;
+    const p = pointAtX((x / chartBox.width) * view.width);
+    const y = (p.y / view.height) * chartBox.height;
+    marker.style.transform = `translate(${x}px, ${y}px)`;
+    drop.style.transform = `translate(${x}px, ${y}px)`;
+    drop.style.height = `${Math.max(0, cardBox.top - chartBox.top - y)}px`;
+    chart.classList.add('is-pointing');
+  };
+
+  const stopPointing = () => chart?.classList.remove('is-pointing');
+
+  statLinks.forEach(card => {
+    card.addEventListener('mouseenter', () => pointTo(card));
+    card.addEventListener('focus', () => pointTo(card));
+    card.addEventListener('blur', stopPointing);
+  });
+
+  // stat cards take turns showing their hint (and pulling the marker) while on screen
+  if (statLinks.length && !reduceMotion && 'IntersectionObserver' in window) {
+    const statList = document.querySelector('.hero__stats');
+    let hinted = -1;
+    let hintTimer = null;
+    const nextHint = () => {
+      statLinks.forEach(l => l.classList.remove('hint'));
+      hinted = (hinted + 1) % statLinks.length;
+      statLinks[hinted].classList.add('hint');
+      pointTo(statLinks[hinted]);
+    };
+    const stopHints = () => {
+      clearInterval(hintTimer);
+      hintTimer = null;
+      statLinks.forEach(l => l.classList.remove('hint'));
+    };
+    statList.addEventListener('mouseenter', stopHints);
+    statList.addEventListener('mouseleave', stopPointing);
+
+    new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !hintTimer && !statList.matches(':hover')) {
+        hintTimer = setInterval(nextHint, 2400);
+      } else if (!entry.isIntersecting) {
+        stopHints();
+        stopPointing();
+      }
+    }, { threshold: 0.6 }).observe(statList);
+  } else if (statLinks.length) {
+    document.querySelector('.hero__stats').addEventListener('mouseleave', stopPointing);
+  }
+
+  // ---- Selected work: the step crossing the viewport middle drives the pinned stage ----
+  const storySteps = [...document.querySelectorAll('.story__step')];
+
+  if (storySteps.length && 'IntersectionObserver' in window) {
+    const storySets = [...document.querySelectorAll('.story__set')];
+    const railTicks = [...document.querySelectorAll('.story__rail i')];
+    const storyNum = document.querySelector('.story__num');
+    const storyNumText = storyNum.querySelector('span');
+    let activeStep = 0;
+
+    const setActiveStep = (i) => {
+      if (i === activeStep) return;
+      activeStep = i;
+      [storySteps, storySets, railTicks].forEach(group => {
+        group.forEach((el, j) => el.classList.toggle('on', j === i));
+      });
+      storyNum.classList.add('swap');
+      storyNumText.textContent = String(i + 1).padStart(2, '0');
+      void storyNum.offsetWidth; // restart the numeral's slide-in transition
+      storyNum.classList.remove('swap');
+    };
+
+    const stepObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) setActiveStep(Number(entry.target.dataset.i));
+        });
+      },
+      { rootMargin: '-45% 0px -45% 0px' }
+    );
+    storySteps.forEach(step => stepObserver.observe(step));
+  }
+
+  // ---- Scroll-linked motion: progress bar, nav state, process line ----
+  // One passive listener, throttled to a frame; all reads happen before writes.
+  const progressBar = document.querySelector('.progress');
+  const siteNav = document.querySelector('.site-nav');
+  const processSteps = document.querySelector('.process__steps');
+  const processFill = document.querySelector('.process__fill');
+  const processItems = processSteps ? [...processSteps.querySelectorAll('.process__step')] : [];
+  let scrollTicking = false;
+
+  function updateScrollMotion() {
+    const y = window.scrollY;
+    const vh = window.innerHeight;
+    const maxScroll = document.documentElement.scrollHeight - vh;
+    const processRect = processSteps ? processSteps.getBoundingClientRect() : null;
+
+    if (progressBar) progressBar.style.transform = `scaleX(${maxScroll > 0 ? y / maxScroll : 0})`;
+    if (siteNav) siteNav.classList.toggle('is-scrolled', y > 80);
+
+    if (processRect && processFill) {
+      // starts as the steps enter the viewport and fills gradually, completing a little
+      // above the middle — early enough to read lit, slow enough to watch it travel
+      const raw = (vh * 0.95 - processRect.top) / (vh * 0.5 + processRect.height * 0.3);
+      const p = Math.min(1, Math.max(0, raw));
+      processFill.style.setProperty('--p', p.toFixed(3));
+      const last = Math.max(1, processItems.length - 1);
+      processItems.forEach((step, i) => step.classList.toggle('lit', p > 0 && p >= i / last - 0.001));
+    }
+
+    scrollTicking = false;
+  }
+
+  if (progressBar || processFill) {
+    window.addEventListener('scroll', () => {
+      if (!scrollTicking) {
+        scrollTicking = true;
+        requestAnimationFrame(updateScrollMotion);
+      }
+    }, { passive: true });
+    window.addEventListener('resize', updateScrollMotion);
+    updateScrollMotion();
   }
 
   // ---- Scroll-spy: active nav section link ----

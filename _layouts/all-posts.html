@@ -1,50 +1,74 @@
 ---
 layout: default
 ---
-<section class="post archives">
-  <header class="post__header">
-    <div class="post-index__title-row" style="margin-bottom:1rem;">
-      <p class="kicker" style="margin:0;">All writing</p>
-      <a class="btn-ghost" href="{{ '/' | relative_url }}">← Back</a>
-    </div>
-    <h1 class="post__title">{{ site.posts.size }} posts, by year.</h1>
-  </header>
+{% comment %} Collect unique primary categories and unique sub-categories {% endcomment %}
+{% assign primary_cats = '' | split: '' %}
+{% assign all_sub_cats = '' | split: '' %}
+{% for post in site.posts %}
+  {% assign first_cat = post.categories | first %}
+  {% assign sub_cat = post.categories | last %}
+  {% unless primary_cats contains first_cat %}
+    {% assign primary_cats = primary_cats | push: first_cat %}
+  {% endunless %}
+  {% unless sub_cat == first_cat or all_sub_cats contains sub_cat %}
+    {% assign all_sub_cats = all_sub_cats | push: sub_cat %}
+  {% endunless %}
+{% endfor %}
 
-  <div class="archives-filters">
-    <div class="arc-select-wrap">
-      <label for="arc-cat">Category</label>
-      <select id="arc-cat" class="arc-select"><option value="all">All categories</option></select>
+<section class="post-index" id="posts">
+  <div class="post-index__header">
+    <div class="post-index__title-row">
+      <div class="rv">
+        <p class="eyebrow">Writing</p>
+        <h1 class="sec-title">{{ site.posts.size }} posts.</h1>
+        <p class="sec-meta">The problems behind my packages — why the standard fix wasn't enough, and what I built instead.</p>
+      </div>
     </div>
-    <div class="arc-select-wrap">
-      <label for="arc-sub">Sub-category</label>
-      <select id="arc-sub" class="arc-select"><option value="all">All sub-categories</option></select>
-    </div>
-    <div class="arc-select-wrap">
-      <label for="arc-tag">Tag</label>
-      <select id="arc-tag" class="arc-select"><option value="all">All tags</option></select>
+    <div class="filter-bar rv" role="group" aria-label="Filter posts by category">
+      <button class="filter-btn active" data-filter="all">All <span class="filter-btn__count">{{ site.posts.size }}</span></button>
+      {% for cat in primary_cats %}
+        {% assign posts_count = 0 %}
+        {% for post in site.posts %}
+          {% if post.categories contains cat %}
+            {% assign posts_count = posts_count | plus: 1 %}
+          {% endif %}
+        {% endfor %}
+        <button class="filter-btn" data-filter="{{ cat }}">{{ cat }} <span class="filter-btn__count">{{ posts_count }}</span></button>
+      {% endfor %}
     </div>
   </div>
 
-  {% assign posts_by_year = site.posts | group_by_exp: 'post', 'post.date | date: "%Y"' %}
-  {% for year in posts_by_year %}
-    <div class="archives__group">
-      <h2 class="archives__year">{{ year.name }}</h2>
-      <ul class="archives__list">
-        {% for post in year.items %}
-          <li class="archives__row"
-              data-category="{{ post.categories | first }}"
-              data-subcategory="{{ post.categories | last }}"
-              data-tags="{{ post.tags | join: ' ' }}">
-            <a href="{{ post.url | relative_url }}">
-              <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: '%b %-d' }}</time>
-              <span class="archives__title">{{ post.title }}</span>
-            </a>
-          </li>
+  {% for cat in primary_cats %}
+    {% assign sub_cats_for = '' | split: '' %}
+    {% for post in site.posts %}
+      {% if post.categories.first == cat %}
+        {% assign sub = post.categories | last %}
+        {% unless sub == cat or sub_cats_for contains sub %}
+          {% assign sub_cats_for = sub_cats_for | push: sub %}
+        {% endunless %}
+      {% endif %}
+    {% endfor %}
+    {% if sub_cats_for.size > 0 %}
+      <div class="sub-filter-bar" data-parent="{{ cat }}">
+        <button class="filter-btn filter-btn--sub active" data-sub-filter="all">All {{ cat }}</button>
+        {% for sub in sub_cats_for %}
+          {% assign sub_count = 0 %}
+          {% for post in site.posts %}
+            {% if post.categories.first == cat and post.categories contains sub %}
+              {% assign sub_count = sub_count | plus: 1 %}
+            {% endif %}
+          {% endfor %}
+          <button class="filter-btn filter-btn--sub" data-sub-filter="{{ sub }}">{{ sub }} <span class="filter-btn__count">{{ sub_count }}</span></button>
         {% endfor %}
-      </ul>
-    </div>
+      </div>
+    {% endif %}
   {% endfor %}
 
-  <p class="no-posts-msg" hidden>No posts match this filter.</p>
-  <div class="archives-pager"></div>
+  <div class="post-grid" id="post-grid">
+    {% for post in site.posts %}
+      {% include post-row.html post=post %}
+    {% endfor %}
+  </div>
+  <p class="no-posts-msg" aria-live="polite" hidden>No posts in this category yet.</p>
+  <div class="post-pager"></div>
 </section>

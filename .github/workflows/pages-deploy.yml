@@ -12,6 +12,10 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+  # Weekly rebuild so the PyPI download counts on the home page stay fresh
+  schedule:
+    - cron: "0 6 * * 1"
+
 permissions:
   contents: read
   pages: write
@@ -44,6 +48,13 @@ jobs:
         with:
           ruby-version: 3.3
           bundler-cache: true
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+
+      - name: Refresh PyPI download counts
+        run: uv run tools/fetch_pypi_stats.py
+        continue-on-error: true  # keep the committed counts if pypistats is unreachable
 
       - name: Build site
         run: bundle exec jekyll b -d "_site${{ steps.pages.outputs.base_path }}"
