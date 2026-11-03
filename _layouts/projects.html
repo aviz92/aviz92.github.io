@@ -28,9 +28,20 @@ layout: default
     </div>
   </div>
   <div class="project-grid">
+    {% comment %} every project, most-downloaded first; projects without counts keep data order {% endcomment %}
+    {% assign all_projects = '' | split: '' %}
     {% for cat_data in site.data.projects %}
-      {% assign cat = cat_data[0] %}
       {% for proj in cat_data[1] %}
+        {% assign all_projects = all_projects | push: proj %}
+      {% endfor %}
+    {% endfor %}
+    {% include sort-by-downloads.html items=all_projects %}
+    {% for proj in sorted_items %}
+      {% comment %} recover the category of this project {% endcomment %}
+      {% for cat_data in site.data.projects %}
+        {% assign hit = cat_data[1] | where: 'name', proj.name | first %}
+        {% if hit %}{% assign cat = cat_data[0] %}{% endif %}
+      {% endfor %}
       <div class="project-card" data-cat="{{ cat }}"{% if proj.pypi %} data-pypi{% endif %}>
         <div class="project-card__top">
           <code class="project-card__name">{{ proj.name }}</code>
@@ -49,7 +60,6 @@ layout: default
           {% endif %}
         </div>
       </div>
-      {% endfor %}
     {% endfor %}
   </div>
   <div class="project-pager"></div>
