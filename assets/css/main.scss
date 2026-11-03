@@ -1848,13 +1848,47 @@ pre.highlight,
 }
 
 @media (max-width: 60rem) {
+  /* phones/tablets: the stage pins to the top under the navbar and the steps scroll
+     beneath it — same crossfade, numeral and rail as desktop, just stacked */
   .story { display: block; }
-  .story__stage { display: none; }
-  .story__inline { display: block; margin-bottom: 1.75rem; }
+
+  .story__stage {
+    top: calc(var(--nav-bottom, 4.75rem) + 0.75rem);
+    z-index: 2;
+    height: 15rem;
+    margin-bottom: 1.5rem;
+    border-radius: 22px;
+    box-shadow:
+      0 18px 30px rgba(8, 8, 15, 0.9),                                       /* steps fade out as they slide under it */
+      0 calc(-1 * (var(--nav-bottom, 4.75rem) + 0.75rem)) 0 0 var(--bg);     /* hide them in the strip up to the navbar */
+  }
+
+  .story__num { top: 0.4rem; left: 1rem; font-size: 4.75rem; }
+
+  .story__rail {
+    right: 0.85rem;
+    gap: 0.35rem;
+
+    i { height: 10px; }
+    i.on { height: 24px; }
+  }
+
+  .story__sets { padding: 2.9rem 2.25rem 0.9rem 1rem; }
+
+  .story__set .term__body { padding: 0.8rem 1rem 1rem; font-size: 0.74rem; line-height: 1.7; }
+
+  .story__inline { display: none; }
 
   .story__step,
-  .story__step:first-child,
-  .story__step:last-child { min-height: 0; padding: 0 0 4rem; opacity: 1; }
+  .story__step:first-child {
+    min-height: 55vh;
+    justify-content: flex-start;
+    padding: 1.5rem 0 2.5rem;
+    /* land #cat-* links below the pinned stage, not behind it */
+    scroll-margin-top: 11.5rem;
+  }
+
+  .story__step:last-child { min-height: 0; padding-bottom: 0; }
 }
 
 /* ---------- process: five steps on a line that fills with scroll ---------- */
