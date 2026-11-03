@@ -1,11 +1,16 @@
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["custom-python-logger", "pyyaml"]
+# dependencies = ["custom-python-logger==4.2.0", "pyyaml==6.0.3"]
+#
+# [tool.uv]
+# exclude-newer = "2026-11-02T00:00:00Z"
 # ///
 """Refresh _data/pypi_stats.json with last-month download counts from pypistats.org.
 
-Runs before every site build (see .github/workflows/pages-deploy.yml) and can be run
-locally with ``uv run tools/fetch_pypi_stats.py``. A failed lookup never breaks the
+Runs in its own read-only CI job before every site build (see
+.github/workflows/pages-deploy.yml). Dependencies are pinned in the adjacent
+``fetch_pypi_stats.py.lock``; run locally with
+``uv run --locked --script tools/fetch_pypi_stats.py``. A failed lookup never breaks the
 build: the package keeps its previous count from the existing data file.
 """
 
