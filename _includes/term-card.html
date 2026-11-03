@@ -10,8 +10,8 @@
   </div>
   <div class="term__body">
     {%- if include.proj.pypi %}
-    <p><span class="term__prompt">$</span> pip install {{ include.proj.name }}</p>
-    <p class="term__ok">✓ Successfully installed {{ include.proj.name }}</p>
+    <p><span class="term__prompt">$</span> <span data-pm-cmd data-uv="uv add {{ include.proj.name }}" data-pip="pip install {{ include.proj.name }}">uv add {{ include.proj.name }}</span></p>
+    <p class="term__ok" data-pm-cmd data-uv="✓ Added {{ include.proj.name }}" data-pip="✓ Successfully installed {{ include.proj.name }}">✓ Added {{ include.proj.name }}</p>
     {%- else %}
     <p><span class="term__prompt">$</span> git clone github.com/{{ site.github.username }}/{{ include.proj.name }}</p>
     <p class="term__ok">✓ Cloned {{ include.proj.name }}</p>

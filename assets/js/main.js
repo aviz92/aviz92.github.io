@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ---- Category filter + sub-category filter + pagination ----
-  const POSTS_PER_PAGE = 6;
+  const POSTS_PER_PAGE = 8;
   let currentPage = 1;
   let activeFilter = 'all';
   let activeSubFilter = 'all';
@@ -284,15 +284,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let projPage = 1;
 
   if (projCards.length && projSelect) {
-    const cats = [...new Set(projCards.map(c => c.dataset.cat))].sort();
-    cats.forEach(cat => {
-      const opt = document.createElement('option');
-      opt.value = cat;
-      opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
-      projSelect.append(opt);
-    });
-    // cross-category view used by the hero "PyPI packages" stat
-    projSelect.append(new Option('On PyPI', 'pypi'));
+    // ?cat=<category|pypi> preselects the filter, so other pages can link straight into a view
+    const requestedCat = new URLSearchParams(window.location.search).get('cat');
+    if (requestedCat && [...projSelect.options].some(o => o.value === requestedCat)) {
+      projSelect.value = requestedCat;
+    }
 
     function renderProjects() {
       const val = projSelect.value;
@@ -338,6 +334,10 @@ document.addEventListener('DOMContentLoaded', () => {
     projSelect.addEventListener('change', () => {
       projPage = 1;
       renderProjects();
+      const url = new URL(window.location.href);
+      if (projSelect.value === 'all') url.searchParams.delete('cat');
+      else url.searchParams.set('cat', projSelect.value);
+      history.replaceState(null, '', url);
     });
 
     renderProjects();
@@ -374,14 +374,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ---- Deck buttons: jump to the project grid pre-filtered ----
-  const projCatSelect = document.querySelector('#proj-cat');
+  // ---- Install commands: uv (default) or pip, remembered per visitor ----
+  const pmButtons = [...document.querySelectorAll('[data-pm]')];
+  const pmTargets = [...document.querySelectorAll('[data-pm-cmd]')];
 
-  document.querySelectorAll('[data-proj-cat]').forEach(link => {
-    link.addEventListener('click', () => {
-      if (!projCatSelect) return;
-      projCatSelect.value = link.dataset.projCat;
-      projCatSelect.dispatchEvent(new Event('change'));
+  if (pmButtons.length && pmTargets.length) {
+    const setPackageManager = (pm) => {
+      pmTargets.forEach(el => { el.textContent = el.dataset[pm]; });
+      pmButtons.forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.pm === pm)));
+      try { localStorage.setItem('pm', pm); } catch (e) { /* storage unavailable: choice lasts this visit */ }
+    };
+
+    let savedPm = null;
+    try { savedPm = localStorage.getItem('pm'); } catch (e) { /* ignore */ }
+    if (savedPm === 'pip') setPackageManager('pip');
+
+    pmButtons.forEach(btn => btn.addEventListener('click', () => setPackageManager(btn.dataset.pm)));
+  }
+
+  document.querySelectorAll('.pkg-card__copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cmd = btn.parentElement.querySelector('[data-pm-cmd]').textContent;
+      navigator.clipboard?.writeText(cmd).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1600);
+      });
     });
   });
 
@@ -393,12 +411,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const countUp = (el) => {
       const target = Number(el.dataset.count);
       const suffix = el.dataset.suffix || '';
+      const decimals = Number(el.dataset.decimals || 0);
       const start = performance.now();
       const duration = 1400;
       const tick = (now) => {
         const t = Math.min(1, (now - start) / duration);
         const eased = 1 - Math.pow(1 - t, 4); // ease-out, matches --ease
-        el.textContent = `${Math.round(target * eased)}${suffix}`;
+        el.textContent = `${(target * eased).toFixed(decimals)}${suffix}`;
         if (t < 1) requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
@@ -415,9 +434,47 @@ document.addEventListener('DOMContentLoaded', () => {
     counters.forEach(el => countObserver.observe(el));
   }
 
-  // hero stat cards take turns showing their "Show me" hint while on screen
+  // ---- Hero chart ↔ stat cards: a marker rides the curve to the active card ----
+  const chart = document.querySelector('.hero__chart');
+  const curve = chart?.querySelector('.hero__line');
+  const marker = chart?.querySelector('.hero__marker');
+  const drop = chart?.querySelector('.hero__drop');
   const statLinks = [...document.querySelectorAll('.hero__stats .stat')];
 
+  // the curve rises left to right, so binary-search its length for the point at user-space x
+  const pointAtX = (x) => {
+    let lo = 0;
+    let hi = curve.getTotalLength();
+    for (let i = 0; i < 24; i++) {
+      const mid = (lo + hi) / 2;
+      if (curve.getPointAtLength(mid).x < x) lo = mid; else hi = mid;
+    }
+    return curve.getPointAtLength(hi);
+  };
+
+  const pointTo = (card) => {
+    if (!chart || !curve || !card) return;
+    const chartBox = chart.getBoundingClientRect();
+    const cardBox = card.getBoundingClientRect();
+    const view = curve.ownerSVGElement.viewBox.baseVal;
+    const x = cardBox.left + cardBox.width / 2 - chartBox.left;
+    const p = pointAtX((x / chartBox.width) * view.width);
+    const y = (p.y / view.height) * chartBox.height;
+    marker.style.transform = `translate(${x}px, ${y}px)`;
+    drop.style.transform = `translate(${x}px, ${y}px)`;
+    drop.style.height = `${Math.max(0, cardBox.top - chartBox.top - y)}px`;
+    chart.classList.add('is-pointing');
+  };
+
+  const stopPointing = () => chart?.classList.remove('is-pointing');
+
+  statLinks.forEach(card => {
+    card.addEventListener('mouseenter', () => pointTo(card));
+    card.addEventListener('focus', () => pointTo(card));
+    card.addEventListener('blur', stopPointing);
+  });
+
+  // stat cards take turns showing their hint (and pulling the marker) while on screen
   if (statLinks.length && !reduceMotion && 'IntersectionObserver' in window) {
     const statList = document.querySelector('.hero__stats');
     let hinted = -1;
@@ -426,6 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
       statLinks.forEach(l => l.classList.remove('hint'));
       hinted = (hinted + 1) % statLinks.length;
       statLinks[hinted].classList.add('hint');
+      pointTo(statLinks[hinted]);
     };
     const stopHints = () => {
       clearInterval(hintTimer);
@@ -433,14 +491,18 @@ document.addEventListener('DOMContentLoaded', () => {
       statLinks.forEach(l => l.classList.remove('hint'));
     };
     statList.addEventListener('mouseenter', stopHints);
+    statList.addEventListener('mouseleave', stopPointing);
 
     new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting && !hintTimer && !statList.matches(':hover')) {
         hintTimer = setInterval(nextHint, 2400);
       } else if (!entry.isIntersecting) {
         stopHints();
+        stopPointing();
       }
     }, { threshold: 0.6 }).observe(statList);
+  } else if (statLinks.length) {
+    document.querySelector('.hero__stats').addEventListener('mouseleave', stopPointing);
   }
 
   // ---- Selected work: the step crossing the viewport middle drives the pinned stage ----
@@ -476,14 +538,13 @@ document.addEventListener('DOMContentLoaded', () => {
     storySteps.forEach(step => stepObserver.observe(step));
   }
 
-  // ---- Scroll-linked motion: progress bar, nav collapse, process line, deck ----
+  // ---- Scroll-linked motion: progress bar, nav state, process line ----
   // One passive listener, throttled to a frame; all reads happen before writes.
   const progressBar = document.querySelector('.progress');
   const siteNav = document.querySelector('.site-nav');
   const processSteps = document.querySelector('.process__steps');
   const processFill = document.querySelector('.process__fill');
   const processItems = processSteps ? [...processSteps.querySelectorAll('.process__step')] : [];
-  const deckCards = [...document.querySelectorAll('.deck__card')];
   let scrollTicking = false;
 
   function updateScrollMotion() {
@@ -491,30 +552,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const vh = window.innerHeight;
     const maxScroll = document.documentElement.scrollHeight - vh;
     const processRect = processSteps ? processSteps.getBoundingClientRect() : null;
-    const deckTops = deckCards.map(card => card.getBoundingClientRect().top);
-    const deckHeights = deckCards.map(card => card.offsetHeight);
 
     if (progressBar) progressBar.style.transform = `scaleX(${maxScroll > 0 ? y / maxScroll : 0})`;
     if (siteNav) siteNav.classList.toggle('is-scrolled', y > 80);
 
     if (processRect && processFill) {
-      // 0 as the steps rise into the lower part of the viewport, 1 once they pass the middle
-      const raw = (vh * 0.85 - processRect.top) / (vh * 0.4 + processRect.height * 0.5);
+      // starts as the steps enter the viewport and fills gradually, completing a little
+      // above the middle — early enough to read lit, slow enough to watch it travel
+      const raw = (vh * 0.95 - processRect.top) / (vh * 0.5 + processRect.height * 0.3);
       const p = Math.min(1, Math.max(0, raw));
       processFill.style.setProperty('--p', p.toFixed(3));
       const last = Math.max(1, processItems.length - 1);
       processItems.forEach((step, i) => step.classList.toggle('lit', p > 0 && p >= i / last - 0.001));
     }
 
-    deckCards.forEach((card, i) => {
-      const nextTop = deckTops[i + 1];
-      card.classList.toggle('under', nextTop !== undefined && nextTop - deckTops[i] < deckHeights[i] * 0.5);
-    });
-
     scrollTicking = false;
   }
 
-  if (progressBar || processFill || deckCards.length) {
+  if (progressBar || processFill) {
     window.addEventListener('scroll', () => {
       if (!scrollTicking) {
         scrollTicking = true;

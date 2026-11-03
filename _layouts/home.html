@@ -1,28 +1,11 @@
 ---
 layout: default
 ---
-{% comment %} Collect unique primary categories and unique sub-categories {% endcomment %}
-{% assign primary_cats = '' | split: '' %}
-{% assign all_sub_cats = '' | split: '' %}
-{% for post in site.posts %}
-  {% assign first_cat = post.categories | first %}
-  {% assign sub_cat = post.categories | last %}
-  {% unless primary_cats contains first_cat %}
-    {% assign primary_cats = primary_cats | push: first_cat %}
-  {% endunless %}
-  {% unless sub_cat == first_cat or all_sub_cats contains sub_cat %}
-    {% assign all_sub_cats = all_sub_cats | push: sub_cat %}
-  {% endunless %}
-{% endfor %}
 {% assign about_tab = site.tabs | where: 'title', 'about' | first %}
 {% assign total_projects = 0 %}
-{% assign tools_count = 0 %}
 {% assign pypi_count = 0 %}
 {% for cat_data in site.data.projects %}
   {% assign total_projects = total_projects | plus: cat_data[1].size %}
-  {% unless cat_data[0] == 'templates' %}
-    {% assign tools_count = tools_count | plus: cat_data[1].size %}
-  {% endunless %}
   {% for proj in cat_data[1] %}
     {% if proj.pypi %}
       {% assign pypi_count = pypi_count | plus: 1 %}
@@ -30,16 +13,19 @@ layout: default
   {% endfor %}
 {% endfor %}
 
-{% comment %} Featured projects (featured: true in _data/projects/*.yml), in category-file order {% endcomment %}
-{% assign featured = '' | split: '' %}
-{% assign featured_cats = '' | split: '' %}
-{% for cat_data in site.data.projects %}
-  {% for proj in cat_data[1] %}
-    {% if proj.featured %}
-      {% assign featured = featured | push: proj %}
-      {% assign featured_cats = featured_cats | push: cat_data[0] %}
-    {% endif %}
-  {% endfor %}
+{% comment %} One story step per category (order from _data/categories.yml).
+   Each shows its featured project (featured: true), else its first one. {% endcomment %}
+{% assign story_cats = '' | split: '' %}
+{% assign story_feats = '' | split: '' %}
+{% for cat_entry in site.data.categories %}
+  {% assign key = cat_entry[0] %}
+  {% assign items = site.data.projects[key] %}
+  {% if items %}
+    {% assign feat = items | where: 'featured', true | first %}
+    {% unless feat %}{% assign feat = items | first %}{% endunless %}
+    {% assign story_cats = story_cats | push: key %}
+    {% assign story_feats = story_feats | push: feat %}
+  {% endif %}
 {% endfor %}
 
 <section class="hero" id="hero">
@@ -66,12 +52,32 @@ layout: default
         </linearGradient>
       </defs>
       <path class="hero__area" d="M0,200 C180,196 320,170 470,110 C600,58 700,30 790,16 L790,220 L0,220 Z" fill="url(#fill)"/>
-      <path class="hero__line" pathLength="1" d="M0,200 C180,196 320,170 470,110 C600,58 700,30 790,16" fill="none" stroke="url(#curve)" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+      <path class="hero__line" pathLength="1" d="M0,200 C180,196 320,170 470,110 C600,58 700,30 790,16" fill="none" stroke="url(#curve)" stroke-width="3" stroke-linecap="round"/>
       <circle class="hero__point" cx="790" cy="16" r="5" fill="#22d3ee"/>
     </svg>
+    <span class="hero__drop" aria-hidden="true"></span>
+    <span class="hero__marker" aria-hidden="true"></span>
   </div>
 
+  {% assign templates_count = site.data.projects.templates.size %}
+  {% assign downloads = site.data.pypi_stats.last_month_total | default: 0 %}
+  {% assign downloads_k = downloads | divided_by: 100 | divided_by: 10.0 %}
+  {% comment %} ascending left → right, so the numbers climb with the curve {% endcomment %}
   <ul class="hero__stats" data-stagger>
+    <li class="rv">
+      <a class="stat" href="#cat-templates">
+        <span class="stat__value" data-count="{{ templates_count }}">{{ templates_count }}</span>
+        <span class="stat__label">Project templates</span>
+        <span class="stat__hint">See the starters →</span>
+      </a>
+    </li>
+    <li class="rv">
+      <a class="stat" href="#work">
+        <span class="stat__value" data-count="{{ pypi_count }}" data-suffix="+">{{ pypi_count }}+</span>
+        <span class="stat__label">PyPI packages</span>
+        <span class="stat__hint">Browse by category →</span>
+      </a>
+    </li>
     <li class="rv">
       <a class="stat" href="#posts">
         <span class="stat__value" data-count="{{ site.posts.size }}">{{ site.posts.size }}</span>
@@ -79,95 +85,17 @@ layout: default
         <span class="stat__hint">Read them →</span>
       </a>
     </li>
+    {% if downloads > 0 %}
     <li class="rv">
-      <a class="stat" href="#projects" data-proj-cat="all">
-        <span class="stat__value" data-count="{{ total_projects }}" data-suffix="+">{{ total_projects }}+</span>
-        <span class="stat__label">GitHub projects</span>
-        <span class="stat__hint">Browse all →</span>
+      <a class="stat" href="#packages" title="Last 30 days, via pypistats.org (updated {{ site.data.pypi_stats.updated }})">
+        <span class="stat__value" data-count="{{ downloads_k }}" data-decimals="1" data-suffix="k">{{ downloads_k }}k</span>
+        <span class="stat__label">Downloads / month</span>
+        <span class="stat__hint">Install one →</span>
       </a>
     </li>
-    <li class="rv">
-      <a class="stat" href="#projects" data-proj-cat="pypi">
-        <span class="stat__value" data-count="{{ pypi_count }}" data-suffix="+">{{ pypi_count }}+</span>
-        <span class="stat__label">PyPI packages</span>
-        <span class="stat__hint">Show packages →</span>
-      </a>
-    </li>
-    <li class="rv">
-      <a class="stat" href="#explore">
-        <span class="stat__value" data-count="{{ tools_count }}" data-suffix="+">{{ tools_count }}+</span>
-        <span class="stat__label">Open-source tools</span>
-        <span class="stat__hint">Explore by category →</span>
-      </a>
-    </li>
+    {% endif %}
   </ul>
 
-  <a class="next" href="#work" aria-label="Next: selected work"><span aria-hidden="true">↓</span></a>
-</section>
-
-<section class="work" id="work">
-  <header class="sec-head rv">
-    <p class="eyebrow">Selected work</p>
-    <h2 class="sec-title">What I've built</h2>
-    <p class="sec-meta">{{ featured.size }} highlights · {{ total_projects }}+ projects in total</p>
-  </header>
-
-  <div class="story" style="--n: {{ featured.size }}">
-    <div class="story__stage" aria-hidden="true">
-      <div class="story__num"><span>01</span></div>
-      <div class="story__rail">
-        {% for proj in featured %}<i{% if forloop.first %} class="on"{% endif %}></i>{% endfor %}
-      </div>
-      <div class="story__sets">
-        {% for proj in featured %}
-          {% assign num = forloop.index | prepend: '0' | slice: -2, 2 %}
-          {% assign cat = featured_cats[forloop.index0] %}
-          <div class="story__set{% if forloop.first %} on{% endif %}">
-            {% include term-card.html proj=proj cat=cat num=num %}
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-
-    <ol class="story__steps">
-      {% for proj in featured %}
-        {% assign num = forloop.index | prepend: '0' | slice: -2, 2 %}
-        {% assign cat = featured_cats[forloop.index0] %}
-        <li class="story__step{% if forloop.first %} on{% endif %}" data-i="{{ forloop.index0 }}">
-          <div class="story__inline" aria-hidden="true">
-            {% include term-card.html proj=proj cat=cat num=num %}
-          </div>
-          <h3 class="story__name">{{ proj.name }} <span class="story__idx">{{ num }}</span></h3>
-          <p class="story__cat">{{ site.data.categories[cat].label | default: cat }}</p>
-          <p class="story__desc">{{ proj.desc }}</p>
-          <ul class="tags">
-            {% if proj.pypi %}<li>PyPI</li>{% endif %}
-            <li>Open source</li>
-            <li>Python</li>
-          </ul>
-          <div class="story__actions">
-            {% if proj.github %}<a class="btn-glow" href="{{ proj.github }}" target="_blank" rel="noopener">GitHub ↗</a>{% endif %}
-            {% if proj.post %}<a class="btn-ghost" href="{{ proj.post | relative_url }}">Read the story →</a>{% endif %}
-          </div>
-        </li>
-      {% endfor %}
-    </ol>
-  </div>
-</section>
-
-<section class="process" id="process">
-  <header class="sec-head rv">
-    <p class="eyebrow">How a tool is born</p>
-    <h2 class="sec-title">Five steps</h2>
-  </header>
-  <ol class="process__steps">
-    <span class="process__line" aria-hidden="true"><span class="process__fill"></span></span>
-    <li class="process__step"><span class="process__dot">1</span><b>It annoys me twice</b><span>The same problem shows up in a second project.</span></li>
-    <li class="process__step"><span class="process__dot">2</span><b>I fix it properly</b><span>Reusable and stable — not another one-off patch.</span></li>
-    <li class="process__step"><span class="process__dot">3</span><b>I package it</b><span>One install instead of twenty lines of setup.</span></li>
-    <li class="process__step"><span class="process__dot">4</span><b>I ship it</b><span>Published to PyPI, versioned, open source.</span></li>
-    <li class="process__step"><span class="process__dot">5</span><b>I write it up</b><span>The problem, the fix, and the patterns behind it.</span></li>
-  </ol>
   <a class="next" href="#about" aria-label="Next: about me"><span aria-hidden="true">↓</span></a>
 </section>
 
@@ -188,131 +116,141 @@ layout: default
       </div>
     </div>
   </div>
+  <a class="next" href="#process" aria-label="Next: how a package is born"><span aria-hidden="true">↓</span></a>
 </section>
 
-<section class="deck-section" id="explore">
+<section class="process" id="process">
   <header class="sec-head rv">
-    <p class="eyebrow">Explore</p>
-    <h2 class="sec-title">Tools by category</h2>
+    <p class="eyebrow">How a package is born</p>
+    <h2 class="sec-title">Five steps</h2>
   </header>
-  <ol class="deck">
-    {% for cat_entry in site.data.categories %}
-      {% assign key = cat_entry[0] %}
-      {% assign items = site.data.projects[key] %}
-      {% if items %}
-        <li class="deck__card" style="--i: {{ forloop.index0 }}">
-          <span class="deck__count" aria-hidden="true">{{ items.size }}</span>
-          <div class="deck__body">
-            <p class="eyebrow">{{ items.size }} {% if items.size == 1 %}project{% else %}projects{% endif %}</p>
-            <h3 class="deck__title">{{ cat_entry[1].label }}</h3>
-            <p class="deck__blurb">{{ cat_entry[1].blurb }}</p>
-            <ul class="tags">
-              {% for proj in items limit: 4 %}<li><code>{{ proj.name }}</code></li>{% endfor %}
-              {% if items.size > 4 %}<li>+{{ items.size | minus: 4 }} more</li>{% endif %}
-            </ul>
-            <a class="btn-glow" href="#projects" data-proj-cat="{{ key }}">See all {{ cat_entry[1].label }} →</a>
+  <ol class="process__steps">
+    <span class="process__line" aria-hidden="true"><span class="process__fill"></span></span>
+    <li class="process__step"><span class="process__dot">1</span><b>It annoys me twice</b><span>The same problem shows up in a second project.</span></li>
+    <li class="process__step"><span class="process__dot">2</span><b>I fix it properly</b><span>Reusable and stable — not another one-off patch.</span></li>
+    <li class="process__step"><span class="process__dot">3</span><b>I package it</b><span>One install instead of twenty lines of setup.</span></li>
+    <li class="process__step"><span class="process__dot">4</span><b>I ship it</b><span>Published to PyPI, versioned, open source.</span></li>
+    <li class="process__step"><span class="process__dot">5</span><b>I write it up</b><span>The problem, the fix, and the patterns behind it.</span></li>
+  </ol>
+  <a class="next" href="#work" aria-label="Next: projects by category"><span aria-hidden="true">↓</span></a>
+</section>
+
+<section class="work" id="work">
+  <header class="sec-head rv">
+    <p class="eyebrow">What I've built</p>
+    <h2 class="sec-title">Projects by category</h2>
+    <p class="sec-meta">{{ story_cats.size }} categories · {{ total_projects }}+ projects in total</p>
+  </header>
+
+  <div class="story">
+    <div class="story__stage" aria-hidden="true">
+      <div class="story__num"><span>01</span></div>
+      <div class="story__rail">
+        {% for key in story_cats %}<i{% if forloop.first %} class="on"{% endif %}></i>{% endfor %}
+      </div>
+      <div class="story__sets">
+        {% for key in story_cats %}
+          {% assign num = forloop.index | prepend: '0' | slice: -2, 2 %}
+          {% assign feat = story_feats[forloop.index0] %}
+          <div class="story__set{% if forloop.first %} on{% endif %}">
+            {% include term-card.html proj=feat cat=key num=num %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <ol class="story__steps">
+      {% for key in story_cats %}
+        {% assign num = forloop.index | prepend: '0' | slice: -2, 2 %}
+        {% assign info = site.data.categories[key] %}
+        {% assign items = site.data.projects[key] %}
+        {% assign feat = story_feats[forloop.index0] %}
+        <li class="story__step{% if forloop.first %} on{% endif %}" id="cat-{{ key }}" data-i="{{ forloop.index0 }}">
+          <div class="story__inline" aria-hidden="true">
+            {% include term-card.html proj=feat cat=key num=num %}
+          </div>
+          <h3 class="story__name">{{ info.label }} <span class="story__idx">{{ num }}</span></h3>
+          <p class="story__cat">{{ items.size }} {% if items.size == 1 %}project{% else %}projects{% endif %}</p>
+          <p class="story__desc">{{ info.blurb }}</p>
+          <ul class="tags">
+            {% for proj in items limit: 5 %}
+              <li><a class="tag-link" href="{{ proj.github | default: proj.pypi }}" target="_blank" rel="noopener" title="{{ proj.name }} on GitHub"><code>{{ proj.name }}</code> <span aria-hidden="true">↗</span></a></li>
+            {% endfor %}
+            {% if items.size > 5 %}<li><a class="tag-link" href="{{ '/projects/?cat=' | append: key | relative_url }}">+{{ items.size | minus: 5 }} more →</a></li>{% endif %}
+          </ul>
+          <div class="story__actions">
+            <a class="btn-glow" href="{{ '/projects/?cat=' | append: key | relative_url }}">See all {{ info.label }} →</a>
+            {% if feat.post %}
+              <a class="btn-ghost" href="{{ feat.post | relative_url }}">Read about {{ feat.name }} →</a>
+            {% elsif feat.github %}
+              <a class="btn-ghost" href="{{ feat.github }}" target="_blank" rel="noopener">{{ feat.name }} on GitHub ↗</a>
+            {% endif %}
           </div>
         </li>
-      {% endif %}
-    {% endfor %}
-  </ol>
+      {% endfor %}
+    </ol>
+  </div>
 </section>
 
-<section class="oss-projects section-reveal" id="projects">
-  <div class="oss-projects__header">
+
+<section class="packages" id="packages">
+  <header class="sec-head writing__head rv">
     <div>
-      <p class="kicker">Open Source</p>
-      <h2 class="section-title">Tools I've shipped</h2>
-      <p class="oss-projects__sub">{{ total_projects }}+ packages across AI, Infra, Testing, and more.</p>
+      <p class="eyebrow">Packages</p>
+      <h2 class="sec-title">Ready to install</h2>
     </div>
-    <div class="arc-select-wrap">
-      <label for="proj-cat">Category</label>
-      <select id="proj-cat" class="arc-select">
-        <option value="all">All categories</option>
-      </select>
-    </div>
-  </div>
-  <div class="project-grid">
-    {% for cat_data in site.data.projects %}
-      {% assign cat = cat_data[0] %}
-      {% for proj in cat_data[1] %}
-      <div class="project-card" data-cat="{{ cat }}"{% if proj.pypi %} data-pypi{% endif %}>
-        <div class="project-card__top">
-          <code class="project-card__name">{{ proj.name }}</code>
-          <span class="project-card__cat project-cat--{{ cat }}">{{ cat }}</span>
-        </div>
-        <p class="project-card__desc">{{ proj.desc }}</p>
-        <div class="project-card__links">
-          {% if proj.post %}
-            <a href="{{ proj.post | relative_url }}" class="project-card__link">Post ↗</a>
-          {% endif %}
-          {% if proj.github %}
-            <a href="{{ proj.github }}" target="_blank" rel="noopener" class="project-card__link">GitHub ↗</a>
-          {% endif %}
-          {% if proj.pypi %}
-            <a href="{{ proj.pypi }}" target="_blank" rel="noopener" class="project-card__link">PyPI ↗</a>
-          {% endif %}
-        </div>
+    <div class="packages__tools">
+      <div class="pm-toggle" role="group" aria-label="Package manager">
+        <button type="button" data-pm="uv" aria-pressed="true">uv</button>
+        <button type="button" data-pm="pip" aria-pressed="false">pip</button>
       </div>
-      {% endfor %}
-    {% endfor %}
-  </div>
-  <div class="project-pager"></div>
-</section>
-
-<section class="post-index section-reveal" id="posts">
-  <div class="post-index__header">
-    <div class="post-index__title-row">
-      <h2 class="section-title">Latest writing</h2>
-      <a class="btn-ghost" href="{{ '/all-posts/' | relative_url }}">View all posts →</a>
+      <a class="btn-ghost" href="{{ '/projects/?cat=pypi' | relative_url }}">All {{ pypi_count }} packages →</a>
     </div>
-    <div class="filter-bar" role="group" aria-label="Filter posts by category">
-      <button class="filter-btn active" data-filter="all">All <span class="filter-btn__count">{{ site.posts.size }}</span></button>
-      {% for cat in primary_cats %}
-        {% assign posts_count = 0 %}
-        {% for post in site.posts %}
-          {% if post.categories contains cat %}
-            {% assign posts_count = posts_count | plus: 1 %}
-          {% endif %}
-        {% endfor %}
-        <button class="filter-btn" data-filter="{{ cat }}">{{ cat }} <span class="filter-btn__count">{{ posts_count }}</span></button>
-      {% endfor %}
-    </div>
-  </div>
-
-  {% for cat in primary_cats %}
-    {% assign sub_cats_for = '' | split: '' %}
-    {% for post in site.posts %}
-      {% if post.categories.first == cat %}
-        {% assign sub = post.categories | last %}
-        {% unless sub == cat or sub_cats_for contains sub %}
-          {% assign sub_cats_for = sub_cats_for | push: sub %}
-        {% endunless %}
+  </header>
+  <div class="post-grid post-grid--teaser" data-stagger>
+    {% assign shown = 0 %}
+    {% for key in story_cats %}
+      {% assign feat = story_feats[forloop.index0] %}
+      {% comment %} only packages whose repo I own — forks (fork_of) are skipped {% endcomment %}
+      {% if feat.pypi and feat.fork_of == nil and shown < 3 %}
+        {% assign shown = shown | plus: 1 %}
+        <div class="rv">
+          <article class="project-card pkg-card">
+            <div class="project-card__top">
+              <code class="project-card__name">{{ feat.name }}</code>
+              <span class="project-card__cat project-cat--{{ key }}">{{ site.data.categories[key].label }}</span>
+            </div>
+            <p class="project-card__desc">{{ feat.desc }}</p>
+            <div class="pkg-card__install">
+              <span class="pkg-card__prompt" aria-hidden="true">$</span>
+              <code data-pm-cmd data-uv="uv add {{ feat.name }}" data-pip="pip install {{ feat.name }}">uv add {{ feat.name }}</code>
+              <button type="button" class="pkg-card__copy" aria-label="Copy install command">Copy</button>
+            </div>
+            <div class="project-card__links">
+              {% if feat.post %}<a href="{{ feat.post | relative_url }}" class="project-card__link">Post ↗</a>{% endif %}
+              {% if feat.github %}<a href="{{ feat.github }}" target="_blank" rel="noopener" class="project-card__link">GitHub ↗</a>{% endif %}
+              <a href="{{ feat.pypi }}" target="_blank" rel="noopener" class="project-card__link">PyPI ↗</a>
+            </div>
+          </article>
+        </div>
       {% endif %}
     {% endfor %}
-    {% if sub_cats_for.size > 0 %}
-      <div class="sub-filter-bar" data-parent="{{ cat }}">
-        <button class="filter-btn filter-btn--sub active" data-sub-filter="all">All {{ cat }}</button>
-        {% for sub in sub_cats_for %}
-          {% assign sub_count = 0 %}
-          {% for post in site.posts %}
-            {% if post.categories.first == cat and post.categories contains sub %}
-              {% assign sub_count = sub_count | plus: 1 %}
-            {% endif %}
-          {% endfor %}
-          <button class="filter-btn filter-btn--sub" data-sub-filter="{{ sub }}">{{ sub }} <span class="filter-btn__count">{{ sub_count }}</span></button>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endfor %}
+  </div>
+</section>
 
-  <div class="post-grid" id="post-grid">
-    {% for post in site.posts %}
-      {% include post-row.html post=post %}
+<section class="writing" id="posts">
+  <header class="sec-head writing__head rv">
+    <div>
+      <p class="eyebrow">Latest writing</p>
+      <h2 class="sec-title">The stories behind the packages</h2>
+    </div>
+    <a class="btn-ghost" href="{{ '/all-posts/' | relative_url }}">All {{ site.posts.size }} posts →</a>
+  </header>
+  <div class="post-grid post-grid--teaser" data-stagger>
+    {% for post in site.posts limit: 3 %}
+      <div class="rv">{% include post-row.html post=post %}</div>
     {% endfor %}
   </div>
-  <p class="no-posts-msg" aria-live="polite" hidden>No posts in this category yet.</p>
-  <div class="post-pager"></div>
 </section>
 
 <section class="contact" id="contact">

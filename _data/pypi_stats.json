@@ -1,0 +1,26 @@
+{
+  "updated": "2026-11-03",
+  "last_month_total": 17866,
+  "packages": {
+    "cast-studio": 26,
+    "custom-python-logger": 2089,
+    "django-versioned-models": 152,
+    "drf-easy-crud": 139,
+    "pyrest-model-client": 1157,
+    "pytest-collect-requirements": 1259,
+    "pytest-depends-on": 394,
+    "pytest-dynamic-parameterize": 148,
+    "pytest-only-markers": 22,
+    "pytest-plugins": 2222,
+    "python-base-command": 1445,
+    "python-base-toolkit": 1632,
+    "python-custom-exceptions": 1310,
+    "python-databases": 1416,
+    "python-github-plus": 153,
+    "python-gitlab-plus": 1318,
+    "python-jira-plus": 1410,
+    "python-notion-plus": 61,
+    "python-simple-email-sender": 178,
+    "python-vault": 1335
+  }
+}
