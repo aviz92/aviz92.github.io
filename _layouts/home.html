@@ -97,8 +97,8 @@ layout: default
     {% endif %}
   </ul>
 
-  <a class="next" href="#about" aria-label="Next: about me"><span aria-hidden="true">↓</span></a>
 </section>
+<a class="next" href="#about" aria-label="Next: about me"><span aria-hidden="true">↓</span></a>
 
 <section class="about-me section-reveal" id="about">
   <div class="about-me__inner">
@@ -117,8 +117,8 @@ layout: default
       </div>
     </div>
   </div>
-  <a class="next" href="#process" aria-label="Next: how a package is born"><span aria-hidden="true">↓</span></a>
 </section>
+<a class="next" href="#process" aria-label="Next: how a package is born"><span aria-hidden="true">↓</span></a>
 
 <section class="process" id="process">
   <header class="sec-head rv">
@@ -133,8 +133,8 @@ layout: default
     <li class="process__step"><span class="process__dot">4</span><b>I ship it</b><span>Published to PyPI, versioned, open source.</span></li>
     <li class="process__step"><span class="process__dot">5</span><b>I write it up</b><span>The problem, the fix, and the patterns behind it.</span></li>
   </ol>
-  <a class="next" href="#work" aria-label="Next: projects by category"><span aria-hidden="true">↓</span></a>
 </section>
+<a class="next" href="#work" aria-label="Next: projects by category"><span aria-hidden="true">↓</span></a>
 
 <section class="work" id="work">
   <header class="sec-head rv">
@@ -194,10 +194,20 @@ layout: default
 </section>
 
 
+{% comment %} Latest packages: newest PyPI releases first (data from tools/fetch_pypi_stats.py;
+   forks are never listed there). Keys look like "<released_at>|<name>" so a plain sort orders them. {% endcomment %}
+{% assign release_keys = '' | split: '' %}
+{% for rel in site.data.pypi_stats.releases %}
+  {% capture release_key %}{{ rel[1].released_at }}|{{ rel[0] }}{% endcapture %}
+  {% assign release_keys = release_keys | push: release_key %}
+{% endfor %}
+{% assign release_keys = release_keys | sort | reverse %}
+{% if release_keys.size > 0 %}<a class="next" href="#packages" aria-label="Next: latest packages"><span aria-hidden="true">↓</span></a>{% else %}<a class="next" href="#posts" aria-label="Next: latest writing"><span aria-hidden="true">↓</span></a>{% endif %}
+{% if release_keys.size > 0 %}
 <section class="packages" id="packages">
   <header class="sec-head writing__head rv">
     <div>
-      <p class="eyebrow">Packages</p>
+      <p class="eyebrow">Latest packages</p>
       <h2 class="sec-title">Ready to install</h2>
     </div>
     <div class="packages__tools">
@@ -209,35 +219,43 @@ layout: default
     </div>
   </header>
   <div class="post-grid post-grid--teaser" data-stagger>
-    {% assign shown = 0 %}
-    {% for key in story_cats %}
-      {% assign feat = story_feats[forloop.index0] %}
-      {% comment %} only packages whose repo I own — forks (fork_of) are skipped {% endcomment %}
-      {% if feat.pypi and feat.fork_of == nil and shown < 3 %}
-        {% assign shown = shown | plus: 1 %}
-        <div class="rv">
-          <article class="project-card pkg-card">
-            <div class="project-card__top">
-              <code class="project-card__name">{{ feat.name }}</code>
-              <span class="project-card__cat project-cat--{{ key }}">{{ site.data.categories[key].label }}</span>
-            </div>
-            <p class="project-card__desc">{{ feat.desc }}</p>
-            <div class="pkg-card__install">
-              <span class="pkg-card__prompt" aria-hidden="true">$</span>
-              <code data-pm-cmd data-uv="uv add {{ feat.name }}" data-pip="pip install {{ feat.name }}">uv add {{ feat.name }}</code>
-              <button type="button" class="pkg-card__copy" aria-label="Copy install command">Copy</button>
-            </div>
-            <div class="project-card__links">
-              {% if feat.post %}<a href="{{ feat.post | relative_url }}" class="project-card__link">Post ↗</a>{% endif %}
-              {% if feat.github %}<a href="{{ feat.github }}" target="_blank" rel="noopener" class="project-card__link">GitHub ↗</a>{% endif %}
-              <a href="{{ feat.pypi }}" target="_blank" rel="noopener" class="project-card__link">PyPI ↗</a>
-            </div>
-          </article>
-        </div>
-      {% endif %}
+    {% for release_key in release_keys limit: 3 %}
+      {% assign name = release_key | split: '|' | last %}
+      {% assign release = site.data.pypi_stats.releases[name] %}
+      {% for cat_data in site.data.projects %}
+        {% assign pkg = cat_data[1] | where: 'name', name | first %}
+        {% if pkg %}
+          {% assign key = cat_data[0] %}
+          <div class="rv">
+            <article class="project-card pkg-card">
+              <div class="project-card__top">
+                <code class="project-card__name">{{ pkg.name }}</code>
+                <span class="project-card__cat project-cat--{{ key }}">{{ site.data.categories[key].label }}</span>
+              </div>
+              <p class="pkg-card__release">
+                <span class="pkg-card__version">v{{ release.version }}</span>
+                <time datetime="{{ release.released }}">{{ release.released | date: '%b %-d, %Y' }}</time>
+              </p>
+              <p class="project-card__desc">{{ pkg.desc }}</p>
+              <div class="pkg-card__install">
+                <span class="pkg-card__prompt" aria-hidden="true">$</span>
+                <code data-pm-cmd data-uv="uv add {{ pkg.name }}" data-pip="pip install {{ pkg.name }}">uv add {{ pkg.name }}</code>
+                <button type="button" class="pkg-card__copy" aria-label="Copy install command">Copy</button>
+              </div>
+              <div class="project-card__links">
+                {% if pkg.post %}<a href="{{ pkg.post | relative_url }}" class="project-card__link">Post ↗</a>{% endif %}
+                {% if pkg.github %}<a href="{{ pkg.github }}" target="_blank" rel="noopener" class="project-card__link">GitHub ↗</a>{% endif %}
+                <a href="{{ pkg.pypi }}" target="_blank" rel="noopener" class="project-card__link">PyPI ↗</a>
+              </div>
+            </article>
+          </div>
+        {% endif %}
+      {% endfor %}
     {% endfor %}
   </div>
 </section>
+<a class="next" href="#posts" aria-label="Next: latest writing"><span aria-hidden="true">↓</span></a>
+{% endif %}
 
 <section class="writing" id="posts">
   <header class="sec-head writing__head rv">
@@ -253,6 +271,7 @@ layout: default
     {% endfor %}
   </div>
 </section>
+<a class="next next--last" href="#contact" aria-label="Next: let's talk"><span aria-hidden="true">↓</span></a>
 
 <section class="contact" id="contact">
   <div class="contact__card rv">

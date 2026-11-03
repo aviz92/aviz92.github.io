@@ -580,6 +580,20 @@ document.addEventListener('DOMContentLoaded', () => {
     updateScrollMotion();
   }
 
+  // ---- Expose navbar bottom edge and footer height for spacing measured from them ----
+  const navInner = document.querySelector('.site-nav__inner');
+  const footer = document.querySelector('.site-footer');
+  const rootStyle = document.documentElement.style;
+  const measureFrame = () => {
+    if (navInner) rootStyle.setProperty('--nav-bottom', `${Math.round(navInner.getBoundingClientRect().bottom)}px`);
+    if (footer) rootStyle.setProperty('--footer-h', `${Math.round(footer.offsetHeight)}px`);
+  };
+  measureFrame();
+  if ('ResizeObserver' in window) {
+    const frameObserver = new ResizeObserver(measureFrame);
+    [navInner, footer].filter(Boolean).forEach(el => frameObserver.observe(el));
+  }
+
   // ---- Scroll-spy: active nav section link ----
   const sections = document.querySelectorAll('section[id]');
   const sectionLinks = document.querySelectorAll('.nav-section-link');

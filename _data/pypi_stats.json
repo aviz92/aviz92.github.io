@@ -22,5 +22,107 @@
     "python-notion-plus": 61,
     "python-simple-email-sender": 178,
     "python-vault": 1335
+  },
+  "releases": {
+    "cast-studio": {
+      "version": "0.1.4",
+      "released": "2026-11-01",
+      "released_at": "2026-11-01T21:21:02.671775Z"
+    },
+    "custom-python-logger": {
+      "version": "4.2.0",
+      "released": "2026-11-01",
+      "released_at": "2026-11-01T19:08:07.677322Z"
+    },
+    "django-versioned-models": {
+      "version": "1.2.1",
+      "released": "2026-11-01",
+      "released_at": "2026-11-01T20:24:24.449105Z"
+    },
+    "drf-easy-crud": {
+      "version": "3.0.0",
+      "released": "2026-11-01",
+      "released_at": "2026-11-01T20:17:20.361561Z"
+    },
+    "pyrest-model-client": {
+      "version": "2.1.1",
+      "released": "2026-11-01",
+      "released_at": "2026-11-01T20:51:05.926164Z"
+    },
+    "pytest-collect-requirements": {
+      "version": "1.1.1",
+      "released": "2026-05-19",
+      "released_at": "2026-05-19T04:25:59.126395Z"
+    },
+    "pytest-depends-on": {
+      "version": "2.3.0",
+      "released": "2026-10-20",
+      "released_at": "2026-10-20T08:19:15.894801Z"
+    },
+    "pytest-dynamic-parameterize": {
+      "version": "1.2.0",
+      "released": "2026-05-27",
+      "released_at": "2026-05-27T06:40:54.702819Z"
+    },
+    "pytest-only-markers": {
+      "version": "1.0.1",
+      "released": "2026-03-17",
+      "released_at": "2026-03-17T17:35:04.933041Z"
+    },
+    "pytest-plugins": {
+      "version": "3.3.0",
+      "released": "2026-09-28",
+      "released_at": "2026-09-28T16:59:39.064770Z"
+    },
+    "python-base-command": {
+      "version": "1.0.0",
+      "released": "2026-11-01",
+      "released_at": "2026-11-01T19:50:40.159349Z"
+    },
+    "python-base-toolkit": {
+      "version": "1.2.1",
+      "released": "2026-11-01",
+      "released_at": "2026-11-01T19:12:51.242925Z"
+    },
+    "python-custom-exceptions": {
+      "version": "1.0.0",
+      "released": "2026-11-01",
+      "released_at": "2026-11-01T19:46:12.919800Z"
+    },
+    "python-databases": {
+      "version": "2.0.0",
+      "released": "2026-09-17",
+      "released_at": "2026-09-17T14:16:15.703762Z"
+    },
+    "python-github-plus": {
+      "version": "2.0.0",
+      "released": "2026-10-27",
+      "released_at": "2026-10-27T18:46:00.574681Z"
+    },
+    "python-gitlab-plus": {
+      "version": "1.1.1",
+      "released": "2026-05-19",
+      "released_at": "2026-05-19T04:23:13.292272Z"
+    },
+    "python-jira-plus": {
+      "version": "4.1.0",
+      "released": "2026-10-25",
+      "released_at": "2026-10-25T18:33:33.999570Z"
+    },
+    "python-notion-plus": {
+      "version": "1.1.1",
+      "released": "2026-05-19",
+      "released_at": "2026-05-19T04:19:51.804067Z"
+    },
+    "python-simple-email-sender": {
+      "version": "1.1.0",
+      "released": "2026-05-19",
+      "released_at": "2026-05-19T04:03:00.369580Z"
+    },
+    "python-vault": {
+      "version": "1.1.2",
+      "released": "2026-05-19",
+      "released_at": "2026-05-19T04:10:12.785243Z"
+    }
   }
 }
