@@ -554,15 +554,24 @@ document.addEventListener('DOMContentLoaded', () => {
       storyNum.classList.remove('swap');
     };
 
-    const stepObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) setActiveStep(Number(entry.target.dataset.i));
-        });
-      },
-      { rootMargin: '-45% 0px -45% 0px' }
-    );
-    storySteps.forEach(step => stepObserver.observe(step));
+    // Desktop: a step activates as it crosses the middle of the screen. Narrow screens pin the
+    // stage on top, so the trigger band sits lower — just under the stage, where the steps are read.
+    const stackedStory = window.matchMedia('(max-width: 60rem)');
+    let stepObserver = null;
+    const observeSteps = () => {
+      stepObserver?.disconnect();
+      stepObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) setActiveStep(Number(entry.target.dataset.i));
+          });
+        },
+        { rootMargin: stackedStory.matches ? '-55% 0px -35% 0px' : '-45% 0px -45% 0px' }
+      );
+      storySteps.forEach(step => stepObserver.observe(step));
+    };
+    observeSteps();
+    stackedStory.addEventListener('change', observeSteps);
   }
 
   // ---- Scroll-linked motion: progress bar, nav state, process line ----

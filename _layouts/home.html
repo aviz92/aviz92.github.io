@@ -12,6 +12,10 @@ layout: default
     {% endif %}
   {% endfor %}
 {% endfor %}
+{% comment %} prefer the live count of packages owned on pypi.org/user/<name> (tools/fetch_pypi_stats.py) {% endcomment %}
+{% if site.data.pypi_stats.pypi_user.count %}
+  {% assign pypi_count = site.data.pypi_stats.pypi_user.count %}
+{% endif %}
 
 {% comment %} One story step per category, most-downloaded categories first (ties keep the
    _data/categories.yml order). Each shows its featured project (featured: true), else its first. {% endcomment %}
@@ -176,7 +180,7 @@ layout: default
                 {% for proj in items %}
                   <div class="pkg-slide{% if forloop.first %} on{% endif %}" data-slide aria-label="{{ forloop.index }} of {{ items.size }}">
                     {% include term-card.html proj=proj cat=key num=num %}
-                    <p class="pkg-slide__summary">{{ proj.desc | truncate: 90 }}</p>
+                    <p class="pkg-slide__summary">{{ proj.desc }}</p>
                   </div>
                 {% endfor %}
               </div>
@@ -249,7 +253,7 @@ layout: default
         <button type="button" data-pm="uv" aria-pressed="true">uv</button>
         <button type="button" data-pm="pip" aria-pressed="false">pip</button>
       </div>
-      <a class="btn-ghost" href="{{ '/projects/?cat=pypi' | relative_url }}">All {{ pypi_count }} packages →</a>
+      <a class="btn-ghost" href="{{ '/projects/?cat=pypi' | relative_url }}">All packages →</a>
     </div>
   </header>
   <div class="post-grid post-grid--teaser" data-stagger>

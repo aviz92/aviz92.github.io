@@ -5,10 +5,11 @@
 # [tool.uv]
 # exclude-newer = "2026-11-02T00:00:00Z"
 # ///
-"""Refresh _data/pypi_stats.json with download counts and latest releases.
+"""Refresh _data/pypi_stats.json with download counts, latest releases and owned packages.
 
 Downloads (last month) come from pypistats.org; the latest version and its release
-date come from the PyPI JSON API.
+date come from the PyPI JSON API; the packages owned by the PyPI user in _config.yml
+(``pypi.username``, the same list pypi.org/user/<name>/ shows) come from PyPI's XML-RPC API.
 
 Runs in its own read-only CI job before every site build (see
 .github/workflows/pages-deploy.yml). Dependencies are pinned in the adjacent
@@ -21,6 +22,7 @@ import json
 import time
 import urllib.error
 import urllib.request
+import xmlrpc.client
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -31,10 +33,13 @@ from custom_python_logger import get_logger
 logger = get_logger(__name__)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+CONFIG_FILE = REPO_ROOT / "_config.yml"
 PROJECTS_DIR = REPO_ROOT / "_data" / "projects"
 STATS_FILE = REPO_ROOT / "_data" / "pypi_stats.json"
 DOWNLOADS_URL = "https://pypistats.org/api/packages/{name}/recent"
 RELEASE_URL = "https://pypi.org/pypi/{name}/json"
+XMLRPC_URL = "https://pypi.org/pypi"
+OWNER_ROLE = "Owner"
 REQUEST_TIMEOUT_SECONDS = 15
 REQUEST_PAUSE_SECONDS = 1.0  # pypistats is a free, rate-limited community service — stay polite
 
@@ -48,6 +53,32 @@ def get_pypi_package_names(projects_dir: Path = PROJECTS_DIR) -> list[str]:
         projects: list[dict[str, Any]] = yaml.safe_load(data_file.read_text()) or []
         names.extend(p["name"] for p in projects if p.get("pypi") and not p.get("fork_of"))
     return names
+
+
+def get_pypi_username(config_file: Path = CONFIG_FILE) -> str | None:
+    """Return ``pypi.username`` from the Jekyll config, or None if it is not set."""
+    config: dict[str, Any] = yaml.safe_load(config_file.read_text()) or {}
+    return (config.get("pypi") or {}).get("username")
+
+
+class _TimeoutTransport(xmlrpc.client.SafeTransport):
+    """HTTPS transport with the same request timeout as the JSON calls."""
+
+    def make_connection(self, host: Any) -> Any:
+        connection = super().make_connection(host)
+        connection.timeout = REQUEST_TIMEOUT_SECONDS
+        return connection
+
+
+def fetch_owned_packages(username: str) -> list[str] | None:
+    """Return the packages ``username`` owns on PyPI, or None if the lookup fails."""
+    try:
+        proxy = xmlrpc.client.ServerProxy(XMLRPC_URL, transport=_TimeoutTransport())
+        roles: list[tuple[str, str]] = proxy.user_packages(username)
+    except (xmlrpc.client.Error, OSError) as exc:
+        logger.warning(f"Could not fetch PyPI packages for {username}: {exc}")
+        return None
+    return sorted(name for role, name in roles if role == OWNER_ROLE)
 
 
 def load_previous_stats(stats_file: Path = STATS_FILE) -> dict[str, Any]:
@@ -105,25 +136,45 @@ def collect(names: list[str], previous: dict[str, Any]) -> tuple[dict[str, int],
     return counts, releases
 
 
-def write_stats(counts: dict[str, int], releases: dict[str, Release], stats_file: Path = STATS_FILE) -> None:
-    """Write totals, per-package counts and latest releases for Jekyll (site.data.pypi_stats)."""
+def write_stats(
+    counts: dict[str, int],
+    releases: dict[str, Release],
+    pypi_user: dict[str, Any],
+    stats_file: Path = STATS_FILE,
+) -> None:
+    """Write totals, per-package counts, latest releases and owned packages (site.data.pypi_stats)."""
     payload = {
         "updated": datetime.now(UTC).strftime("%Y-%m-%d"),
         "last_month_total": sum(counts.values()),
         "packages": dict(sorted(counts.items())),
         "releases": dict(sorted(releases.items())),
+        "pypi_user": pypi_user,
     }
     stats_file.write_text(json.dumps(payload, indent=2) + "\n")
-    logger.info(f"Wrote {len(counts)} download counts and {len(releases)} releases")
+    logger.info(
+        f"Wrote {len(counts)} download counts, {len(releases)} releases, "
+        f"{pypi_user.get('count', 0)} owned packages"
+    )
+
+
+def collect_pypi_user(previous: dict[str, Any]) -> dict[str, Any]:
+    """Owned-package list for the configured PyPI user, falling back to the previous one."""
+    username = get_pypi_username()
+    owned = fetch_owned_packages(username) if username else None
+    if owned is None:
+        return previous.get("pypi_user", {})
+    return {"username": username, "count": len(owned), "packages": owned}
 
 
 def main() -> None:
+    previous = load_previous_stats()
     names = get_pypi_package_names()
-    counts, releases = collect(names, load_previous_stats())
-    if not counts and not releases:
+    counts, releases = collect(names, previous)
+    pypi_user = collect_pypi_user(previous)
+    if not counts and not releases and not pypi_user:
         logger.warning("Nothing fetched — keeping the existing data file")
         return
-    write_stats(counts, releases)
+    write_stats(counts, releases, pypi_user)
 
 
 if __name__ == "__main__":

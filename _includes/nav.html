@@ -10,15 +10,16 @@
 
     <ul class="site-nav__links">
       {%- comment -%}
-        Same links, same order on every page. On the home page About/Work are in-page
-        anchors (scroll-spy marks them); elsewhere they lead back to those home sections.
+        Same links, same order on every page, and every one points into the home page:
+        in-page anchors there (scroll-spy marks them), links back to those sections elsewhere.
+        The full lists (/projects/, /all-posts/) are reached from each section's "All …" button.
       {%- endcomment -%}
       {% if page.url == '/' %}{% assign home = '' %}{% else %}{% assign home = '/' | relative_url %}{% endif %}
       <li><a href="{% if page.url == '/' %}#hero{% else %}{{ '/' | relative_url }}{% endif %}"{% if page.url == '/' %} class="nav-section-link active"{% endif %}>Home</a></li>
       <li><a href="{{ home }}#about"{% if page.url == '/' %} class="nav-section-link"{% endif %}>About</a></li>
       <li><a href="{{ home }}#work"{% if page.url == '/' %} class="nav-section-link"{% endif %}>Work</a></li>
-      <li><a href="{{ '/projects/' | relative_url }}"{% if page.url == '/projects/' %} class="active" aria-current="page"{% endif %}>Projects</a></li>
-      <li><a href="{{ '/all-posts/' | relative_url }}"{% if page.url == '/all-posts/' %} class="active" aria-current="page"{% endif %}>Posts</a></li>
+      <li><a href="{{ home }}#packages"{% if page.url == '/' %} class="nav-section-link"{% elsif page.url == '/projects/' %} class="active" aria-current="page"{% endif %}>Projects</a></li>
+      <li><a href="{{ home }}#posts"{% if page.url == '/' %} class="nav-section-link"{% elsif page.url == '/all-posts/' %} class="active" aria-current="page"{% endif %}>Posts</a></li>
       <li class="site-nav__cta">
         <a class="btn-glow" href="{{ '/#contact' | relative_url }}">Let's talk</a>
       </li>

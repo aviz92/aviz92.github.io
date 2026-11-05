@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-03",
+  "updated": "2026-11-05",
   "last_month_total": 17866,
   "packages": {
     "cast-studio": 26,
@@ -124,5 +124,39 @@
       "released": "2026-05-19",
       "released_at": "2026-05-19T04:10:12.785243Z"
     }
+  },
+  "pypi_user": {
+    "username": "aviz",
+    "count": 28,
+    "packages": [
+      "cast-studio",
+      "custom-python-logger",
+      "django-versioned-models",
+      "drf-easy-crud",
+      "pyrest-model-client",
+      "pytest-better-report",
+      "pytest-collect-requirements",
+      "pytest-depends-on",
+      "pytest-dynamic-parameterize",
+      "pytest-fail2skip",
+      "pytest-inject-config",
+      "pytest-max-fail-streak",
+      "pytest-only-markers",
+      "pytest-plugins",
+      "python-automation-test",
+      "python-base-command",
+      "python-base-toolkit",
+      "python-custom-exceptions",
+      "python-databases",
+      "python-github-plus",
+      "python-gitlab-plus",
+      "python-jira-plus",
+      "python-llm-factory",
+      "python-notion-plus",
+      "python-pandas-translation",
+      "python-simple-email-sender",
+      "python-test-aviz",
+      "python-vault"
+    ]
   }
 }
