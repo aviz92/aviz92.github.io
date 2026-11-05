@@ -561,13 +561,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const stackedStory = window.matchMedia('(max-width: 60rem)');
     const storyStage = document.querySelector('.story__stage');
     let stepTicking = false;
+    const stepsList = document.querySelector('.story__steps');
+    const workHeading = document.querySelector('#work .sec-head');
+    const workHeadPinned = window.matchMedia('(min-width: 60.01rem) and (min-height: 46rem)');
 
     const updateActiveStep = () => {
       stepTicking = false;
       // stacked: just under the pinned stage, which is where #cat-* links land a step's title
+      // side by side: the stage's own middle, which is what each step centres against
+      const stageBox = storyStage.getBoundingClientRect();
       const line = stackedStory.matches
-        ? storyStage.getBoundingClientRect().bottom + 80
-        : window.innerHeight * 0.5;
+        ? stageBox.bottom + 80
+        : stageBox.top + stageBox.height / 2;
       let best = 0;
       let bestDistance = Infinity;
       storySteps.forEach((step, i) => {
@@ -576,6 +581,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (distance < bestDistance) { best = i; bestDistance = distance; }
       });
       setActiveStep(best);
+
+      // pinned heading has no backdrop: fade the steps out where they slide beneath it
+      if (stepsList && workHeadPinned.matches) {
+        const cut = workHeading.getBoundingClientRect().bottom - stepsList.getBoundingClientRect().top;
+        stepsList.style.setProperty('--steps-cut', `${Math.max(-24, Math.round(cut))}px`);
+      }
     };
 
     const requestStepUpdate = () => {
@@ -635,10 +646,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const navInner = document.querySelector('.site-nav__inner');
   const footer = document.querySelector('.site-footer');
   const contactCard = document.querySelector('.contact__card');
+  const workHead = document.querySelector('#work .sec-head');
   const rootStyle = document.documentElement.style;
   const measureFrame = () => {
     if (navInner) rootStyle.setProperty('--nav-bottom', `${Math.round(navInner.getBoundingClientRect().bottom)}px`);
     if (footer) rootStyle.setProperty('--footer-h', `${Math.round(footer.offsetHeight)}px`);
+    // Projects by category keeps its heading pinned; the stage pins right under it
+    if (workHead) rootStyle.setProperty('--work-head-h', `${Math.round(workHead.offsetHeight)}px`);
     if (contactCard?.firstElementChild) {
       // natural height = content + padding (the card itself is stretched to fill its section)
       const cs = getComputedStyle(contactCard);
@@ -651,7 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
   measureFrame();
   if ('ResizeObserver' in window) {
     const frameObserver = new ResizeObserver(measureFrame);
-    [navInner, footer, contactCard].filter(Boolean).forEach(el => frameObserver.observe(el));
+    [navInner, footer, contactCard, workHead].filter(Boolean).forEach(el => frameObserver.observe(el));
   }
   window.addEventListener('resize', measureFrame);  // svh-based card padding changes with height only
 
