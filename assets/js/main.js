@@ -554,24 +554,39 @@ document.addEventListener('DOMContentLoaded', () => {
       storyNum.classList.remove('swap');
     };
 
-    // Desktop: a step activates as it crosses the middle of the screen. Narrow screens pin the
-    // stage on top, so the trigger band sits lower — just under the stage, where the steps are read.
+    // The active step is whichever one sits on a trigger line: the middle of the screen on
+    // desktop, lower on narrow screens where the stage is pinned on top. Measured every scroll
+    // frame (not from enter events), so stage, numeral and steps can never disagree — even
+    // when two short steps cross the line together or the reader scrolls back up.
     const stackedStory = window.matchMedia('(max-width: 60rem)');
-    let stepObserver = null;
-    const observeSteps = () => {
-      stepObserver?.disconnect();
-      stepObserver = new IntersectionObserver(
-        (entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) setActiveStep(Number(entry.target.dataset.i));
-          });
-        },
-        { rootMargin: stackedStory.matches ? '-55% 0px -35% 0px' : '-45% 0px -45% 0px' }
-      );
-      storySteps.forEach(step => stepObserver.observe(step));
+    const storyStage = document.querySelector('.story__stage');
+    let stepTicking = false;
+
+    const updateActiveStep = () => {
+      stepTicking = false;
+      // stacked: just under the pinned stage, which is where #cat-* links land a step's title
+      const line = stackedStory.matches
+        ? storyStage.getBoundingClientRect().bottom + 80
+        : window.innerHeight * 0.5;
+      let best = 0;
+      let bestDistance = Infinity;
+      storySteps.forEach((step, i) => {
+        const { top, bottom } = step.getBoundingClientRect();
+        const distance = top <= line && bottom >= line ? 0 : Math.min(Math.abs(top - line), Math.abs(bottom - line));
+        if (distance < bestDistance) { best = i; bestDistance = distance; }
+      });
+      setActiveStep(best);
     };
-    observeSteps();
-    stackedStory.addEventListener('change', observeSteps);
+
+    const requestStepUpdate = () => {
+      if (!stepTicking) {
+        stepTicking = true;
+        requestAnimationFrame(updateActiveStep);
+      }
+    };
+    window.addEventListener('scroll', requestStepUpdate, { passive: true });
+    window.addEventListener('resize', requestStepUpdate);
+    updateActiveStep();
   }
 
   // ---- Scroll-linked motion: progress bar, nav state, process line ----
