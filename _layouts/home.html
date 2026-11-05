@@ -181,6 +181,14 @@ layout: default
                   <div class="pkg-slide{% if forloop.first %} on{% endif %}" data-slide aria-label="{{ forloop.index }} of {{ items.size }}">
                     {% include term-card.html proj=proj cat=key num=num %}
                     <p class="pkg-slide__summary">{{ proj.desc }}</p>
+                    {% assign proj_dl = site.data.pypi_stats.packages[proj.name] %}
+                    {% if proj_dl %}
+                      <p class="pkg-slide__meta">
+                        <span class="pkg-card__downloads" title="Last 30 days, via pypistats.org">
+                          <span aria-hidden="true">↓</span> {% if proj_dl >= 1000 %}{{ proj_dl | divided_by: 100.0 | round | divided_by: 10.0 }}k{% else %}{{ proj_dl }}{% endif %} downloads/mo
+                        </span>
+                      </p>
+                    {% endif %}
                   </div>
                 {% endfor %}
               </div>

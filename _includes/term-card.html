@@ -16,9 +16,7 @@
     <p><span class="term__prompt">$</span> git clone github.com/{{ site.github.username }}/{{ include.proj.name }}</p>
     <p class="term__ok">✓ Cloned {{ include.proj.name }}</p>
     {%- endif %}
-    {%- assign term_dl = site.data.pypi_stats.packages[include.proj.name] %}
-    <p class="term__muted"># {{ cat_info.label | default: include.cat }}
-      {%- if term_dl %} · {% if term_dl >= 1000 %}{{ term_dl | divided_by: 100.0 | round | divided_by: 10.0 }}k{% else %}{{ term_dl }}{% endif %} downloads/mo{% endif %}</p>
+    <p class="term__muted"># {{ cat_info.label | default: include.cat }}</p>
   </div>
   <span class="term__num" aria-hidden="true">{{ include.num }}</span>
 </div>
