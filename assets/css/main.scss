@@ -1704,7 +1704,7 @@ pre.highlight,
   inset: 0;
   display: grid;
   place-items: start center;
-  padding: 10.5rem 3.5rem 2rem 2.5rem;  /* starts below the numeral */
+  padding: 10.5rem 3.5rem 4.75rem 2.5rem;  /* below the numeral, above the pinned controls */
   perspective: 1200px;
 }
 
@@ -1714,15 +1714,28 @@ pre.highlight,
   max-width: 26rem;
   opacity: 0;
   visibility: hidden;
-  transform: rotateY(22deg) scale(0.9) translateY(60px);
-  transition: opacity 0.7s var(--ease), transform 1.1s var(--ease), visibility 0s 0.7s;
+  /* outgoing category vanishes at once — never two cards on screen together.
+     No transform here: a transformed ancestor would capture the absolutely
+     positioned arrows and drag them onto the text mid-animation. */
+  transition: opacity 0.12s ease, visibility 0s 0.12s;
 
   &.on {
     opacity: 1;
     visibility: visible;
-    transform: none;
-    transition: opacity 0.7s var(--ease), transform 1.1s var(--ease), visibility 0s;
+    /* incoming waits for the outgoing one to clear */
+    transition: opacity 0.5s var(--ease) 0.12s, visibility 0s 0.12s;
   }
+}
+
+/* the swing-in lives on the card content only, so the pinned arrows never move */
+.story__set .pkg-carousel__slides {
+  transform: perspective(1200px) rotateY(22deg) scale(0.9) translateY(60px);
+  transition: transform 0s 0.12s;
+}
+
+.story__set.on .pkg-carousel__slides {
+  transform: none;
+  transition: transform 0.9s var(--ease) 0.12s;
 }
 
 /* package carousel inside the stage: one package of the category at a time */
@@ -1737,14 +1750,15 @@ pre.highlight,
   grid-area: 1 / 1;
   opacity: 0;
   visibility: hidden;
-  transform: translateX(14px);
-  transition: opacity 0.45s var(--ease), transform 0.6s var(--ease), visibility 0s 0.45s;
+  transform: translateX(10px);
+  /* outgoing package hides instantly, so slides never overlap */
+  transition: opacity 0s, transform 0s, visibility 0s;
 
   &.on {
     opacity: 1;
     visibility: inherit;  /* stay hidden (and unclickable) while its category's set is hidden */
     transform: none;
-    transition: opacity 0.45s var(--ease), transform 0.6s var(--ease), visibility 0s;
+    transition: opacity 0.25s ease, transform 0.35s var(--ease), visibility 0s;
   }
 }
 
@@ -1756,12 +1770,16 @@ pre.highlight,
   color: var(--text-soft);
 }
 
+/* pinned to the bottom of the stage so the arrows never move between packages */
 .pkg-carousel__nav {
+  position: absolute;
+  left: 2.5rem;    /* same side padding as .story__sets, so it stays centred under the card */
+  right: 3.5rem;
+  bottom: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.9rem;
-  margin-top: 0.9rem;
 }
 
 .pkg-carousel__btn {
@@ -1769,14 +1787,17 @@ pre.highlight,
   place-items: center;
   width: 2.1rem;
   height: 2.1rem;
-  padding: 0 0 0.15rem;
+  padding: 0;
   border: 1px solid var(--border-bright);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-bright);
-  font-size: 1.15rem;
-  line-height: 1;
+  line-height: 0;
   cursor: pointer;
+  touch-action: manipulation;  /* no double-tap-zoom delay on phones */
+  -webkit-tap-highlight-color: transparent;
+
+  svg { display: block; }
   transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.3s var(--ease);
 
   &:hover,
@@ -1974,7 +1995,10 @@ pre.highlight,
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .pkg-carousel__nav { margin-top: 0.6rem; }
+  .pkg-carousel__nav { left: 1rem; right: 2.25rem; bottom: 0.85rem; }
+
+  /* tighter stage: swing in without the vertical drop so the content never reaches the arrows */
+  .story__set .pkg-carousel__slides { transform: perspective(1200px) rotateY(16deg) scale(0.96); }
 
   .story__inline { display: none; }
 
