@@ -1652,7 +1652,7 @@ pre.highlight,
   order: 2;
   position: sticky;
   top: 6.5rem;
-  height: max(33rem, min(37rem, calc(100vh - 8rem)));
+  height: max(34rem, min(37rem, calc(100vh - 8rem)));
   border: 1px solid var(--border);
   border-radius: 28px;
   background:
@@ -1949,7 +1949,7 @@ pre.highlight,
     i.on { height: 24px; }
   }
 
-  .story__sets { padding: 5.25rem 2.25rem 0.9rem 1rem; }
+  .story__sets { padding: 5.25rem 2.25rem 3.5rem 1rem; }
 
   .story__set .term__body { padding: 0.8rem 1rem 1rem; font-size: 0.74rem; line-height: 1.7; }
 
@@ -2180,7 +2180,8 @@ pre.highlight,
 .packages,
 .writing { margin-bottom: var(--section-space); }
 
-.post-grid--teaser .project-card { flex: 1; }
+.post-grid--teaser .project-card { flex: 1; min-width: 0; }
+.post-grid--teaser > .rv { min-width: 0; }  /* let one-line install commands ellipsize instead of widening the card */
 
 .pkg-card__install {
   display: flex;
@@ -2195,13 +2196,33 @@ pre.highlight,
   font-size: 0.78rem;
   color: var(--text-bright);
 
-  code { flex: 1; min-width: 0; font: inherit; overflow-wrap: anywhere; }
+  /* one line on every card so the install boxes line up; Copy still copies the full command */
+  code { flex: 1; min-width: 0; font: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
 
 .pkg-card__prompt { color: var(--accent); }
 
 /* one calm green for every category in the install teaser (the /projects/ grid keeps per-category colors) */
 .pkg-card .project-card__cat { color: #6ee7b7; background: rgba(110, 231, 183, 0.12); }
+
+/* carousel slides: same downloads badge, bottom-right under the description */
+.pkg-slide__meta {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0.35rem 0.25rem 0;
+}
+
+/* monthly downloads: always its own row under the links, right-aligned */
+.pkg-card__downloads {
+  flex-basis: 100%;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--text-faint);
+  white-space: nowrap;
+
+  span { color: var(--accent); }
+}
 
 .pkg-card__release {
   display: flex;
