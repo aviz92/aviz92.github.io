@@ -1737,14 +1737,14 @@ pre.highlight,
   grid-area: 1 / 1;
   opacity: 0;
   visibility: hidden;
-  transform: translateX(14px);
-  transition: opacity 0.45s var(--ease), transform 0.6s var(--ease), visibility 0s 0.45s;
+  transform: translateX(10px);
+  transition: opacity 0.2s ease, transform 0.3s var(--ease), visibility 0s 0.2s;
 
   &.on {
     opacity: 1;
     visibility: inherit;  /* stay hidden (and unclickable) while its category's set is hidden */
     transform: none;
-    transition: opacity 0.45s var(--ease), transform 0.6s var(--ease), visibility 0s;
+    transition: opacity 0.25s ease 0.05s, transform 0.35s var(--ease), visibility 0s;
   }
 }
 
@@ -1773,14 +1773,17 @@ pre.highlight,
   place-items: center;
   width: 2.1rem;
   height: 2.1rem;
-  padding: 0 0 0.15rem;
+  padding: 0;
   border: 1px solid var(--border-bright);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-bright);
-  font-size: 1.15rem;
-  line-height: 1;
+  line-height: 0;
   cursor: pointer;
+  touch-action: manipulation;  /* no double-tap-zoom delay on phones */
+  -webkit-tap-highlight-color: transparent;
+
+  svg { display: block; }
   transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.3s var(--ease);
 
   &:hover,
