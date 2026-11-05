@@ -2203,6 +2203,17 @@ pre.highlight,
 /* one calm green for every category in the install teaser (the /projects/ grid keeps per-category colors) */
 .pkg-card .project-card__cat { color: #6ee7b7; background: rgba(110, 231, 183, 0.12); }
 
+/* monthly downloads, pushed to the bottom-right of the links row */
+.pkg-card__downloads {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--text-faint);
+  white-space: nowrap;
+
+  span { color: var(--accent); }
+}
+
 .pkg-card__release {
   display: flex;
   align-items: center;

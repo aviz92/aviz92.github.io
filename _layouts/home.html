@@ -284,6 +284,12 @@ layout: default
                 {% if pkg.post %}<a href="{{ pkg.post | relative_url }}" class="project-card__link">Post ↗</a>{% endif %}
                 {% if pkg.github %}<a href="{{ pkg.github }}" target="_blank" rel="noopener" class="project-card__link">GitHub ↗</a>{% endif %}
                 <a href="{{ pkg.pypi }}" target="_blank" rel="noopener" class="project-card__link">PyPI ↗</a>
+                {% assign pkg_dl = site.data.pypi_stats.packages[pkg.name] %}
+                {% if pkg_dl %}
+                  <span class="pkg-card__downloads" title="Last 30 days, via pypistats.org">
+                    <span aria-hidden="true">↓</span> {% if pkg_dl >= 1000 %}{{ pkg_dl | divided_by: 100.0 | round | divided_by: 10.0 }}k{% else %}{{ pkg_dl }}{% endif %} downloads/mo
+                  </span>
+                {% endif %}
               </div>
             </article>
           </div>
