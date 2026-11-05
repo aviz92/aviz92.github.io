@@ -1646,13 +1646,20 @@ pre.highlight,
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   gap: 3.5rem;
+  /* the stage pins centred in the space under the navbar; every step is as tall as
+     the stage, so the step being read always sits level with it */
+  --stage-h: max(34rem, min(37rem, calc(100vh - 8rem)));
+  --stage-top: max(
+    calc(var(--nav-bottom, 4.75rem) + 1rem),
+    calc((100vh + var(--nav-bottom, 4.75rem) - var(--stage-h)) / 2)
+  );
 }
 
 .story__stage {
   order: 2;
   position: sticky;
-  top: 6.5rem;
-  height: max(34rem, min(37rem, calc(100vh - 8rem)));
+  top: var(--stage-top);
+  height: var(--stage-h);
   border: 1px solid var(--border);
   border-radius: 28px;
   background:
@@ -1671,9 +1678,16 @@ pre.highlight,
   line-height: 1;
   letter-spacing: -0.05em;
   color: transparent;
-  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.12);
 
-  span { display: inline-block; transition: transform 0.8s var(--ease), opacity 0.5s; }
+  /* soft filled glyph: a text-stroke would trace the font's overlapping contours
+     (visible seams inside 4, 6, 8…), a fill has no inner edges */
+  span {
+    display: inline-block;
+    background: linear-gradient(160deg, rgba(var(--accent-2-rgb), 0.18), rgba(var(--accent-rgb), 0.07));
+    -webkit-background-clip: text;
+    background-clip: text;
+    transition: transform 0.8s var(--ease), opacity 0.5s;
+  }
 
   &.swap span { transform: translateY(18%); opacity: 0; transition: none; }
 }
@@ -1829,18 +1843,18 @@ pre.highlight,
 }
 
 .story__step {
-  min-height: 70vh;
+  min-height: var(--stage-h);
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 2rem 0;
+  /* #cat-* links land level with the stage (html's scroll-padding-top is added on top) */
+  scroll-margin-top: calc(var(--stage-top) - var(--nav-bottom, 4.75rem) - var(--section-gap));
   opacity: 0.28;
   transition: opacity 0.6s var(--ease);
 
   &.on { opacity: 1; }
 
-  &:first-child { min-height: 50vh; justify-content: flex-start; padding-top: 4rem; }
-  &:last-child { min-height: 0; padding-bottom: 0; }
 }
 
 .story__inline { display: none; }
@@ -2012,6 +2026,39 @@ pre.highlight,
   }
 
   .story__step:last-child { min-height: 0; padding-bottom: 0; }
+}
+
+/* tall-enough desktop: the section heading stays pinned under the navbar so the reader
+   always knows where they are, and the stage pins right beneath it */
+@media (min-width: 60.01rem) and (min-height: 46rem) {
+  .work .sec-head {
+    position: sticky;
+    top: calc(var(--nav-bottom, 4.75rem) + 0.75rem);
+    z-index: 3;
+  }
+
+  /* no backdrop behind the heading: the steps fade out where they meet it instead
+     (--steps-cut = how far the list reaches up under the heading, set on scroll) */
+  .work .story__steps {
+    --steps-cut: -1.5rem;
+    -webkit-mask-image: linear-gradient(transparent var(--steps-cut), #000 calc(var(--steps-cut) + 1rem));
+    mask-image: linear-gradient(transparent var(--steps-cut), #000 calc(var(--steps-cut) + 1rem));
+  }
+
+  .work .story {
+    --stage-top: calc(var(--nav-bottom, 4.75rem) + 0.75rem + var(--work-head-h, 8.5rem) + 1.5rem);
+    --stage-h: min(37rem, calc(100vh - var(--stage-top) - 1.5rem));
+  }
+}
+
+/* desktop, shorter stage (laptop heights): smaller numeral, so the card keeps clear of the arrows */
+@media (min-width: 60.01rem) {
+  .work .story__stage { container-type: size; }
+
+  @container (max-height: 35rem) {
+    .story__num { font-size: 5.5rem; }
+    .story__sets { padding-top: 7.75rem; }
+  }
 }
 
 /* ---------- process: five steps on a line that fills with scroll ---------- */
