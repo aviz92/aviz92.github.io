@@ -1714,17 +1714,28 @@ pre.highlight,
   max-width: 26rem;
   opacity: 0;
   visibility: hidden;
-  transform: rotateY(22deg) scale(0.9) translateY(60px);
-  /* outgoing category vanishes at once — never two cards on screen together */
-  transition: opacity 0.12s ease, transform 0s 0.12s, visibility 0s 0.12s;
+  /* outgoing category vanishes at once — never two cards on screen together.
+     No transform here: a transformed ancestor would capture the absolutely
+     positioned arrows and drag them onto the text mid-animation. */
+  transition: opacity 0.12s ease, visibility 0s 0.12s;
 
   &.on {
     opacity: 1;
     visibility: visible;
-    transform: none;
-    /* incoming waits for the outgoing one to clear, then swings in */
-    transition: opacity 0.5s var(--ease) 0.12s, transform 0.9s var(--ease) 0.12s, visibility 0s 0.12s;
+    /* incoming waits for the outgoing one to clear */
+    transition: opacity 0.5s var(--ease) 0.12s, visibility 0s 0.12s;
   }
+}
+
+/* the swing-in lives on the card content only, so the pinned arrows never move */
+.story__set .pkg-carousel__slides {
+  transform: perspective(1200px) rotateY(22deg) scale(0.9) translateY(60px);
+  transition: transform 0s 0.12s;
+}
+
+.story__set.on .pkg-carousel__slides {
+  transform: none;
+  transition: transform 0.9s var(--ease) 0.12s;
 }
 
 /* package carousel inside the stage: one package of the category at a time */
@@ -1985,6 +1996,9 @@ pre.highlight,
     overflow: hidden;
   }
   .pkg-carousel__nav { left: 1rem; right: 2.25rem; bottom: 0.85rem; }
+
+  /* tighter stage: swing in without the vertical drop so the content never reaches the arrows */
+  .story__set .pkg-carousel__slides { transform: perspective(1200px) rotateY(16deg) scale(0.96); }
 
   .story__inline { display: none; }
 
