@@ -1652,7 +1652,7 @@ pre.highlight,
   order: 2;
   position: sticky;
   top: 6.5rem;
-  height: min(34rem, calc(100vh - 8rem));
+  height: max(33rem, min(37rem, calc(100vh - 8rem)));
   border: 1px solid var(--border);
   border-radius: 28px;
   background:
@@ -1666,7 +1666,7 @@ pre.highlight,
   top: 1rem;
   left: 1.75rem;
   font-family: var(--font-display);
-  font-size: clamp(7rem, 14vw, 12.5rem);
+  font-size: clamp(6rem, 10vw, 8.5rem);  /* sized to sit above the card, never behind it */
   font-weight: 900;
   line-height: 1;
   letter-spacing: -0.05em;
@@ -1703,8 +1703,8 @@ pre.highlight,
   position: absolute;
   inset: 0;
   display: grid;
-  place-items: center;
-  padding: 3rem 3.5rem 2rem 2.5rem;
+  place-items: start center;
+  padding: 10.5rem 3.5rem 2rem 2.5rem;  /* starts below the numeral */
   perspective: 1200px;
 }
 
@@ -1727,6 +1727,9 @@ pre.highlight,
 
 /* package carousel inside the stage: one package of the category at a time */
 .pkg-carousel { width: 100%; }
+
+/* the stage already shows the big numeral — no second one inside its cards */
+.story__set .term__num { display: none; }
 
 .pkg-carousel__slides { display: grid; }
 
@@ -1928,7 +1931,7 @@ pre.highlight,
   .story__stage {
     top: calc(var(--nav-bottom, 4.75rem) + 0.75rem);
     z-index: 2;
-    height: 23rem;
+    height: 25rem;
     margin-bottom: 1.5rem;
     border-radius: 22px;
     box-shadow:
@@ -1936,7 +1939,7 @@ pre.highlight,
       0 calc(-1 * (var(--nav-bottom, 4.75rem) + 0.75rem)) 0 0 var(--bg);     /* hide them in the strip up to the navbar */
   }
 
-  .story__num { top: 0.4rem; left: 1rem; font-size: 4.75rem; }
+  .story__num { top: 0.5rem; left: 1rem; font-size: 4.25rem; }
 
   .story__rail {
     right: 0.85rem;
@@ -1946,9 +1949,23 @@ pre.highlight,
     i.on { height: 24px; }
   }
 
-  .story__sets { padding: 2.9rem 2.25rem 0.9rem 1rem; }
+  .story__sets { padding: 5.25rem 2.25rem 0.9rem 1rem; }
 
   .story__set .term__body { padding: 0.8rem 1rem 1rem; font-size: 0.74rem; line-height: 1.7; }
+
+  /* long package names stay on one line in the pinned card */
+  .story__set .term__title,
+  .story__set .term__body p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .story__sets { grid-template-columns: minmax(0, 1fr); }
+
+  .story__set,
+  .pkg-carousel__slides,
+  .pkg-slide { min-width: 0; }  /* let the card shrink so "…" can apply */
   .pkg-slide__summary {
     margin-top: 0.6rem;
     font-size: 0.8rem;
@@ -1967,7 +1984,7 @@ pre.highlight,
     justify-content: flex-start;
     padding: 1.5rem 0 2.5rem;
     /* land #cat-* links below the pinned stage, not behind it */
-    scroll-margin-top: 20.5rem;
+    scroll-margin-top: 22.5rem;
   }
 
   .story__step:last-child { min-height: 0; padding-bottom: 0; }
