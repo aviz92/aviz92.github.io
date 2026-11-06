@@ -6,6 +6,8 @@ tags: [python, pytest, ci, reporting, testing]
 description: "pytest-plugins supercharges your test suite with structured JSON/Markdown reporting, consecutive failure detection, smart skip-on-fail, and verbose parameter IDs — all configurable via pytest.ini."
 ---
 
+> **Update (November 2026):** the core features of `pytest-plugins` now also ship as standalone, focused packages — [`pytest-better-report`](/posts/pytest-better-report), [`pytest-max-fail-streak`](/posts/pytest-max-fail-streak), [`pytest-fail2skip`](/posts/pytest-fail2skip) and [`pytest-inject-config`](/posts/pytest-inject-config). Each post has a migration section; note that a standalone package and `pytest-plugins` register the same options, so don't install both until you're on a `pytest-plugins` release without that feature.
+
 Running tests is easy. Understanding what happened, why it failed, and how to act on it in CI — that's the hard part. Standard pytest gives you a pass/fail count and a traceback. What it doesn't give you is structured output you can feed to dashboards, traceability back to the exact commit and pipeline that triggered the run, or smart failure strategies that distinguish a flaky test from a systemic breakdown. `pytest-plugins` adds all of that in one package.
 
 ## Why I Built This

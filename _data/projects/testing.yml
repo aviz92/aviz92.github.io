@@ -10,6 +10,30 @@
   pypi: https://pypi.org/project/pytest-plugins/
   post: /posts/pytest-plugins/
 
+- name: pytest-better-report
+  desc: "Structured JSON and Markdown reports of every run with CI metadata (repo, PR/MR, pipeline, commit), plus a CLI to compare two runs."
+  github: https://github.com/aviz92/pytest-better-report
+  pypi: https://pypi.org/project/pytest-better-report/
+  post: /posts/pytest-better-report/
+
+- name: pytest-inject-config
+  desc: "Load a JSON or YAML config via --config-path and inject it into every test class as self.config — one suite, any environment."
+  github: https://github.com/aviz92/pytest-inject-config
+  pypi: https://pypi.org/project/pytest-inject-config/
+  post: /posts/pytest-inject-config/
+
+- name: pytest-max-fail-streak
+  desc: "Stop the run after N consecutive failing tests, setup errors included — a broken environment fails fast."
+  github: https://github.com/aviz92/pytest-max-fail-streak
+  pypi: https://pypi.org/project/pytest-max-fail-streak/
+  post: /posts/pytest-max-fail-streak/
+
+- name: pytest-fail2skip
+  desc: "Opt-in conversion of known failures into skips, scoped to expected exceptions, so they don't block the CI gate."
+  github: https://github.com/aviz92/pytest-fail2skip
+  pypi: https://pypi.org/project/pytest-fail2skip/
+  post: /posts/pytest-fail2skip/
+
 - name: pytest-collect-requirements
   desc: "Annotate tests with requirements, collect them into structured JSON — without running the suite."
   github: https://github.com/aviz92/pytest-collect-requirements
